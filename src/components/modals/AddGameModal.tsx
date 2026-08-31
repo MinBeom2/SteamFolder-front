@@ -51,7 +51,6 @@ export const AddGameModal: React.FC<AddGameModalProps> = ({
     checkCooldown,
     toggleGameSelection,
     addSelectedGamesToFolder,
-    currentFolderId,
   } = useShowcaseStore();
 
   const [search, setSearch] = useState('');
@@ -181,9 +180,17 @@ export const AddGameModal: React.FC<AddGameModalProps> = ({
 
   const selectedCount = userGames.filter((g) => g.selected).length;
 
-  const handleAdd = () => {
-    addSelectedGamesToFolder(currentFolderId || 'root');
-    onClose();
+  const handleAdd = async () => {
+    try {
+      await addSelectedGamesToFolder();
+      onClose();
+    } catch (err: unknown) {
+      console.error('Failed to add games to folder:', err);
+      const msg =
+        (err as { response?: { data?: { message?: string } } })?.response
+          ?.data?.message || '폴더에 게임을 추가하지 못했습니다.';
+      setErrorMessage(msg);
+    }
   };
 
   const formatLastPlayed = (dateStr?: string) => {

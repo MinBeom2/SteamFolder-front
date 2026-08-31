@@ -1,4 +1,34 @@
-import type { FolderItem, GameItem, ShowcaseData } from '@/types/showcase';
+export interface GameItem {
+  id: string;
+  appId: number;
+  name: string;
+  headerImage: string;
+  playtimeHours: number;
+  genres: string[];
+  rating?: number;
+  selected?: boolean;
+}
+
+export interface FolderItem {
+  id: string;
+  name: string;
+  color?: string;
+  gameCount: number;
+  parentId?: string | null;
+  subFolders?: FolderItem[];
+}
+
+export interface ShowcaseData {
+  userId: string;
+  username: string;
+  customTitle: string;
+  totalFolders: number;
+  totalGames: number;
+  themeColor: string;
+  isPublic: boolean;
+  folders: FolderItem[];
+  games: GameItem[];
+}
 
 export const INITIAL_AVAILABLE_GAMES: GameItem[] = [
   {
@@ -21,189 +51,4 @@ export const INITIAL_AVAILABLE_GAMES: GameItem[] = [
     rating: 9.0,
     selected: true,
   },
-  {
-    id: 'game-3',
-    appId: 1086940,
-    name: "Baldur's Gate 3",
-    headerImage: 'https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1086940/header.jpg',
-    playtimeHours: 320,
-    genres: ['RPG', '전략'],
-    rating: 9.8,
-    selected: true,
-  },
-  {
-    id: 'game-4',
-    appId: 413150,
-    name: 'Stardew Valley',
-    headerImage: 'https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/413150/header.jpg',
-    playtimeHours: 145,
-    genres: ['인디', '시뮬레이션', '힐링'],
-    rating: 9.7,
-    selected: false,
-  },
-  {
-    id: 'game-5',
-    appId: 367520,
-    name: 'Hollow Knight',
-    headerImage: 'https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/367520/header.jpg',
-    playtimeHours: 95,
-    genres: ['인디', '액션'],
-    rating: 9.6,
-    selected: false,
-  },
-  {
-    id: 'game-6',
-    appId: 646570,
-    name: 'Slay the Spire',
-    headerImage: 'https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/646570/header.jpg',
-    playtimeHours: 210,
-    genres: ['인디', '전략', '카드'],
-    rating: 9.4,
-    selected: false,
-  },
-  {
-    id: 'game-7',
-    appId: 730,
-    name: 'Counter-Strike 2',
-    headerImage: 'https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/730/header.jpg',
-    playtimeHours: 520,
-    genres: ['FPS', '액션'],
-    rating: 8.8,
-    selected: false,
-  },
-  {
-    id: 'game-8',
-    appId: 1888930,
-    name: 'Armored Core VI',
-    headerImage: 'https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1888930/header.jpg',
-    playtimeHours: 88,
-    genres: ['액션', '시뮬레이션'],
-    rating: 9.1,
-    selected: false,
-  },
 ];
-
-export const INITIAL_SUBFOLDERS_GENRE: FolderItem[] = [
-  {
-    id: 'sub-1',
-    name: 'FPS 명작',
-    color: '#00F0FF',
-    gameCount: 15,
-    parentId: 'folder-1',
-  },
-  {
-    id: 'sub-2',
-    name: '인디 보석',
-    color: '#9D4EDD',
-    gameCount: 8,
-    parentId: 'folder-1',
-  },
-  {
-    id: 'sub-3',
-    name: '멀티플레이어',
-    color: '#00E676',
-    gameCount: 6,
-    parentId: 'folder-1',
-  },
-  {
-    id: 'sub-4',
-    name: '스토리 갓겜',
-    color: '#3B82F6',
-    gameCount: 22,
-    parentId: 'folder-1',
-  },
-  {
-    id: 'sub-5',
-    name: '힐링 게임',
-    color: '#FFA000',
-    gameCount: 12,
-    parentId: 'folder-1',
-  },
-  {
-    id: 'sub-6',
-    name: 'RPG 컬렉션',
-    color: '#FF5252',
-    gameCount: 18,
-    parentId: 'folder-1',
-  },
-];
-
-export const INITIAL_ROOT_FOLDERS: FolderItem[] = [
-  {
-    id: 'folder-1',
-    name: '장르별로',
-    color: '#00F0FF',
-    gameCount: 81,
-    parentId: null,
-    subFolders: INITIAL_SUBFOLDERS_GENRE,
-  },
-  {
-    id: 'folder-2',
-    name: '마법사',
-    color: '#00E676',
-    gameCount: 14,
-    parentId: null,
-    subFolders: [],
-  },
-];
-
-export const INITIAL_GUEST_SHOWCASE: ShowcaseData = {
-  userId: 'pixelhunter-01',
-  username: 'PixelHunter',
-  customTitle: "PIXELHUNTER'S SHOWCASE",
-  totalFolders: 3,
-  totalGames: 26,
-  themeColor: '#00F0FF',
-  isPublic: true,
-  folders: INITIAL_ROOT_FOLDERS,
-  games: [
-    {
-      id: 'guest-g1',
-      appId: 1245620,
-      name: '인생 최고의 RPG',
-      headerImage: 'https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1245620/header.jpg',
-      playtimeHours: 240,
-      genres: ['RPG'],
-    },
-    {
-      id: 'guest-g2',
-      appId: 413150,
-      name: '밤샘 보장 인디겜',
-      headerImage: 'https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/413150/header.jpg',
-      playtimeHours: 145,
-      genres: ['인디'],
-    },
-    {
-      id: 'guest-g3',
-      appId: 1091500,
-      name: '피지컬 FPS/슈터',
-      headerImage: 'https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1091500/header.jpg',
-      playtimeHours: 185,
-      genres: ['FPS'],
-    },
-    {
-      id: 'guest-g4',
-      appId: 1086940,
-      name: '협동/우정 파괴',
-      headerImage: 'https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1086940/header.jpg',
-      playtimeHours: 320,
-      genres: ['멀티플레이'],
-    },
-    {
-      id: 'guest-g5',
-      appId: 646570,
-      name: '클래식 복고 감성',
-      headerImage: 'https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/646570/header.jpg',
-      playtimeHours: 210,
-      genres: ['인디'],
-    },
-    {
-      id: 'guest-g6',
-      appId: 1888930,
-      name: '최근 달리는 게임',
-      headerImage: 'https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1888930/header.jpg',
-      playtimeHours: 88,
-      genres: ['액션'],
-    },
-  ],
-};

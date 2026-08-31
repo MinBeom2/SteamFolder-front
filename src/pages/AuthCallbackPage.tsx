@@ -70,7 +70,7 @@ export const AuthCallbackPage: React.FC = () => {
         </div>
       ) : (
         <div className="space-y-4">
-          <LoadingSpinner size="lg" label="스팀 계정 인증 및 JWT 토큰 발급 중..." />
+          <LoadingSpinner size="lg" label="스팀 인증중..." />
         </div>
       )}
     </div>

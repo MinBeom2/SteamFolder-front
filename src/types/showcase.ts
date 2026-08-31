@@ -1,33 +1,110 @@
-export interface GameItem {
-  id: string;
+export interface FolderGameDto {
+  id: number; // folderGameId
   appId: number;
   name: string;
   headerImage: string;
-  playtimeHours: number;
-  genres: string[];
-  rating?: number;
-  selected?: boolean;
+  positionX: number;
+  positionY: number;
+  genres?: string[];
 }
 
-export interface FolderItem {
-  id: string;
+export interface FolderResponse {
+  id: number;
   name: string;
-  color?: string; // Theme color (cyan, purple, green, etc.)
+  themeColor: string;
+  icon?: string;
+  positionX: number;
+  positionY: number;
+  depth: number;
+  isOpen?: boolean;
+  parentFolderId?: number | null;
   gameCount: number;
-  parentId?: string | null;
-  subFolders?: FolderItem[];
-  games?: GameItem[];
-  previewImages?: string[]; // 2x2 grid image preview URLs
+  childFolderCount: number;
+  childFolders?: FolderResponse[];
+  games?: FolderGameDto[];
+  breadcrumbs?: BreadcrumbItem[];
+  createdAt?: string;
+  updatedAt?: string;
 }
 
-export interface ShowcaseData {
-  userId: number | string;
+export interface ShowcaseUserDto {
+  id: number;
+  steamId: string;
   username: string;
-  customTitle: string;
-  totalFolders: number;
-  totalGames: number;
+  avatarUrl: string;
   themeColor: string;
   isPublic: boolean;
-  folders: FolderItem[];
-  games: GameItem[];
 }
+
+export interface ShowcaseStatsDto {
+  totalFolders: number;
+  totalGamesInFolders: number;
+  totalOwnedGames: number;
+  totalPlaytimeForever: number; // 분 단위
+}
+
+export interface ShowcaseResponse {
+  user: ShowcaseUserDto;
+  stats: ShowcaseStatsDto;
+  rootFolders: FolderResponse[];
+}
+
+export interface FolderGameDetailResponse {
+  id: number; // folderGameId
+  folderId: number;
+  appId: number;
+  name: string;
+  headerImage: string;
+  positionX: number;
+  positionY: number;
+  genres?: string[];
+  createdAt?: string;
+}
+
+// 2D Canvas Unified Grid Item
+export type CanvasItemType = 'FOLDER' | 'GAME';
+
+export interface CanvasItem {
+  type: CanvasItemType;
+  id: number; // folderId or folderGameId
+  name: string;
+  positionX: number;
+  positionY: number;
+  // Folder specific
+  themeColor?: string;
+  icon?: string;
+  depth?: number;
+  gameCount?: number;
+  childFolderCount?: number;
+  folderData?: FolderResponse;
+  // Game specific
+  appId?: number;
+  headerImage?: string;
+  genres?: string[];
+  playtimeHours?: number;
+  gameData?: FolderGameDto;
+}
+
+// Breadcrumb Item
+export interface BreadcrumbItem {
+  id: number | null; // null for Root Showcase
+  name: string;
+}
+
+// Clipboard Item for Multi-selection Ctrl+C / Ctrl+X / Ctrl+V
+export interface ClipboardEntry {
+  type: CanvasItemType;
+  id: number; // folderGameId or folderId
+  appId?: number;
+  name: string;
+  themeColor?: string;
+  icon?: string;
+}
+
+export interface ClipboardItem {
+  action: 'copy' | 'cut';
+  sourceFolderId: number | null;
+  entries: ClipboardEntry[];
+}
+
+

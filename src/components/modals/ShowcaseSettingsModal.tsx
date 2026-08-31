@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Modal } from '@/components/common/Modal';
 import { Button } from '@/components/common/Button';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useShowcaseStore } from '@/store/useShowcaseStore';
+import type { User } from '@/types/auth';
 import { Check, RefreshCw } from 'lucide-react';
 
 interface ShowcaseSettingsModalProps {
@@ -19,16 +20,22 @@ const PRESET_THEME_COLORS = [
   { name: 'Amber', hex: '#FFA000' },
 ];
 
-export const ShowcaseSettingsModal: React.FC<ShowcaseSettingsModalProps> = ({
-  isOpen,
+interface ShowcaseSettingsFormProps {
+  user: User;
+  onClose: () => void;
+}
+
+const ShowcaseSettingsForm: React.FC<ShowcaseSettingsFormProps> = ({
+  user,
   onClose,
 }) => {
-  const { user, updateProfile, updateVisibility, deleteAccount, isLoading } = useAuthStore();
+  const { updateProfile, updateVisibility, deleteAccount, isLoading } = useAuthStore();
   const { syncGames, isSyncingGames, cooldownSeconds } = useShowcaseStore();
 
-  const [isPublic, setIsPublic] = useState(true);
-  const [selectedColor, setSelectedColor] = useState('#00F0FF');
-  const [hexInput, setHexInput] = useState('00F0FF');
+  const initialColor = user.themeColor || '#00F0FF';
+  const [isPublic, setIsPublic] = useState(user.isPublic ?? true);
+  const [selectedColor, setSelectedColor] = useState(initialColor);
+  const [hexInput, setHexInput] = useState(initialColor.replace('#', ''));
   const [syncStatus, setSyncStatus] = useState<string | null>(null);
 
   const isCooldownActive = cooldownSeconds > 0;
@@ -37,15 +44,6 @@ export const ShowcaseSettingsModal: React.FC<ShowcaseSettingsModalProps> = ({
   const formattedCooldown = `${cooldownMin}분 ${
     cooldownSec < 10 ? '0' + cooldownSec : cooldownSec
   }초`;
-
-  useEffect(() => {
-    if (user) {
-      setIsPublic(user.isPublic ?? true);
-      const color = user.themeColor || '#00F0FF';
-      setSelectedColor(color);
-      setHexInput(color.replace('#', ''));
-    }
-  }, [user, isOpen]);
 
   const handleColorSelect = (hex: string) => {
     setSelectedColor(hex);
@@ -100,173 +98,190 @@ export const ShowcaseSettingsModal: React.FC<ShowcaseSettingsModalProps> = ({
   };
 
   return (
+    <div className="space-y-6">
+      {syncStatus && (
+        <div
+          className={`p-3 rounded-xl text-xs ${
+            isCooldownActive
+              ? 'bg-amber-950/50 border border-amber-800/60 text-amber-200'
+              : 'bg-sky-950/60 border border-[#00F0FF]/40 text-[#00F0FF]'
+          }`}
+        >
+          {syncStatus}
+        </div>
+      )}
+
+      {/* 1. 공개 설정 */}
+      <div className="space-y-2">
+        <label className="block text-xs font-semibold text-slate-300">
+          공개 설정
+        </label>
+        <div className="grid grid-cols-2 gap-2 p-1 bg-[#090d14] rounded-xl border border-slate-800">
+          <button
+            type="button"
+            onClick={() => setIsPublic(true)}
+            className={`py-2.5 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
+              isPublic
+                ? 'bg-[#15202b] text-[#00F0FF] border border-[#00F0FF]/60 shadow-[0_0_12px_rgba(0,240,255,0.25)]'
+                : 'text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            Public (공개)
+          </button>
+          <button
+            type="button"
+            onClick={() => setIsPublic(false)}
+            className={`py-2.5 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
+              !isPublic
+                ? 'bg-[#15202b] text-[#00F0FF] border border-[#00F0FF]/60 shadow-[0_0_12px_rgba(0,240,255,0.25)]'
+                : 'text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            Private (비공개)
+          </button>
+        </div>
+      </div>
+
+      {/* 2. 테마 컬러 */}
+      <div className="space-y-3">
+        <label className="block text-xs font-semibold text-slate-300">
+          테마 컬러
+        </label>
+        {/* Preset Circles */}
+        <div className="flex items-center gap-3.5">
+          {PRESET_THEME_COLORS.map((preset) => {
+            const isSelected =
+              selectedColor.toLowerCase() === preset.hex.toLowerCase();
+            return (
+              <button
+                key={preset.hex}
+                type="button"
+                onClick={() => handleColorSelect(preset.hex)}
+                className={`w-7 h-7 rounded-full transition-transform duration-150 cursor-pointer flex items-center justify-center ${
+                  isSelected
+                    ? 'scale-110 ring-2 ring-offset-2 ring-offset-[#121620] ring-[#00F0FF]'
+                    : 'hover:scale-105 border border-white/20'
+                }`}
+                style={{ backgroundColor: preset.hex }}
+                title={preset.name}
+              >
+                {isSelected && (
+                  <Check
+                    className={`w-3.5 h-3.5 ${
+                      preset.hex === '#1A1B26' ? 'text-white' : 'text-black font-bold'
+                    }`}
+                  />
+                )}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Hex Input */}
+        <div className="flex items-center gap-2 px-3.5 py-2.5 bg-[#090d14] border border-slate-800 rounded-xl">
+          <span className="text-slate-500 font-mono text-sm">#</span>
+          <input
+            type="text"
+            maxLength={6}
+            value={hexInput}
+            onChange={handleHexInputChange}
+            className="w-full bg-transparent text-sm font-mono text-slate-100 uppercase focus:outline-none tracking-wider"
+            placeholder="00F0FF"
+          />
+          <div
+            className="w-4 h-4 rounded-full shrink-0 border border-white/20"
+            style={{ backgroundColor: selectedColor }}
+          />
+        </div>
+      </div>
+
+      {/* 3. 계정 행동 */}
+      <div className="space-y-3 pt-2">
+        <label className="block text-xs font-semibold text-slate-300">
+          계정 행동
+        </label>
+        <Button
+          type="button"
+          variant="secondary"
+          className={`w-full py-2.5 text-xs font-medium border transition-all ${
+            isCooldownActive
+              ? 'bg-amber-950/30 border-amber-800/60 text-amber-300 cursor-not-allowed'
+              : 'bg-[#1e293b]/70 border-slate-700/70 hover:bg-[#283548] text-slate-200'
+          }`}
+          onClick={handleSyncSteam}
+          disabled={isCooldownActive}
+          isLoading={isSyncingGames}
+          leftIcon={
+            <RefreshCw
+              className={`w-3.5 h-3.5 ${
+                isCooldownActive ? 'text-amber-400' : 'text-slate-300'
+              }`}
+            />
+          }
+        >
+          {isCooldownActive
+            ? `동기화 쿨다운 중 (${formattedCooldown})`
+            : '스팀 프로필 & 라이브러리 동기화 (API)'}
+        </Button>
+
+        <div className="text-center pt-1">
+          <button
+            type="button"
+            onClick={handleDeleteAccount}
+            className="text-xs text-red-500 hover:text-red-400 font-medium transition-colors cursor-pointer"
+          >
+            계정 삭제
+          </button>
+        </div>
+      </div>
+
+      {/* Modal Footer */}
+      <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-800/80">
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={onClose}
+          disabled={isLoading}
+          className="text-xs text-slate-400 hover:text-slate-200"
+        >
+          취소
+        </Button>
+        <Button
+          type="button"
+          variant="cyan"
+          size="sm"
+          onClick={handleSave}
+          isLoading={isLoading}
+          className="px-6 text-xs font-bold"
+        >
+          저장하기
+        </Button>
+      </div>
+    </div>
+  );
+};
+
+export const ShowcaseSettingsModal: React.FC<ShowcaseSettingsModalProps> = ({
+  isOpen,
+  onClose,
+}) => {
+  const { user } = useAuthStore();
+
+  if (!user) return null;
+
+  return (
     <Modal
       isOpen={isOpen}
       onClose={onClose}
       title="쇼케이스 설정"
       maxWidth="md"
     >
-      <div className="space-y-6">
-        {syncStatus && (
-          <div
-            className={`p-3 rounded-xl text-xs ${
-              isCooldownActive
-                ? 'bg-amber-950/50 border border-amber-800/60 text-amber-200'
-                : 'bg-sky-950/60 border border-[#00F0FF]/40 text-[#00F0FF]'
-            }`}
-          >
-            {syncStatus}
-          </div>
-        )}
-
-        {/* 1. 공개 설정 */}
-        <div className="space-y-2">
-          <label className="block text-xs font-semibold text-slate-300">
-            공개 설정
-          </label>
-          <div className="grid grid-cols-2 gap-2 p-1 bg-[#090d14] rounded-xl border border-slate-800">
-            <button
-              type="button"
-              onClick={() => setIsPublic(true)}
-              className={`py-2.5 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
-                isPublic
-                  ? 'bg-[#15202b] text-[#00F0FF] border border-[#00F0FF]/60 shadow-[0_0_12px_rgba(0,240,255,0.25)]'
-                  : 'text-slate-400 hover:text-slate-200'
-              }`}
-            >
-              Public
-            </button>
-            <button
-              type="button"
-              onClick={() => setIsPublic(false)}
-              className={`py-2.5 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
-                !isPublic
-                  ? 'bg-[#15202b] text-[#00F0FF] border border-[#00F0FF]/60 shadow-[0_0_12px_rgba(0,240,255,0.25)]'
-                  : 'text-slate-400 hover:text-slate-200'
-              }`}
-            >
-              Private
-            </button>
-          </div>
-        </div>
-
-        {/* 2. 테마 컬러 */}
-        <div className="space-y-3">
-          <label className="block text-xs font-semibold text-slate-300">
-            테마 컬러
-          </label>
-          {/* Preset Circles */}
-          <div className="flex items-center gap-3.5">
-            {PRESET_THEME_COLORS.map((preset) => {
-              const isSelected =
-                selectedColor.toLowerCase() === preset.hex.toLowerCase();
-              return (
-                <button
-                  key={preset.hex}
-                  type="button"
-                  onClick={() => handleColorSelect(preset.hex)}
-                  className={`w-7 h-7 rounded-full transition-transform duration-150 cursor-pointer flex items-center justify-center ${
-                    isSelected
-                      ? 'scale-110 ring-2 ring-offset-2 ring-offset-[#121620] ring-[#00F0FF]'
-                      : 'hover:scale-105 border border-white/20'
-                  }`}
-                  style={{ backgroundColor: preset.hex }}
-                  title={preset.name}
-                >
-                  {isSelected && (
-                    <Check
-                      className={`w-3.5 h-3.5 ${
-                        preset.hex === '#1A1B26' ? 'text-white' : 'text-black font-bold'
-                      }`}
-                    />
-                  )}
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Hex Input */}
-          <div className="flex items-center gap-2 px-3.5 py-2.5 bg-[#090d14] border border-slate-800 rounded-xl">
-            <span className="text-slate-500 font-mono text-sm">#</span>
-            <input
-              type="text"
-              maxLength={6}
-              value={hexInput}
-              onChange={handleHexInputChange}
-              className="w-full bg-transparent text-sm font-mono text-slate-100 uppercase focus:outline-none tracking-wider"
-              placeholder="00F0FF"
-            />
-            <div
-              className="w-4 h-4 rounded-full shrink-0 border border-white/20"
-              style={{ backgroundColor: selectedColor }}
-            />
-          </div>
-        </div>
-
-        {/* 3. 계정 행동 */}
-        <div className="space-y-3 pt-2">
-          <label className="block text-xs font-semibold text-slate-300">
-            계정 행동
-          </label>
-          <Button
-            type="button"
-            variant="secondary"
-            className={`w-full py-2.5 text-xs font-medium border transition-all ${
-              isCooldownActive
-                ? 'bg-amber-950/30 border-amber-800/60 text-amber-300 cursor-not-allowed'
-                : 'bg-[#1e293b]/70 border-slate-700/70 hover:bg-[#283548] text-slate-200'
-            }`}
-            onClick={handleSyncSteam}
-            disabled={isCooldownActive}
-            isLoading={isSyncingGames}
-            leftIcon={
-              <RefreshCw
-                className={`w-3.5 h-3.5 ${
-                  isCooldownActive ? 'text-amber-400' : 'text-slate-300'
-                }`}
-              />
-            }
-          >
-            {isCooldownActive
-              ? `동기화 쿨다운 중 (${formattedCooldown})`
-              : '스팀 프로필 & 라이브러리 동기화 (API)'}
-          </Button>
-
-          <div className="text-center pt-1">
-            <button
-              type="button"
-              onClick={handleDeleteAccount}
-              className="text-xs text-red-500 hover:text-red-400 font-medium transition-colors cursor-pointer"
-            >
-              계정 삭제
-            </button>
-          </div>
-        </div>
-
-        {/* Modal Footer */}
-        <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-800/80">
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={onClose}
-            disabled={isLoading}
-            className="text-xs text-slate-400 hover:text-slate-200"
-          >
-            취소
-          </Button>
-          <Button
-            type="button"
-            variant="cyan"
-            size="sm"
-            onClick={handleSave}
-            isLoading={isLoading}
-            className="px-6 text-xs font-bold"
-          >
-            저장하기
-          </Button>
-        </div>
-      </div>
+      <ShowcaseSettingsForm
+        key={`${user.id}-${user.themeColor}-${user.isPublic}`}
+        user={user}
+        onClose={onClose}
+      />
     </Modal>
   );
 };
