@@ -90,7 +90,7 @@ const EditFolderForm: React.FC<EditFolderFormProps> = ({ folder, onClose }) => {
           onChange={(e) => setName(e.target.value)}
           placeholder="폴더 이름 입력"
           maxLength={100}
-          className="w-full px-3.5 py-2.5 bg-[#090d14] border border-slate-800 rounded-xl text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-[#00F0FF] focus:ring-1 focus:ring-[#00F0FF] transition-all"
+          className="w-full px-3.5 py-2.5 bg-[#090d14] border border-slate-800 rounded-xl text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-[#2a475e] focus:ring-1 focus:ring-[#2a475e] transition-all"
         />
       </div>
 
@@ -109,7 +109,7 @@ const EditFolderForm: React.FC<EditFolderFormProps> = ({ folder, onClose }) => {
                 onClick={() => setThemeColor(preset.hex)}
                 className={`w-7 h-7 rounded-full transition-transform duration-150 cursor-pointer flex items-center justify-center ${
                   isSelected
-                    ? 'scale-110 ring-2 ring-offset-2 ring-offset-[#121620] ring-[#00F0FF]'
+                    ? 'scale-110 ring-2 ring-offset-2 ring-offset-[#121620] ring-[#2a475e]'
                     : 'hover:scale-105 border border-white/20'
                 }`}
                 style={{ backgroundColor: preset.hex }}

@@ -67,12 +67,12 @@ export const GameCard: React.FC<GameCardProps> = ({
       onContextMenu={handleContextMenu}
       className={`relative flex flex-col items-center gap-1.5 p-2 rounded-2xl cursor-pointer select-none transition-all duration-200 group ${
         isSelected
-          ? 'ring-2 ring-[#00F0FF] bg-[#00F0FF]/10 shadow-[0_0_20px_rgba(0,240,255,0.3)] scale-105'
+          ? 'ring-2 ring-[#2a475e] bg-[#1e3a5f]/25 shadow-[0_0_16px_rgba(42,71,94,0.4)] scale-105'
           : 'hover:scale-105 hover:bg-white/5'
       }`}
     >
       {/* Game Card Container - Official Steam Header Aspect Ratio (460:215) */}
-      <div className="relative w-36 sm:w-44 aspect-[460/215] rounded-xl bg-[#101520] border border-slate-700/80 p-1 shadow-lg group-hover:border-[#00F0FF]/80 group-hover:shadow-[0_0_16px_rgba(0,240,255,0.25)] transition-all overflow-hidden">
+      <div className="relative w-36 sm:w-44 aspect-[460/215] rounded-xl bg-[#101520] border border-slate-700/80 p-1 shadow-lg group-hover:border-[#2a475e] group-hover:shadow-[0_0_16px_rgba(42,71,94,0.4)] transition-all overflow-hidden">
         <div className="w-full h-full rounded-lg overflow-hidden bg-[#07090e]">
           <img
             src={game.headerImage}
@@ -85,7 +85,7 @@ export const GameCard: React.FC<GameCardProps> = ({
 
       {/* Card Info */}
       <div className="text-center max-w-[160px] w-full px-1">
-        <h4 className="text-xs font-bold text-slate-100 truncate group-hover:text-[#00F0FF] transition-colors">
+        <h4 className="text-xs font-bold text-slate-100 truncate group-hover:text-white transition-colors">
           {game.name}
         </h4>
         {game.genres && game.genres.length > 0 && (

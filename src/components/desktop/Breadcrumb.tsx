@@ -5,9 +5,15 @@ import { useNavigate } from 'react-router-dom';
 
 interface BreadcrumbProps {
   isReadOnly?: boolean;
+  basePath?: string;
+  trail?: Array<{ id: number | null; name: string }>;
 }
 
-export const Breadcrumb: React.FC<BreadcrumbProps> = ({ isReadOnly = false }) => {
+export const Breadcrumb: React.FC<BreadcrumbProps> = ({
+  isReadOnly = false,
+  basePath,
+  trail,
+}) => {
   const navigate = useNavigate();
   const {
     breadcrumbTrail,
@@ -15,13 +21,22 @@ export const Breadcrumb: React.FC<BreadcrumbProps> = ({ isReadOnly = false }) =>
     moveGameToFolder,
   } = useShowcaseStore();
 
+  const activeTrail = trail || breadcrumbTrail;
   const [dragOverIdx, setDragOverIdx] = useState<number | null>(null);
 
   const handleClickCrumb = (crumbId: number | null) => {
-    if (crumbId === null) {
-      navigate('/');
+    if (basePath) {
+      if (crumbId === null) {
+        navigate(basePath);
+      } else {
+        navigate(`${basePath}/folders/${crumbId}`);
+      }
     } else {
-      navigate(`/folders/${crumbId}`);
+      if (crumbId === null) {
+        navigate('/');
+      } else {
+        navigate(`/folders/${crumbId}`);
+      }
     }
   };
 
@@ -44,7 +59,7 @@ export const Breadcrumb: React.FC<BreadcrumbProps> = ({ isReadOnly = false }) =>
     e.stopPropagation();
     setDragOverIdx(null);
 
-    const targetBreadcrumb = breadcrumbTrail[idx];
+    const targetBreadcrumb = activeTrail[idx];
     const targetFolderId = targetBreadcrumb.id;
 
     try {
@@ -68,12 +83,12 @@ export const Breadcrumb: React.FC<BreadcrumbProps> = ({ isReadOnly = false }) =>
 
   return (
     <nav className="flex items-center gap-1.5 text-xs text-slate-400 mb-6 flex-wrap select-none">
-      {breadcrumbTrail.map((crumb, idx) => {
-        const isLast = idx === breadcrumbTrail.length - 1;
+      {activeTrail.map((crumb, idx) => {
+        const isLast = idx === activeTrail.length - 1;
         const isDragOver = dragOverIdx === idx;
 
         return (
-          <React.Fragment key={crumb.id ?? 'root'}>
+          <React.Fragment key={`${crumb.id ?? 'root'}-${idx}`}>
             {idx > 0 && (
               <ChevronRight className="w-3.5 h-3.5 text-slate-600 shrink-0" />
             )}
@@ -86,14 +101,14 @@ export const Breadcrumb: React.FC<BreadcrumbProps> = ({ isReadOnly = false }) =>
               onDrop={(e) => handleDrop(e, idx)}
               className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg transition-all cursor-pointer ${
                 isLast
-                  ? 'bg-[#15202b] text-[#00F0FF] font-bold border border-[#00F0FF]/40 shadow-sm'
+                  ? 'bg-[#1b2838] text-white font-bold border border-[#2a475e] shadow-sm'
                   : 'hover:bg-white/5 hover:text-slate-200'
               } ${isDragOver ? 'ring-2 ring-emerald-400 bg-emerald-500/20' : ''}`}
             >
               {idx === 0 ? (
                 <Home className="w-3.5 h-3.5" />
               ) : (
-                <Folder className="w-3.5 h-3.5 text-[#00F0FF]" />
+                <Folder className="w-3.5 h-3.5 text-slate-300" />
               )}
               <span>{crumb.name}</span>
             </button>

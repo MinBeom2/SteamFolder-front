@@ -33,7 +33,7 @@ export const Navbar: React.FC = () => {
   };
 
   return (
-    <header className="sticky top-0 z-40 w-full bg-[#0b0e14]/90 backdrop-blur-md border-b border-slate-800/80 px-6 py-3">
+    <header className="sticky top-0 z-40 w-full bg-[#07090e]/50 backdrop-blur-lg border-b border-white/5 px-6 py-3 transition-colors">
       <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
         {/* Left: Clean Typography Brand Logo */}
         <Link to="/" className="flex items-center gap-1 group cursor-pointer shrink-0">
@@ -50,7 +50,7 @@ export const Navbar: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setSettingsModalOpen(true)}
-                className="p-2 rounded-lg bg-[#121620] border border-slate-800 text-slate-300 hover:text-white hover:border-[#00F0FF]/50 transition-colors cursor-pointer"
+                className="p-2 rounded-lg bg-[#121620] border border-slate-800 text-slate-300 hover:text-white hover:border-[#2a475e] transition-colors cursor-pointer"
                 title="쇼케이스 설정"
               >
                 <Settings className="w-4 h-4" />
@@ -81,7 +81,7 @@ export const Navbar: React.FC = () => {
                     'https://avatars.steamstatic.com/fef49e7fa7e1997310d705b2a6158ff8dc1cdfeb_full.jpg'
                   }
                   alt={user.username}
-                  className="w-7 h-7 rounded-full ring-1 ring-[#00F0FF]/50 object-cover"
+                  className="w-7 h-7 rounded-full ring-1 ring-[#2a475e] object-cover"
                 />
                 <span className="text-xs font-semibold text-slate-200 hidden sm:inline">
                   {user.username}

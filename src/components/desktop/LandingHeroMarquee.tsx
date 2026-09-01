@@ -1,0 +1,187 @@
+import React from 'react';
+import { SteamLoginButton } from '@/components/auth/SteamLoginButton';
+
+const ROW1_GAMES = [
+  { appId: 1245620, name: 'Elden Ring', img: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1245620/header.jpg' },
+  { appId: 1091500, name: 'Cyberpunk 2077', img: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1091500/header.jpg' },
+  { appId: 2358720, name: 'Black Myth: Wukong', img: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2358720/header.jpg' },
+  { appId: 1086940, name: "Baldur's Gate 3", img: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1086940/header.jpg' },
+  { appId: 582010, name: 'Monster Hunter: World', img: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/582010/header.jpg' },
+  { appId: 553850, name: 'Helldivers 2', img: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/553850/header.jpg' },
+  { appId: 1174180, name: 'Red Dead Redemption 2', img: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1174180/header.jpg' },
+  { appId: 292030, name: 'The Witcher 3: Wild Hunt', img: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/292030/header.jpg' },
+  { appId: 1888160, name: 'Armored Core VI', img: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1888160/header.jpg' },
+  { appId: 1627720, name: 'Lies of P', img: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1627720/header.jpg' },
+  { appId: 814380, name: 'Sekiro: Shadows Die Twice', img: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/814380/header.jpg' },
+  { appId: 2215430, name: 'Ghost of Tsushima', img: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2215430/header.jpg' },
+];
+
+const ROW2_GAMES = [
+  { appId: 1623730, name: 'Palworld', img: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1623730/header.jpg' },
+  { appId: 271590, name: 'Grand Theft Auto V', img: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/271590/header.jpg' },
+  { appId: 1868140, name: 'Dave the Diver', img: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1868140/header.jpg' },
+  { appId: 1145350, name: 'Hades II', img: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1145350/header.jpg' },
+  { appId: 367520, name: 'Hollow Knight', img: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/367520/header.jpg' },
+  { appId: 730, name: 'Counter-Strike 2', img: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/730/header.jpg' },
+  { appId: 1687950, name: 'Persona 5 Royal', img: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1687950/header.jpg' },
+  { appId: 1462040, name: 'Final Fantasy VII Remake', img: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1462040/header.jpg' },
+  { appId: 1593500, name: 'God of War', img: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1593500/header.jpg' },
+  { appId: 524220, name: 'NieR:Automata', img: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/524220/header.jpg' },
+  { appId: 1364780, name: 'Street Fighter 6', img: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1364780/header.jpg' },
+  { appId: 1778820, name: 'Tekken 8', img: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1778820/header.jpg' },
+];
+
+const ROW3_GAMES = [
+  { appId: 990080, name: 'Hogwarts Legacy', img: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/990080/header.jpg' },
+  { appId: 1172470, name: 'Apex Legends', img: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1172470/header.jpg' },
+  { appId: 374320, name: 'Dark Souls III', img: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/374320/header.jpg' },
+  { appId: 646570, name: 'Slay the Spire', img: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/646570/header.jpg' },
+  { appId: 2050650, name: 'Resident Evil 4', img: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2050650/header.jpg' },
+  { appId: 413150, name: 'Stardew Valley', img: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/413150/header.jpg' },
+  { appId: 381210, name: 'Dead by Daylight', img: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/381210/header.jpg' },
+  { appId: 252490, name: 'Rust', img: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/252490/header.jpg' },
+  { appId: 2138330, name: 'Cyberpunk 2077: Phantom Liberty', img: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2138330/header.jpg' },
+  { appId: 1790600, name: 'DRAGON BALL: Sparking! ZERO', img: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1790600/header.jpg' },
+  { appId: 427520, name: 'Factorio', img: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/427520/header.jpg' },
+  { appId: 294100, name: 'RimWorld', img: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/294100/header.jpg' },
+];
+
+const ROW4_GAMES = [
+  { appId: 1446780, name: 'Monster Hunter Rise', img: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1446780/header.jpg' },
+  { appId: 1551360, name: 'Forza Horizon 5', img: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1551360/header.jpg' },
+  { appId: 105600, name: 'Terraria', img: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/105600/header.jpg' },
+  { appId: 1172620, name: 'Sea of Thieves', img: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1172620/header.jpg' },
+  { appId: 782330, name: 'DOOM Eternal', img: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/782330/header.jpg' },
+  { appId: 1426210, name: 'It Takes Two', img: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1426210/header.jpg' },
+  { appId: 289070, name: 'Civilization VI', img: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/289070/header.jpg' },
+  { appId: 264710, name: 'Subnautica', img: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/264710/header.jpg' },
+  { appId: 588650, name: 'Dead Cells', img: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/588650/header.jpg' },
+  { appId: 1145360, name: 'Hades', img: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1145360/header.jpg' },
+  { appId: 1817070, name: "Marvel's Spider-Man Remastered", img: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1817070/header.jpg' },
+  { appId: 1222140, name: 'Detroit: Become Human', img: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1222140/header.jpg' },
+];
+
+const ROW5_GAMES = [
+  { appId: 570, name: 'DOTA 2', img: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/570/header.jpg' },
+  { appId: 431960, name: 'Wallpaper Engine', img: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/431960/header.jpg' },
+  { appId: 1966720, name: 'Lethal Company', img: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1966720/header.jpg' },
+  { appId: 892970, name: 'Valheim', img: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/892970/header.jpg' },
+  { appId: 359550, name: 'Rainbow Six Siege', img: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/359550/header.jpg' },
+  { appId: 550, name: 'Left 4 Dead 2', img: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/550/header.jpg' },
+  { appId: 218620, name: 'Payday 2', img: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/218620/header.jpg' },
+  { appId: 548430, name: 'Deep Rock Galactic', img: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/548430/header.jpg' },
+  { appId: 739630, name: 'Phasmophobia', img: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/739630/header.jpg' },
+  { appId: 4000, name: "Garry's Mod", img: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/4000/header.jpg' },
+  { appId: 227300, name: 'Euro Truck Simulator 2', img: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/227300/header.jpg' },
+  { appId: 440, name: 'Team Fortress 2', img: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/440/header.jpg' },
+];
+
+interface MarqueeRowProps {
+  games: typeof ROW1_GAMES;
+  duration: number;
+}
+
+// 100% Mathematically Seamless Infinite Marquee Row Component
+const MarqueeRow: React.FC<MarqueeRowProps> = ({ games, duration }) => {
+  return (
+    <div
+      className="flex w-max shrink-0 will-change-transform"
+      style={{
+        animation: `marqueeSeamless ${duration}s linear infinite`,
+      }}
+    >
+      {/* Primary List A */}
+      <div className="flex gap-4 sm:gap-5 shrink-0 pr-4 sm:pr-5">
+        {games.map((game, idx) => (
+          <div
+            key={`a-${game.appId}-${idx}`}
+            className="w-60 sm:w-72 h-30 sm:h-36 rounded-2xl overflow-hidden shadow-2xl border border-white/10 shrink-0 bg-[#121620]"
+          >
+            <img
+              src={game.img}
+              alt={game.name}
+              className="w-full h-full object-cover select-none"
+              loading="lazy"
+              decoding="async"
+              draggable={false}
+            />
+          </div>
+        ))}
+      </div>
+
+      {/* Clone List B: Exactly matches List A with padding-right for a zero-stutter seamless loop */}
+      <div className="flex gap-4 sm:gap-5 shrink-0 pr-4 sm:pr-5">
+        {games.map((game, idx) => (
+          <div
+            key={`b-${game.appId}-${idx}`}
+            className="w-60 sm:w-72 h-30 sm:h-36 rounded-2xl overflow-hidden shadow-2xl border border-white/10 shrink-0 bg-[#121620]"
+          >
+            <img
+              src={game.img}
+              alt={game.name}
+              className="w-full h-full object-cover select-none"
+              loading="lazy"
+              decoding="async"
+              draggable={false}
+            />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+export const LandingHeroMarquee: React.FC = () => {
+  return (
+    <div className="relative min-h-screen -mt-[61px] pt-[61px] w-full flex flex-col items-center justify-center overflow-hidden bg-[#07090e]">
+      {/* Hardware-accelerated GPU translation for 100% seamless zero-jitter infinite scrolling */}
+      <style>{`
+        @keyframes marqueeSeamless {
+          0% {
+            transform: translate3d(0, 0, 0);
+          }
+          100% {
+            transform: translate3d(-50%, 0, 0);
+          }
+        }
+      `}</style>
+
+      {/* Background Marquee Lanes: 7 densely stacked rows with zero loop seam */}
+      <div className="absolute -top-36 -bottom-36 inset-x-0 flex flex-col justify-center gap-3 sm:gap-4.5 opacity-55 blur-[3px] scale-105 pointer-events-none select-none overflow-hidden">
+        <MarqueeRow games={ROW1_GAMES} duration={52} />
+        <MarqueeRow games={ROW2_GAMES} duration={66} />
+        <MarqueeRow games={ROW3_GAMES} duration={46} />
+        <MarqueeRow games={ROW4_GAMES} duration={60} />
+        <MarqueeRow games={ROW5_GAMES} duration={50} />
+        <MarqueeRow games={ROW1_GAMES} duration={56} />
+        <MarqueeRow games={ROW2_GAMES} duration={44} />
+      </div>
+
+      {/* Full-Screen Radial Gradient: Deep dark translucency in center, smoothly softening towards edges */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background:
+            'radial-gradient(ellipse 75% 70% at 50% 50%, rgba(7, 9, 14, 0.94) 0%, rgba(7, 9, 14, 0.82) 35%, rgba(7, 9, 14, 0.55) 65%, rgba(7, 9, 14, 0.25) 100%)',
+        }}
+      />
+
+      {/* Center Hero Content (Frameless, Integrated directly into the full-screen radial glow) */}
+      <div className="relative z-10 max-w-xl mx-auto px-6 py-12 text-center space-y-6 animate-in fade-in zoom-in-95 duration-300">
+        <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-white leading-tight drop-shadow-lg">
+          스팀 라이브러리를 <br />
+          <span className="text-[#66c0f4]">
+            나만의 쇼케이스
+          </span>
+          로
+        </h1>
+
+
+        {/* Action Button */}
+        <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
+          <SteamLoginButton size="lg" />
+        </div>
+      </div>
+    </div>
+  );
+};

@@ -33,11 +33,11 @@ export const Button: React.FC<ButtonProps> = ({
 
   const variantStyles = {
     primary:
-      'bg-[#00F0FF] text-[#07090e] font-semibold hover:bg-[#33f3ff] hover:shadow-[0_0_16px_rgba(0,240,255,0.4)] focus:ring-[#00F0FF]',
+      'bg-[#21384e] text-white font-semibold border border-[#315372] hover:bg-[#2a475e] hover:border-[#3d678d] hover:shadow-[0_0_15px_rgba(42,71,94,0.4)] focus:ring-[#2a475e]',
     cyan:
-      'bg-[#00F0FF] text-[#07090e] font-bold hover:bg-[#33f3ff] hover:shadow-[0_0_20px_rgba(0,240,255,0.5)] focus:ring-[#00F0FF]',
+      'bg-[#21384e] text-white font-bold border border-[#315372] hover:bg-[#2a475e] hover:border-[#3d678d] hover:shadow-[0_0_15px_rgba(42,71,94,0.4)] focus:ring-[#2a475e]',
     steam:
-      'bg-[#1976d2] text-white hover:bg-[#1565c0] hover:shadow-[0_0_15px_rgba(25,118,210,0.4)] focus:ring-[#1976d2]',
+      'bg-[#21384e] text-white font-semibold border border-[#315372] hover:bg-[#2a475e] hover:border-[#3d678d] hover:shadow-[0_0_15px_rgba(42,71,94,0.4)] focus:ring-[#2a475e]',
     secondary:
       'bg-[#1e293b] text-slate-200 border border-slate-700 hover:bg-[#334155] hover:text-white focus:ring-slate-500',
     danger:

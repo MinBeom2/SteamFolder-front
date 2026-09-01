@@ -8,15 +8,8 @@ import { GameCard } from '@/components/desktop/GameCard';
 import { GuestBanner } from '@/components/layout/GuestBanner';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { Button } from '@/components/common/Button';
-import {
-  Sparkles,
-  Lock,
-  Globe,
-  Folder as FolderIcon,
-  Gamepad2,
-  Clock,
-  ArrowLeft,
-} from 'lucide-react';
+import { Breadcrumb } from '@/components/desktop/Breadcrumb';
+import { Lock } from 'lucide-react';
 
 export const GuestShowcasePage: React.FC = () => {
   const { identifier, folderId } = useParams<{ identifier?: string; folderId?: string }>();
@@ -73,14 +66,6 @@ export const GuestShowcasePage: React.FC = () => {
 
   const handleOpenFolder = (folder: FolderResponse) => {
     navigate(`/showcase/${targetId}/folders/${folder.id}`);
-  };
-
-  const handleGoBack = () => {
-    if (currentFolder?.parentFolderId) {
-      navigate(`/showcase/${targetId}/folders/${currentFolder.parentFolderId}`);
-    } else {
-      navigate(`/showcase/${targetId}`);
-    }
   };
 
   if (isLoading) {
@@ -186,20 +171,8 @@ export const GuestShowcasePage: React.FC = () => {
 
           <div className="flex items-center gap-3">
             <span className="px-3 py-1 rounded-full text-[11px] font-semibold bg-[#121620] text-slate-300 border border-slate-700/80 flex items-center gap-1.5">
-              <Globe className="w-3 h-3 text-[#00F0FF]" />
-              <span>GUEST VIEW • 읽기 전용</span>
+              <span>GUEST VIEW</span>
             </span>
-
-            <Link to="/">
-              <Button
-                variant="steam"
-                size="sm"
-                className="text-xs font-semibold px-4"
-                leftIcon={<Sparkles className="w-3.5 h-3.5" />}
-              >
-                나도 만들기
-              </Button>
-            </Link>
           </div>
         </div>
       </header>
@@ -215,63 +188,45 @@ export const GuestShowcasePage: React.FC = () => {
                 'https://avatars.steamstatic.com/fef49e7fa7e1997310d705b2a6158ff8dc1cdfeb_full.jpg'
               }
               alt={showcase.user.username}
-              className="w-14 h-14 rounded-full ring-2 ring-[#00F0FF]/60 object-cover shadow-lg"
+              className="w-14 h-14 rounded-full ring-2 ring-[#2a475e] object-cover shadow-lg"
             />
             <div>
               <h1 className="text-xl sm:text-2xl font-black text-white tracking-tight flex items-center gap-2">
                 <span>{showcase.user.username}님의 쇼케이스</span>
               </h1>
-              <p className="text-xs text-slate-400 mt-0.5">
-                SteamID: <span className="font-mono text-slate-300">{showcase.user.steamId}</span>
-              </p>
+
             </div>
           </div>
 
-          {/* Stats Badges */}
-          <div className="flex items-center gap-4 flex-wrap">
-            <div className="px-3.5 py-2 rounded-xl bg-[#090d14] border border-slate-800 flex items-center gap-2 text-xs">
-              <FolderIcon className="w-4 h-4 text-[#00F0FF]" />
-              <div>
-                <span className="text-slate-400 block text-[10px]">총 폴더</span>
-                <strong className="text-white font-bold">{showcase.stats.totalFolders}개</strong>
-              </div>
+          {/* Plain Text Stats (No borders, no total folders, no icons) */}
+          <div className="flex items-center gap-4 sm:gap-6 text-xs sm:text-sm text-slate-400">
+            <div>
+              보유 게임 <span className="text-white font-bold ml-1">{showcase.stats.totalOwnedGames}개</span>
             </div>
-
-            <div className="px-3.5 py-2 rounded-xl bg-[#090d14] border border-slate-800 flex items-center gap-2 text-xs">
-              <Gamepad2 className="w-4 h-4 text-emerald-400" />
-              <div>
-                <span className="text-slate-400 block text-[10px]">보유 게임</span>
-                <strong className="text-white font-bold">{showcase.stats.totalOwnedGames}개</strong>
-              </div>
-            </div>
-
-            <div className="px-3.5 py-2 rounded-xl bg-[#090d14] border border-slate-800 flex items-center gap-2 text-xs">
-              <Clock className="w-4 h-4 text-amber-400" />
-              <div>
-                <span className="text-slate-400 block text-[10px]">총 플레이시간</span>
-                <strong className="text-white font-bold">{playtimeHours}시간</strong>
-              </div>
+            <span className="text-slate-600">•</span>
+            <div>
+              총 플레이 시간 <span className="text-white font-bold ml-1">{playtimeHours}시간</span>
             </div>
           </div>
         </div>
 
-        {/* Folder Navigation Path when inside subfolder */}
-        {currentFolder && (
-          <div className="flex items-center gap-2 mb-6">
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={handleGoBack}
-              className="text-xs text-slate-300 bg-[#121620]"
-              leftIcon={<ArrowLeft className="w-3.5 h-3.5" />}
-            >
-              상위 폴더로
-            </Button>
-            <span className="text-xs text-slate-400 font-semibold">
-              현재 위치: <strong className="text-[#00F0FF]">{currentFolder.name}</strong>
-            </span>
-          </div>
-        )}
+        {/* Hierarchical Breadcrumb Navigation Path */}
+        <Breadcrumb
+          isReadOnly={true}
+          basePath={`/showcase/${encodeURIComponent(targetId)}`}
+          trail={
+            currentFolder
+              ? [
+                  { id: null, name: `${showcase.user.username}님의 쇼케이스` },
+                  ...(currentFolder.breadcrumbs || []).map((b) => ({
+                    id: b.id,
+                    name: b.name,
+                  })),
+                  { id: currentFolder.id, name: currentFolder.name },
+                ]
+              : [{ id: null, name: `${showcase.user.username}님의 쇼케이스` }]
+          }
+        />
 
         {/* 2D 6-Column Grid Items */}
         <div className="p-6 rounded-2xl bg-[#090d14]/40 border border-slate-800/60 backdrop-blur-sm min-h-[380px]">
@@ -317,7 +272,7 @@ export const GuestShowcasePage: React.FC = () => {
 
             {currentFolders.length === 0 && currentGames.length === 0 && (
               <div className="col-span-full py-16 text-center text-xs text-slate-500">
-                폴더에 등록된 항목이 없습니다.
+                폴더가 비어있습니다.
               </div>
             )}
           </div>

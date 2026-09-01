@@ -80,7 +80,7 @@ export const CreateFolderModal: React.FC<CreateFolderModalProps> = ({
             placeholder="예: 소울라이크 모음, 2026 베스트 등"
             maxLength={100}
             autoFocus
-            className="w-full px-3.5 py-2.5 bg-[#090d14] border border-slate-800 rounded-xl text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-[#00F0FF] focus:ring-1 focus:ring-[#00F0FF] transition-all"
+            className="w-full px-3.5 py-2.5 bg-[#090d14] border border-slate-800 rounded-xl text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-[#2a475e] focus:ring-1 focus:ring-[#2a475e] transition-all"
           />
         </div>
 
@@ -99,7 +99,7 @@ export const CreateFolderModal: React.FC<CreateFolderModalProps> = ({
                   onClick={() => setThemeColor(preset.hex)}
                   className={`w-7 h-7 rounded-full transition-transform duration-150 cursor-pointer flex items-center justify-center ${
                     isSelected
-                      ? 'scale-110 ring-2 ring-offset-2 ring-offset-[#121620] ring-[#00F0FF]'
+                      ? 'scale-110 ring-2 ring-offset-2 ring-offset-[#121620] ring-[#2a475e]'
                       : 'hover:scale-105 border border-white/20'
                   }`}
                   style={{ backgroundColor: preset.hex }}

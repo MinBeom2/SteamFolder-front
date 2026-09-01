@@ -1,6 +1,5 @@
 import React from 'react';
 import { Button } from '@/components/common/Button';
-import { Sparkles } from 'lucide-react';
 import { useShowcaseStore } from '@/store/useShowcaseStore';
 
 interface SteamLoginButtonProps {
@@ -11,7 +10,7 @@ interface SteamLoginButtonProps {
 
 export const SteamLoginButton: React.FC<SteamLoginButtonProps> = ({
   size = 'md',
-  showDemoOption = true,
+  showDemoOption = false,
   className = '',
 }) => {
   const { setDirectLoginModalOpen } = useShowcaseStore();
@@ -38,16 +37,11 @@ export const SteamLoginButton: React.FC<SteamLoginButtonProps> = ({
   return (
     <div className={`flex flex-wrap items-center gap-2.5 ${className}`}>
       <Button
-        variant="steam"
+        variant="secondary"
         size={size}
         onClick={handleSteamRedirect}
-        className="font-bold tracking-tight bg-gradient-to-r from-[#171a21] via-[#1b2838] to-[#2a475e] border border-[#66c0f4]/40 hover:border-[#66c0f4] hover:shadow-[0_0_20px_rgba(102,192,244,0.4)]"
-        leftIcon={
-          <svg className="w-5 h-5 fill-current text-[#66c0f4]" viewBox="0 0 24 24">
-            <path d="M12 2a10 10 0 0 0-10 10c0 4.7 3.2 8.6 7.6 9.7l2.8-4.1a3.5 3.5 0 0 1 1.6-4.5V13a3.5 3.5 0 1 1 5.9-2.5 3.5 3.5 0 0 1-4.7 3.3l-3.3 4.8A10 10 0 0 0 22 12 10 10 0 0 0 12 2z"/>
-          </svg>
-        }
-      >
+        className="font-semibold tracking-normal text-white bg-[#1e2837] border border-slate-700 hover:bg-[#2a384d] hover:border-slate-500 transition-colors shadow-md cursor-pointer"
+        >
         <span>스팀 계정으로 로그인</span>
       </Button>
 
@@ -56,8 +50,7 @@ export const SteamLoginButton: React.FC<SteamLoginButtonProps> = ({
           variant="ghost"
           size={size}
           onClick={() => setDirectLoginModalOpen(true)}
-          className="text-xs text-[#00F0FF] border border-[#00F0FF]/30 hover:border-[#00F0FF] hover:bg-[#00F0FF]/10 transition-all font-semibold"
-          leftIcon={<Sparkles className="w-3.5 h-3.5 text-[#00F0FF]" />}
+          className="text-xs text-slate-400 border border-slate-800 hover:bg-white/5 hover:text-white transition-all font-medium"
         >
           간편 / 데모 로그인
         </Button>

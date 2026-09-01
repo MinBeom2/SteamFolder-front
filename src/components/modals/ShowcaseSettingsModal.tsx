@@ -104,7 +104,7 @@ const ShowcaseSettingsForm: React.FC<ShowcaseSettingsFormProps> = ({
           className={`p-3 rounded-xl text-xs ${
             isCooldownActive
               ? 'bg-amber-950/50 border border-amber-800/60 text-amber-200'
-              : 'bg-sky-950/60 border border-[#00F0FF]/40 text-[#00F0FF]'
+              : 'bg-[#121b28] border border-[#2a475e] text-slate-200'
           }`}
         >
           {syncStatus}
@@ -122,7 +122,7 @@ const ShowcaseSettingsForm: React.FC<ShowcaseSettingsFormProps> = ({
             onClick={() => setIsPublic(true)}
             className={`py-2.5 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
               isPublic
-                ? 'bg-[#15202b] text-[#00F0FF] border border-[#00F0FF]/60 shadow-[0_0_12px_rgba(0,240,255,0.25)]'
+                ? 'bg-[#1b2838] text-white border border-[#2a475e] shadow-[0_0_12px_rgba(42,71,94,0.4)]'
                 : 'text-slate-400 hover:text-slate-200'
             }`}
           >
@@ -133,7 +133,7 @@ const ShowcaseSettingsForm: React.FC<ShowcaseSettingsFormProps> = ({
             onClick={() => setIsPublic(false)}
             className={`py-2.5 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
               !isPublic
-                ? 'bg-[#15202b] text-[#00F0FF] border border-[#00F0FF]/60 shadow-[0_0_12px_rgba(0,240,255,0.25)]'
+                ? 'bg-[#1b2838] text-white border border-[#2a475e] shadow-[0_0_12px_rgba(42,71,94,0.4)]'
                 : 'text-slate-400 hover:text-slate-200'
             }`}
           >
@@ -159,7 +159,7 @@ const ShowcaseSettingsForm: React.FC<ShowcaseSettingsFormProps> = ({
                 onClick={() => handleColorSelect(preset.hex)}
                 className={`w-7 h-7 rounded-full transition-transform duration-150 cursor-pointer flex items-center justify-center ${
                   isSelected
-                    ? 'scale-110 ring-2 ring-offset-2 ring-offset-[#121620] ring-[#00F0FF]'
+                    ? 'scale-110 ring-2 ring-offset-2 ring-offset-[#121620] ring-[#2a475e]'
                     : 'hover:scale-105 border border-white/20'
                 }`}
                 style={{ backgroundColor: preset.hex }}

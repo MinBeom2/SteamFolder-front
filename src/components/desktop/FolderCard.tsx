@@ -118,7 +118,7 @@ export const FolderCard: React.FC<FolderCardProps> = ({
       onContextMenu={handleContextMenu}
       className={`relative flex flex-col items-center gap-2 p-2.5 rounded-2xl cursor-pointer select-none transition-all duration-200 group ${
         isSelected
-          ? 'ring-2 ring-[#00F0FF] bg-[#00F0FF]/10 shadow-[0_0_20px_rgba(0,240,255,0.3)] scale-105'
+          ? 'ring-2 ring-[#2a475e] bg-[#1e3a5f]/25 shadow-[0_0_16px_rgba(42,71,94,0.4)] scale-105'
           : isDragOver
           ? 'ring-2 ring-emerald-400 bg-emerald-500/20 scale-110'
           : 'hover:scale-105 hover:bg-white/5'

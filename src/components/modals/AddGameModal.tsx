@@ -219,12 +219,12 @@ export const AddGameModal: React.FC<AddGameModalProps> = ({
             className={`text-[11px] py-1 px-3 border transition-all ${
               isCooldownActive
                 ? 'bg-amber-950/30 border-amber-800/60 text-amber-300 cursor-not-allowed'
-                : 'bg-[#1e293b]/70 border-slate-700 hover:border-[#00F0FF]/50 text-slate-300'
+                : 'bg-[#1e293b]/70 border-slate-700 hover:border-[#2a475e] text-slate-300'
             }`}
             leftIcon={
               <RefreshCw
                 className={`w-3 h-3 ${
-                  isCooldownActive ? 'text-amber-400' : 'text-[#00F0FF]'
+                  isCooldownActive ? 'text-amber-400' : 'text-[#66c0f4]'
                 }`}
               />
             }
@@ -240,7 +240,7 @@ export const AddGameModal: React.FC<AddGameModalProps> = ({
       <div className="space-y-4">
         {/* Success Message Banner */}
         {successMessage && (
-          <div className="p-3 bg-sky-950/60 border border-[#00F0FF]/40 rounded-xl text-xs text-[#00F0FF] flex items-center justify-between animate-in fade-in duration-200">
+          <div className="p-3 bg-[#121b28] border border-[#2a475e] rounded-xl text-xs text-slate-200 flex items-center justify-between animate-in fade-in duration-200">
             <span>{successMessage}</span>
           </div>
         )}
@@ -260,7 +260,7 @@ export const AddGameModal: React.FC<AddGameModalProps> = ({
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="보유 게임 검색..."
-            className="w-full pl-10 pr-4 py-2 bg-[#090d14] border border-slate-800 rounded-xl text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-[#00F0FF] focus:ring-1 focus:ring-[#00F0FF] transition-all"
+            className="w-full pl-10 pr-4 py-2 bg-[#090d14] border border-slate-800 rounded-xl text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-[#2a475e] focus:ring-1 focus:ring-[#2a475e] transition-all"
           />
         </div>
 
@@ -284,7 +284,7 @@ export const AddGameModal: React.FC<AddGameModalProps> = ({
                 onClick={() => handleTagClick(genre)}
                 className={`px-3.5 py-1 rounded-lg text-xs font-semibold transition-all shrink-0 cursor-pointer ${
                   isActive
-                    ? 'bg-[#00F0FF] text-[#07090e] shadow-[0_0_10px_rgba(0,240,255,0.35)]'
+                    ? 'bg-[#2a475e] text-white border border-[#3b6485] shadow-[0_0_10px_rgba(42,71,94,0.4)]'
                     : 'bg-[#121620] text-slate-400 border border-slate-800 hover:text-slate-200 hover:border-slate-700'
                 }`}
               >
@@ -298,7 +298,7 @@ export const AddGameModal: React.FC<AddGameModalProps> = ({
         <div className="flex items-center justify-between gap-3 pt-1 border-t border-slate-800/60 pb-1">
           {/* Left: Filtered games count */}
           <div className="flex items-center gap-1.5 text-xs text-slate-400 font-medium">
-            <Layers className="w-3.5 h-3.5 text-[#00F0FF]" />
+            <Layers className="w-3.5 h-3.5 text-slate-400" />
             <span>
               총 <strong className="text-slate-200">{sortedGames.length}</strong>개 게임
             </span>
@@ -311,7 +311,7 @@ export const AddGameModal: React.FC<AddGameModalProps> = ({
               onClick={() => setSortBy('playtime')}
               className={`px-3 py-1 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 cursor-pointer ${
                 sortBy === 'playtime'
-                  ? 'bg-[#1e293b] text-[#00F0FF] font-bold shadow-sm'
+                  ? 'bg-[#21384e] text-white border border-[#2e5270] font-bold shadow-sm'
                   : 'text-slate-400 hover:text-slate-200'
               }`}
               title="플레이타임이 많은 순으로 정렬"
@@ -325,7 +325,7 @@ export const AddGameModal: React.FC<AddGameModalProps> = ({
               onClick={() => setSortBy('recent')}
               className={`px-3 py-1 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 cursor-pointer ${
                 sortBy === 'recent'
-                  ? 'bg-[#1e293b] text-[#00F0FF] font-bold shadow-sm'
+                  ? 'bg-[#21384e] text-white border border-[#2e5270] font-bold shadow-sm'
                   : 'text-slate-400 hover:text-slate-200'
               }`}
               title="최근에 플레이한 순으로 정렬"
@@ -340,7 +340,7 @@ export const AddGameModal: React.FC<AddGameModalProps> = ({
               onClick={handleNameSortClick}
               className={`px-3 py-1 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 cursor-pointer ${
                 sortBy === 'name-asc' || sortBy === 'name-desc'
-                  ? 'bg-[#1e293b] text-[#00F0FF] font-bold shadow-sm'
+                  ? 'bg-[#21384e] text-white border border-[#2e5270] font-bold shadow-sm'
                   : 'text-slate-400 hover:text-slate-200'
               }`}
               title={
@@ -352,7 +352,7 @@ export const AddGameModal: React.FC<AddGameModalProps> = ({
               }
             >
               {sortBy === 'name-desc' ? (
-                <ArrowDownAZ className="w-3.5 h-3.5 text-[#00F0FF]" />
+                <ArrowDownAZ className="w-3.5 h-3.5 text-white" />
               ) : (
                 <ArrowUpAZ className="w-3.5 h-3.5" />
               )}
@@ -379,7 +379,7 @@ export const AddGameModal: React.FC<AddGameModalProps> = ({
                   onClick={() => toggleGameSelection(game.appId)}
                   className={`relative rounded-xl bg-[#121620] border transition-all duration-200 cursor-pointer overflow-hidden group select-none ${
                     isSelected
-                      ? 'border-[#00F0FF] shadow-[0_0_14px_rgba(0,240,255,0.25)]'
+                      ? 'border-[#2a475e] shadow-[0_0_14px_rgba(42,71,94,0.4)]'
                       : 'border-slate-800/80 hover:border-slate-600'
                   }`}
                 >

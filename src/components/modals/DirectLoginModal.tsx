@@ -109,7 +109,7 @@ export const DirectLoginModal: React.FC<DirectLoginModalProps> = ({
             type="text"
             value={steamId}
             onChange={(e) => setSteamId(e.target.value)}
-            className="w-full px-3.5 py-2 text-sm bg-[#090d14] border border-slate-800 rounded-lg text-slate-100 placeholder-slate-500 focus:outline-none focus:border-[#00F0FF] focus:ring-1 focus:ring-[#00F0FF]"
+            className="w-full px-3.5 py-2 text-sm bg-[#090d14] border border-slate-800 rounded-lg text-slate-100 placeholder-slate-500 focus:outline-none focus:border-[#2a475e] focus:ring-1 focus:ring-[#2a475e]"
             placeholder="76561198028793194"
             required
           />
@@ -123,7 +123,7 @@ export const DirectLoginModal: React.FC<DirectLoginModalProps> = ({
             type="text"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
-            className="w-full px-3.5 py-2 text-sm bg-[#090d14] border border-slate-800 rounded-lg text-slate-100 placeholder-slate-500 focus:outline-none focus:border-[#00F0FF] focus:ring-1 focus:ring-[#00F0FF]"
+            className="w-full px-3.5 py-2 text-sm bg-[#090d14] border border-slate-800 rounded-lg text-slate-100 placeholder-slate-500 focus:outline-none focus:border-[#2a475e] focus:ring-1 focus:ring-[#2a475e]"
             placeholder="PixelHunter"
           />
         </div>
@@ -136,7 +136,7 @@ export const DirectLoginModal: React.FC<DirectLoginModalProps> = ({
             type="text"
             value={avatarUrl}
             onChange={(e) => setAvatarUrl(e.target.value)}
-            className="w-full px-3.5 py-2 text-sm bg-[#090d14] border border-slate-800 rounded-lg text-slate-100 placeholder-slate-500 focus:outline-none focus:border-[#00F0FF] focus:ring-1 focus:ring-[#00F0FF]"
+            className="w-full px-3.5 py-2 text-sm bg-[#090d14] border border-slate-800 rounded-lg text-slate-100 placeholder-slate-500 focus:outline-none focus:border-[#2a475e] focus:ring-1 focus:ring-[#2a475e]"
             placeholder="https://avatars.steamstatic.com/..."
           />
         </div>

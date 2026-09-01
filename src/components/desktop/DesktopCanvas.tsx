@@ -5,13 +5,12 @@ import { useShowcaseStore } from '@/store/useShowcaseStore';
 import { FolderCard } from './FolderCard';
 import { GameCard } from './GameCard';
 import { Breadcrumb } from './Breadcrumb';
-import { SteamLoginButton } from '@/components/auth/SteamLoginButton';
+import { LandingHeroMarquee } from './LandingHeroMarquee';
 import { Button } from '@/components/common/Button';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import {
   Plus,
   FolderPlus,
-  Sparkles,
   Info,
 } from 'lucide-react';
 
@@ -233,37 +232,9 @@ export const DesktopCanvas: React.FC<DesktopCanvasProps> = ({ isReadOnly = false
     setSelectionBox(null);
   };
 
-  // Unauthenticated Welcome State
+  // Unauthenticated Welcome State (Infinite Flowing Games Marquee)
   if (!isAuthenticated && !isReadOnly) {
-    return (
-      <div className="relative min-h-[calc(100vh-61px)] w-full flex flex-col items-center justify-center p-6 text-center overflow-hidden">
-        <div className="absolute inset-0 desktop-dot-bg opacity-30 pointer-events-none" />
-        <div className="absolute w-[500px] h-[300px] rounded-full blur-[140px] opacity-20 bg-[#00F0FF] pointer-events-none" />
-
-        <div className="relative z-10 max-w-2xl mx-auto space-y-6 animate-in fade-in zoom-in-95 duration-300">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#00F0FF]/10 text-[#00F0FF] border border-[#00F0FF]/25 text-xs font-semibold">
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>2D 데스크탑 캔버스 & 계층형 폴더 시스템</span>
-          </div>
-
-          <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-white leading-tight">
-            스팀 라이브러리를 나만의 <br />
-            <span className="bg-gradient-to-r from-[#66c0f4] via-[#00F0FF] to-[#38bdf8] bg-clip-text text-transparent">
-              감성 데스크탑 쇼케이스
-            </span>
-            로
-          </h1>
-
-          <p className="text-sm sm:text-base text-slate-400 max-w-lg mx-auto leading-relaxed">
-            스팀 계정으로 로그인하여 6열 2D 격자 위에 자유롭게 폴더를 만들고, 윈도우처럼 드래그 앤 드롭으로 큐레이션해 보세요.
-          </p>
-
-          <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-3">
-            <SteamLoginButton size="lg" />
-          </div>
-        </div>
-      </div>
-    );
+    return <LandingHeroMarquee />;
   }
 
   const handleCanvasContextMenu = (e: React.MouseEvent) => {
@@ -327,7 +298,7 @@ export const DesktopCanvas: React.FC<DesktopCanvasProps> = ({ isReadOnly = false
       {selectionBox && selectionStyle && (
         <div
           style={selectionStyle}
-          className="absolute z-30 border border-[#00F0FF] bg-[#00F0FF]/15 pointer-events-none rounded-[2px] shadow-sm transition-none"
+          className="absolute z-30 border border-[#2a475e] bg-[#1e3a5f]/25 pointer-events-none rounded-[2px] shadow-sm transition-none"
         />
       )}
 
@@ -362,8 +333,8 @@ export const DesktopCanvas: React.FC<DesktopCanvasProps> = ({ isReadOnly = false
                 variant="secondary"
                 size="sm"
                 onClick={() => setCreateFolderModalOpen(true)}
-                className="text-xs font-semibold text-slate-200 border-slate-700 hover:border-[#00F0FF]/60 hover:text-white bg-[#121620]"
-                leftIcon={<FolderPlus className="w-3.5 h-3.5 text-[#00F0FF]" />}
+                className="text-xs font-semibold text-slate-200 border-slate-700 hover:border-[#2a475e] hover:text-white bg-[#121620]"
+                leftIcon={<FolderPlus className="w-3.5 h-3.5 text-slate-300" />}
               >
                 폴더 추가
               </Button>
@@ -457,8 +428,8 @@ export const DesktopCanvas: React.FC<DesktopCanvasProps> = ({ isReadOnly = false
 
       {/* Floating Toast Notification Banner */}
       {toastMessage && (
-        <div className="fixed bottom-16 right-8 z-50 px-4 py-2.5 rounded-xl bg-[#0e1420]/95 border border-[#00F0FF]/60 text-white text-xs font-semibold shadow-2xl backdrop-blur-md flex items-center gap-2.5 animate-in fade-in slide-in-from-bottom-3 duration-200">
-          <Info className="w-4 h-4 text-[#00F0FF]" />
+        <div className="fixed bottom-16 right-8 z-50 px-4 py-2.5 rounded-xl bg-[#0e1420]/95 border border-[#2a475e] text-white text-xs font-semibold shadow-2xl backdrop-blur-md flex items-center gap-2.5 animate-in fade-in slide-in-from-bottom-3 duration-200">
+          <Info className="w-4 h-4 text-[#66c0f4]" />
           <span>{toastMessage}</span>
         </div>
       )}
