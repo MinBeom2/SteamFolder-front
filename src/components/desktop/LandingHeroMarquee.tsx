@@ -146,8 +146,8 @@ export const LandingHeroMarquee: React.FC = () => {
         }
       `}</style>
 
-      {/* Background Marquee Lanes: 7 densely stacked rows with zero loop seam */}
-      <div className="absolute -top-36 -bottom-36 inset-x-0 flex flex-col justify-center gap-3 sm:gap-4.5 opacity-55 blur-[3px] scale-105 pointer-events-none select-none overflow-hidden">
+      {/* Background Marquee Lanes: Rotated -15deg (Counter-Clockwise) & Scaled to fill all corners */}
+      <div className="absolute -inset-[30vw] flex flex-col justify-center gap-3.5 sm:gap-5 opacity-50 blur-[3px] pointer-events-none select-none overflow-hidden -rotate-[15deg] scale-125 origin-center">
         <MarqueeRow games={ROW1_GAMES} duration={52} />
         <MarqueeRow games={ROW2_GAMES} duration={66} />
         <MarqueeRow games={ROW3_GAMES} duration={46} />
@@ -155,6 +155,8 @@ export const LandingHeroMarquee: React.FC = () => {
         <MarqueeRow games={ROW5_GAMES} duration={50} />
         <MarqueeRow games={ROW1_GAMES} duration={56} />
         <MarqueeRow games={ROW2_GAMES} duration={44} />
+        <MarqueeRow games={ROW3_GAMES} duration={62} />
+        <MarqueeRow games={ROW4_GAMES} duration={48} />
       </div>
 
       {/* Full-Screen Radial Gradient: Deep dark translucency in center, smoothly softening towards edges */}
@@ -168,15 +170,13 @@ export const LandingHeroMarquee: React.FC = () => {
 
       {/* Center Hero Content (Frameless, Integrated directly into the full-screen radial glow) */}
       <div className="relative z-10 max-w-xl mx-auto px-6 py-12 text-center space-y-6 animate-in fade-in zoom-in-95 duration-300">
-        <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-white leading-tight drop-shadow-lg">
+        <h1 className="text-3xl sm:text-5xl font-bold tracking-tight text-white leading-tight drop-shadow-lg">
           스팀 라이브러리를 <br />
           <span className="text-[#66c0f4]">
             나만의 쇼케이스
           </span>
           로
         </h1>
-
-
         {/* Action Button */}
         <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
           <SteamLoginButton size="lg" />

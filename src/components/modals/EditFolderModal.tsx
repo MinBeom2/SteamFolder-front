@@ -3,21 +3,12 @@ import { Modal } from '@/components/common/Modal';
 import { Button } from '@/components/common/Button';
 import { useShowcaseStore } from '@/store/useShowcaseStore';
 import type { FolderResponse } from '@/types/showcase';
-import { Check, Trash2 } from 'lucide-react';
+import { Trash2 } from 'lucide-react';
 
 interface EditFolderModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
-
-const PRESET_COLORS = [
-  { name: 'Dark', hex: '#1A1B26' },
-  { name: 'Cyan', hex: '#00F0FF' },
-  { name: 'Purple', hex: '#9D4EDD' },
-  { name: 'Green', hex: '#00E676' },
-  { name: 'Red', hex: '#FF5252' },
-  { name: 'Amber', hex: '#FFA000' },
-];
 
 interface EditFolderFormProps {
   folder: FolderResponse;
@@ -28,7 +19,6 @@ const EditFolderForm: React.FC<EditFolderFormProps> = ({ folder, onClose }) => {
   const { updateFolder, deleteFolder } = useShowcaseStore();
 
   const [name, setName] = useState(folder.name || '');
-  const [themeColor, setThemeColor] = useState(folder.themeColor || '#00F0FF');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -43,7 +33,8 @@ const EditFolderForm: React.FC<EditFolderFormProps> = ({ folder, onClose }) => {
     setError(null);
 
     try {
-      await updateFolder(folder.id, name.trim(), themeColor, folder.icon || 'folder');
+      // Keep default Steam Dark Blue theme
+      await updateFolder(folder.id, name.trim(), '#2a475e', folder.icon || 'folder');
       onClose();
     } catch (err: unknown) {
       console.error('Failed to update folder:', err);
@@ -82,7 +73,7 @@ const EditFolderForm: React.FC<EditFolderFormProps> = ({ folder, onClose }) => {
       {/* 1. 폴더 이름 */}
       <div className="space-y-1.5">
         <label className="block text-xs font-semibold text-slate-300">
-          폴더 이름 <span className="text-[#00F0FF]">*</span>
+          폴더 이름
         </label>
         <input
           type="text"
@@ -90,42 +81,9 @@ const EditFolderForm: React.FC<EditFolderFormProps> = ({ folder, onClose }) => {
           onChange={(e) => setName(e.target.value)}
           placeholder="폴더 이름 입력"
           maxLength={100}
+          autoFocus
           className="w-full px-3.5 py-2.5 bg-[#090d14] border border-slate-800 rounded-xl text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-[#2a475e] focus:ring-1 focus:ring-[#2a475e] transition-all"
         />
-      </div>
-
-      {/* 2. 테마 컬러 */}
-      <div className="space-y-2">
-        <label className="block text-xs font-semibold text-slate-300">
-          폴더 테마 색상
-        </label>
-        <div className="flex items-center gap-3">
-          {PRESET_COLORS.map((preset) => {
-            const isSelected = themeColor === preset.hex;
-            return (
-              <button
-                key={preset.hex}
-                type="button"
-                onClick={() => setThemeColor(preset.hex)}
-                className={`w-7 h-7 rounded-full transition-transform duration-150 cursor-pointer flex items-center justify-center ${
-                  isSelected
-                    ? 'scale-110 ring-2 ring-offset-2 ring-offset-[#121620] ring-[#2a475e]'
-                    : 'hover:scale-105 border border-white/20'
-                }`}
-                style={{ backgroundColor: preset.hex }}
-                title={preset.name}
-              >
-                {isSelected && (
-                  <Check
-                    className={`w-3.5 h-3.5 ${
-                      preset.hex === '#1A1B26' ? 'text-white' : 'text-black font-bold'
-                    }`}
-                  />
-                )}
-              </button>
-            );
-          })}
-        </div>
       </div>
 
       {/* Footer with Delete & Save */}

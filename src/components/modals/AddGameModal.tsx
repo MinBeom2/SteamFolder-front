@@ -45,12 +45,16 @@ export const AddGameModal: React.FC<AddGameModalProps> = ({
   const {
     userGames,
     isLoadingGames,
+    isLoadingMoreGames,
+    hasMoreGames,
+    totalGamesCount,
     isSyncingGames,
     cooldownSeconds,
     syncGames,
     checkCooldown,
     toggleGameSelection,
     addSelectedGamesToFolder,
+    loadMoreGames,
   } = useShowcaseStore();
 
   const [search, setSearch] = useState('');
@@ -67,6 +71,9 @@ export const AddGameModal: React.FC<AddGameModalProps> = ({
   const hasMovedRef = useRef(false);
   const [isGrabbed, setIsGrabbed] = useState(false);
 
+  // Infinite scroll observer sentry ref
+  const observerTargetRef = useRef<HTMLDivElement>(null);
+
   const isCooldownActive = cooldownSeconds > 0;
   const cooldownMin = Math.floor(cooldownSeconds / 60);
   const cooldownSec = cooldownSeconds % 60;
@@ -80,6 +87,36 @@ export const AddGameModal: React.FC<AddGameModalProps> = ({
       checkCooldown();
     }
   }, [isOpen, checkCooldown]);
+
+  // Infinite scroll observer setup
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (
+          entries[0].isIntersecting &&
+          hasMoreGames &&
+          !isLoadingMoreGames &&
+          !isLoadingGames
+        ) {
+          loadMoreGames();
+        }
+      },
+      { threshold: 0.1, rootMargin: '120px' }
+    );
+
+    const currentTarget = observerTargetRef.current;
+    if (currentTarget) {
+      observer.observe(currentTarget);
+    }
+
+    return () => {
+      if (currentTarget) {
+        observer.unobserve(currentTarget);
+      }
+    };
+  }, [isOpen, hasMoreGames, isLoadingMoreGames, isLoadingGames, loadMoreGames]);
 
   const handleSync = async () => {
     if (isCooldownActive) {
@@ -296,11 +333,11 @@ export const AddGameModal: React.FC<AddGameModalProps> = ({
 
         {/* 3. Sort Row (Positioned underneath genre tags) */}
         <div className="flex items-center justify-between gap-3 pt-1 border-t border-slate-800/60 pb-1">
-          {/* Left: Filtered games count */}
+          {/* Left: Filtered games count / Total count */}
           <div className="flex items-center gap-1.5 text-xs text-slate-400 font-medium">
             <Layers className="w-3.5 h-3.5 text-slate-400" />
             <span>
-              총 <strong className="text-slate-200">{sortedGames.length}</strong>개 게임
+              총 <strong className="text-slate-200">{totalGamesCount || sortedGames.length}</strong>개 중 <strong className="text-[#66c0f4]">{sortedGames.length}</strong>개 표시
             </span>
           </div>
 
@@ -379,7 +416,7 @@ export const AddGameModal: React.FC<AddGameModalProps> = ({
                   onClick={() => toggleGameSelection(game.appId)}
                   className={`relative rounded-xl bg-[#121620] border transition-all duration-200 cursor-pointer overflow-hidden group select-none ${
                     isSelected
-                      ? 'border-[#2a475e] shadow-[0_0_14px_rgba(42,71,94,0.4)]'
+                      ? 'border-[#3d678d] ring-1 ring-[#3d678d] shadow-[0_0_14px_rgba(42,71,94,0.4)]'
                       : 'border-slate-800/80 hover:border-slate-600'
                   }`}
                 >
@@ -395,7 +432,7 @@ export const AddGameModal: React.FC<AddGameModalProps> = ({
                     <div
                       className={`absolute top-2 right-2 w-5 h-5 rounded-md flex items-center justify-center transition-all ${
                         isSelected
-                          ? 'bg-[#00F0FF] text-[#07090e]'
+                          ? 'bg-[#2a475e] text-white border border-[#3d678d]'
                           : 'bg-black/60 border border-slate-500/60'
                       }`}
                     >
@@ -405,13 +442,13 @@ export const AddGameModal: React.FC<AddGameModalProps> = ({
 
                   {/* Card Info */}
                   <div className="p-3">
-                    <h4 className="font-bold text-xs text-slate-100 truncate mb-1.5 group-hover:text-[#00F0FF] transition-colors">
+                    <h4 className="font-bold text-xs text-slate-100 truncate mb-1.5 group-hover:text-[#66c0f4] transition-colors">
                       {game.name}
                     </h4>
 
                     <div className="flex flex-wrap items-center justify-between text-[11px] text-slate-400 gap-1">
                       <div className="flex items-center gap-1">
-                        <Clock className="w-3 h-3 text-[#00F0FF]" />
+                        <Clock className="w-3 h-3 text-[#66c0f4]" />
                         <span className="font-medium text-slate-300">
                           {playtimeHours}시간
                         </span>
@@ -429,6 +466,23 @@ export const AddGameModal: React.FC<AddGameModalProps> = ({
               );
             })}
 
+            {/* Bottom Sentinel Element for Infinite Scroll */}
+            <div ref={observerTargetRef} className="col-span-full h-2 w-full" />
+
+            {/* Loading More Indicator */}
+            {isLoadingMoreGames && (
+              <div className="col-span-full py-4 flex items-center justify-center gap-2 text-xs text-slate-400">
+                <LoadingSpinner size="sm" label="게임 더 불러오는 중..." />
+              </div>
+            )}
+
+            {/* End of list message */}
+            {!hasMoreGames && sortedGames.length > 0 && (
+              <div className="col-span-full py-2 text-center text-[11px] text-slate-500">
+                모든 게임을 불러왔습니다
+              </div>
+            )}
+
             {sortedGames.length === 0 && (
               <div className="col-span-full py-12 text-center text-xs text-slate-500 space-y-3">
                 <p>조건과 일치하는 게임이 없습니다.</p>
@@ -437,7 +491,7 @@ export const AddGameModal: React.FC<AddGameModalProps> = ({
                   size="sm"
                   onClick={handleSync}
                   disabled={isCooldownActive}
-                  leftIcon={<RefreshCw className="w-3.5 h-3.5 text-[#00F0FF]" />}
+                  leftIcon={<RefreshCw className="w-3.5 h-3.5 text-[#66c0f4]" />}
                 >
                   {isCooldownActive
                     ? `쿨다운 중 (${formattedCooldown})`
@@ -451,7 +505,7 @@ export const AddGameModal: React.FC<AddGameModalProps> = ({
         {/* Modal Footer */}
         <div className="flex items-center justify-between pt-3 border-t border-slate-800/80">
           <span className="text-xs text-slate-400 font-medium">
-            선택된 게임: <strong className="text-[#00F0FF]">{selectedCount}</strong>개
+            선택된 게임: <strong className="text-[#66c0f4]">{selectedCount}</strong>개
           </span>
           <div className="flex items-center gap-2.5">
             <Button
@@ -464,7 +518,7 @@ export const AddGameModal: React.FC<AddGameModalProps> = ({
               취소
             </Button>
             <Button
-              type="button"
+              type="submit"
               variant="cyan"
               size="sm"
               onClick={handleAdd}

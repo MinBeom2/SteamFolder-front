@@ -37,7 +37,7 @@ export const Navbar: React.FC = () => {
       <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
         {/* Left: Clean Typography Brand Logo */}
         <Link to="/" className="flex items-center gap-1 group cursor-pointer shrink-0">
-          <span className="font-black text-lg tracking-tight text-white group-hover:text-[#00F0FF] transition-colors">
+          <span className="font-bold text-lg tracking-tight text-white group-hover:text-[#66c0f4] transition-colors">
             SteamFolder
           </span>
         </Link>

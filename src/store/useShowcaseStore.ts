@@ -27,6 +27,7 @@ import {
 } from '@/api/folder';
 import {
   getUserGamesApi,
+  getUserGamesCursorApi,
   syncSteamGamesApi,
   getSyncCooldownApi,
 } from '@/api/game';
@@ -50,7 +51,11 @@ interface ShowcaseState {
 
   // Steam Games Library & Sync
   userGames: UserGame[];
+  gamesCursor: number | null;
+  hasMoreGames: boolean;
+  totalGamesCount: number;
   isLoadingGames: boolean;
+  isLoadingMoreGames: boolean;
   isSyncingGames: boolean;
   cooldownSeconds: number;
   searchQuery: string;
@@ -109,7 +114,8 @@ interface ShowcaseState {
   // Actions - Search, Steam Sync & Cooldown
   setSearchQuery: (query: string) => void;
   setSelectedGenre: (genre: string) => void;
-  fetchUserGames: () => Promise<void>;
+  fetchUserGames: (reset?: boolean) => Promise<void>;
+  loadMoreGames: () => Promise<void>;
   syncGames: () => Promise<SyncResult>;
   checkCooldown: () => Promise<CooldownStatus | null>;
   setCooldownSeconds: (seconds: number) => void;
@@ -231,7 +237,11 @@ export const useShowcaseStore = create<ShowcaseState>((set, get) => ({
   isLoadingShowcase: false,
 
   userGames: [],
+  gamesCursor: null,
+  hasMoreGames: true,
+  totalGamesCount: 0,
   isLoadingGames: false,
+  isLoadingMoreGames: false,
   isSyncingGames: false,
   cooldownSeconds: 0,
   searchQuery: '',
@@ -803,18 +813,85 @@ export const useShowcaseStore = create<ShowcaseState>((set, get) => ({
     }
   },
 
-  fetchUserGames: async () => {
-    set({ isLoadingGames: true });
+  fetchUserGames: async (reset = true) => {
+    if (reset) {
+      set({
+        isLoadingGames: true,
+        userGames: [],
+        gamesCursor: null,
+        hasMoreGames: true,
+      });
+    } else {
+      set({ isLoadingGames: true });
+    }
+
     try {
-      const games = await getUserGamesApi();
-      if (games && games.length > 0) {
-        set({ userGames: games, isLoadingGames: false });
+      const pageData = await getUserGamesCursorApi(null, 24);
+      if (pageData && pageData.content) {
+        // 기존에 선택되었던 항목 유지
+        const existingSelectedAppIds = new Set(
+          get()
+            .userGames.filter((g) => g.selected)
+            .map((g) => g.appId)
+        );
+
+        const formattedGames: UserGame[] = pageData.content.map((g) => ({
+          ...g,
+          selected: existingSelectedAppIds.has(g.appId),
+        }));
+
+        set({
+          userGames: formattedGames,
+          gamesCursor: pageData.nextCursor,
+          hasMoreGames: pageData.hasNext,
+          totalGamesCount: pageData.totalElements,
+          isLoadingGames: false,
+        });
       } else {
-        set({ isLoadingGames: false });
+        set({ isLoadingGames: false, hasMoreGames: false });
       }
     } catch (err) {
-      console.warn('Backend getUserGames fallback:', err);
-      set({ isLoadingGames: false });
+      console.warn('Backend getUserGamesCursor fallback:', err);
+      try {
+        const games = await getUserGamesApi();
+        set({
+          userGames: games || [],
+          gamesCursor: null,
+          hasMoreGames: false,
+          totalGamesCount: games?.length || 0,
+          isLoadingGames: false,
+        });
+      } catch (fallbackErr) {
+        console.error('Failed to load user games:', fallbackErr);
+        set({ isLoadingGames: false });
+      }
+    }
+  },
+
+  loadMoreGames: async () => {
+    const { hasMoreGames, isLoadingMoreGames, isLoadingGames, gamesCursor, userGames } = get();
+    if (!hasMoreGames || isLoadingMoreGames || isLoadingGames) return;
+
+    set({ isLoadingMoreGames: true });
+    try {
+      const pageData = await getUserGamesCursorApi(gamesCursor, 24);
+      if (pageData && pageData.content) {
+        const currentAppIds = new Set(userGames.map((g) => g.appId));
+        const newUniqueGames = pageData.content.filter((g) => !currentAppIds.has(g.appId));
+
+        set({
+          userGames: [...userGames, ...newUniqueGames],
+          gamesCursor: pageData.nextCursor,
+          hasMoreGames: pageData.hasNext,
+          totalGamesCount: pageData.totalElements,
+          isLoadingMoreGames: false,
+        });
+      } else {
+        set({ hasMoreGames: false, isLoadingMoreGames: false });
+      }
+    } catch (err) {
+      console.error('Failed to load more games:', err);
+      set({ isLoadingMoreGames: false });
     }
   },
 

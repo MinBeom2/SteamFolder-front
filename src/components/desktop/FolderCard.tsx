@@ -27,7 +27,6 @@ export const FolderCard: React.FC<FolderCardProps> = ({
   } = useShowcaseStore();
 
   const [isDragOver, setIsDragOver] = useState(false);
-  const borderColor = folder.themeColor || '#00F0FF';
 
   // Get up to 4 preview thumbnails from games inside folder
   const previewGames = (folder.games || []).slice(0, 4);
@@ -127,21 +126,10 @@ export const FolderCard: React.FC<FolderCardProps> = ({
       {/* Folder Shape Container */}
       <div className="relative w-28 h-24 flex items-center justify-center">
         {/* Folder Top Tab */}
-        <div
-          className="absolute -top-1 left-2 w-10 h-3 rounded-t-md bg-[#131926] border-t border-l border-r transition-colors"
-          style={{ borderColor: `${borderColor}66` }}
-        />
+        <div className="absolute -top-1 left-2 w-10 h-3 rounded-t-md bg-[#131926] border-t border-l border-r border-[#2a475e]/80 transition-colors group-hover:border-[#3d678d]" />
 
         {/* Folder Body */}
-        <div
-          className="relative w-full h-full bg-[#101520]/95 rounded-xl border-2 p-2 flex flex-col justify-center shadow-lg transition-all duration-200 group-hover:shadow-[0_0_20px_var(--glow-color)]"
-          style={
-            {
-              borderColor: borderColor,
-              '--glow-color': `${borderColor}44`,
-            } as React.CSSProperties
-          }
-        >
+        <div className="relative w-full h-full bg-[#101520]/95 rounded-xl border-2 border-[#2a475e] p-2 flex flex-col justify-center shadow-lg transition-all duration-200 group-hover:border-[#3d678d] group-hover:shadow-[0_0_16px_rgba(42,71,94,0.4)]">
           {/* 2x2 Inner Grid Slots for Mini Thumbnails */}
           <div className="grid grid-cols-2 gap-1 w-full h-full p-1 bg-[#090d14]/80 rounded-lg overflow-hidden">
             {[0, 1, 2, 3].map((slotIdx) => {

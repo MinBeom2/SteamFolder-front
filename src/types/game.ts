@@ -11,6 +11,14 @@ export interface UserGame {
   selected?: boolean;
 }
 
+export interface CursorPageResponse<T> {
+  content: T[];
+  nextCursor: number | null;
+  hasNext: boolean;
+  totalElements: number;
+  pageSize: number;
+}
+
 export interface SyncResult {
   syncedGameCount: number;
   newlyAddedCount: number;

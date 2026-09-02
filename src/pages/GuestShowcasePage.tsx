@@ -164,7 +164,7 @@ export const GuestShowcasePage: React.FC = () => {
       <header className="sticky top-0 z-40 w-full bg-[#0b0e14]/90 backdrop-blur-md border-b border-slate-800/80 px-6 py-3">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <Link to="/" className="flex items-center gap-1 group cursor-pointer shrink-0">
-            <span className="font-black text-lg tracking-tight text-white group-hover:text-[#00F0FF] transition-colors">
+            <span className="font-bold text-lg tracking-tight text-white group-hover:text-[#66c0f4] transition-colors">
               SteamFolder
             </span>
           </Link>
