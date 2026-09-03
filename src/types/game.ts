@@ -8,6 +8,9 @@ export interface UserGame {
   heroImage?: string;
   genres: string[];
   developer?: string;
+  totalAchievements?: number;
+  achievedAchievements?: number;
+  achievementRate?: number;
   selected?: boolean;
 }
 
@@ -30,4 +33,20 @@ export interface CooldownStatus {
   isCooldownActive?: boolean;
   remainingSeconds: number;
   lastSyncedAt?: string;
+}
+
+export interface AchievementItem {
+  apiName: string;
+  achieved: boolean;
+  unlockTime?: string | null;
+}
+
+export interface GameAchievementDetail {
+  appId: number;
+  gameName: string;
+  totalAchievements: number;
+  achievedAchievements: number;
+  achievementRate: number; // 0.0 ~ 100.0 %
+  syncedAt?: string | null;
+  achievements: AchievementItem[];
 }

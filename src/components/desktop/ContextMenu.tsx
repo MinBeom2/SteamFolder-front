@@ -12,6 +12,7 @@ import {
   ClipboardPaste,
   ExternalLink,
   RefreshCw,
+  Info,
 } from 'lucide-react';
 
 export const ContextMenu: React.FC = () => {
@@ -31,6 +32,7 @@ export const ContextMenu: React.FC = () => {
     clipboard,
     refreshCurrentView,
     selectItem,
+    openGameDetailModal,
   } = useShowcaseStore();
 
   const menuRef = useRef<HTMLDivElement>(null);
@@ -225,23 +227,43 @@ export const ContextMenu: React.FC = () => {
 
       {type === 'GAME' && targetItem && (
         <div className="space-y-0.5">
-          <div className="px-3 py-1.5 text-[10px] font-bold text-slate-400 truncate border-b border-slate-800/80 mb-1">
-            🎮 {targetItem.name}
-          </div>
 
           {targetItem.appId && (
-            <a
-              href={`https://store.steampowered.com/app/${targetItem.appId}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={() => closeContextMenu()}
-              className="w-full flex items-center justify-between px-3 py-2 rounded-lg hover:bg-[#00F0FF]/15 hover:text-[#00F0FF] transition-colors text-left cursor-pointer"
-            >
-              <div className="flex items-center gap-2">
-                <ExternalLink className="w-4 h-4 text-[#00F0FF]" />
-                <span>스팀 상점 페이지 보기</span>
-              </div>
-            </a>
+            <>
+              <button
+                type="button"
+                onClick={() => {
+                  closeContextMenu();
+                  if (targetItem.appId) {
+                    openGameDetailModal({
+                      appId: targetItem.appId,
+                      name: targetItem.name,
+                      headerImage: targetItem.headerImage,
+                      genres: targetItem.genres,
+                    });
+                  }
+                }}
+                className="w-full flex items-center justify-between px-3 py-2 rounded-lg hover:bg-[#66c0f4]/15 hover:text-[#66c0f4] text-slate-100 transition-colors text-left cursor-pointer font-bold"
+              >
+                <div className="flex items-center gap-2">
+                  <Info className="w-4 h-4 text-[#66c0f4]" />
+                  <span>상세보기</span>
+                </div>
+              </button>
+
+              <a
+                href={`https://store.steampowered.com/app/${targetItem.appId}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => closeContextMenu()}
+                className="w-full flex items-center justify-between px-3 py-2 rounded-lg hover:bg-white/10 text-slate-300 hover:text-white transition-colors text-left cursor-pointer"
+              >
+                <div className="flex items-center gap-2">
+                  <ExternalLink className="w-4 h-4 text-slate-400" />
+                  <span>상점 페이지 보기</span>
+                </div>
+              </a>
+            </>
           )}
 
           <button
@@ -255,7 +277,7 @@ export const ContextMenu: React.FC = () => {
           >
             <div className="flex items-center gap-2">
               <Copy className="w-4 h-4 text-slate-300" />
-              <span>복사하기 (다중 복제)</span>
+              <span>복사하기</span>
             </div>
             <span className="text-[10px] text-slate-500 font-mono">Ctrl+C</span>
           </button>
@@ -271,7 +293,7 @@ export const ContextMenu: React.FC = () => {
           >
             <div className="flex items-center gap-2">
               <Scissors className="w-4 h-4 text-slate-300" />
-              <span>잘라내기 (이동)</span>
+              <span>잘라내기</span>
             </div>
             <span className="text-[10px] text-slate-500 font-mono">Ctrl+X</span>
           </button>
@@ -288,7 +310,7 @@ export const ContextMenu: React.FC = () => {
           >
             <div className="flex items-center gap-2">
               <Trash2 className="w-4 h-4" />
-              <span>폴더에서 제거</span>
+              <span>제거</span>
             </div>
             <span className="text-[10px] text-red-400/60 font-mono">Del</span>
           </button>

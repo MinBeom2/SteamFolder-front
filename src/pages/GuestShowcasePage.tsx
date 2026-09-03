@@ -9,6 +9,7 @@ import { GuestBanner } from '@/components/layout/GuestBanner';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { Button } from '@/components/common/Button';
 import { Breadcrumb } from '@/components/desktop/Breadcrumb';
+import { GameDetailModal } from '@/components/modals/GameDetailModal';
 import { Lock } from 'lucide-react';
 
 export const GuestShowcasePage: React.FC = () => {
@@ -281,6 +282,9 @@ export const GuestShowcasePage: React.FC = () => {
 
       {/* Bottom CTA Banner */}
       <GuestBanner />
+
+      {/* Game Detail & Achievement Modal */}
+      <GameDetailModal />
     </div>
   );
 };

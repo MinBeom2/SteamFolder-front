@@ -7,7 +7,7 @@ import type {
   ClipboardItem,
   ClipboardEntry,
 } from '@/types/showcase';
-import type { UserGame, SyncResult, CooldownStatus } from '@/types/game';
+import type { UserGame, SyncResult, CooldownStatus, GameAchievementDetail } from '@/types/game';
 import {
   getMyShowcaseApi,
 } from '@/api/showcase';
@@ -30,6 +30,8 @@ import {
   getUserGamesCursorApi,
   syncSteamGamesApi,
   getSyncCooldownApi,
+  getGameAchievementsApi,
+  syncGameAchievementsApi,
 } from '@/api/game';
 
 interface ContextMenuState {
@@ -76,6 +78,21 @@ interface ShowcaseState {
   isCreateFolderModalOpen: boolean;
   isEditFolderModalOpen: boolean;
   editingFolder: FolderResponse | null;
+
+  // Game Detail & Achievement Modal State
+  isGameDetailModalOpen: boolean;
+  selectedGameDetail: {
+    appId: number;
+    name: string;
+    headerImage?: string;
+    genres?: string[];
+    playtimeForever?: number;
+    lastPlayedAt?: string;
+  } | null;
+  achievementDetail: GameAchievementDetail | null;
+  isLoadingGameDetail: boolean;
+  isSyncingAchievements: boolean;
+  gameDetailError: string | null;
 
   // Actions - Showcase & Navigation
   loadFolderView: (folderId: number | null) => Promise<void>;
@@ -127,6 +144,15 @@ interface ShowcaseState {
   setDirectLoginModalOpen: (open: boolean) => void;
   setCreateFolderModalOpen: (open: boolean) => void;
   setEditFolderModalOpen: (open: boolean, folder?: FolderResponse | null) => void;
+  openGameDetailModal: (game: {
+    appId: number;
+    name: string;
+    headerImage?: string;
+    genres?: string[];
+  }) => Promise<void>;
+  closeGameDetailModal: () => void;
+  syncGameAchievements: (force?: boolean) => Promise<void>;
+  setGameDetailModalOpen: (open: boolean) => void;
 }
 
 let countdownTimer: ReturnType<typeof setInterval> | null = null;
@@ -258,6 +284,13 @@ export const useShowcaseStore = create<ShowcaseState>((set, get) => ({
   isCreateFolderModalOpen: false,
   isEditFolderModalOpen: false,
   editingFolder: null,
+
+  isGameDetailModalOpen: false,
+  selectedGameDetail: null,
+  achievementDetail: null,
+  isLoadingGameDetail: false,
+  isSyncingAchievements: false,
+  gameDetailError: null,
 
   setToastMessage: (msg: string | null) => {
     if (toastTimeout) {
@@ -942,5 +975,111 @@ export const useShowcaseStore = create<ShowcaseState>((set, get) => ({
 
   setEditFolderModalOpen: (open: boolean, folder: FolderResponse | null = null) => {
     set({ isEditFolderModalOpen: open, editingFolder: folder });
+  },
+
+  openGameDetailModal: async (game: {
+    appId: number;
+    name: string;
+    headerImage?: string;
+    genres?: string[];
+  }) => {
+    const matchingUserGame = get().userGames.find((g) => g.appId === game.appId);
+
+    set({
+      isGameDetailModalOpen: true,
+      selectedGameDetail: {
+        appId: game.appId,
+        name: game.name,
+        headerImage: game.headerImage,
+        genres: game.genres,
+        playtimeForever: matchingUserGame?.playtimeForever,
+        lastPlayedAt: matchingUserGame?.lastPlayedAt,
+      },
+      achievementDetail: null,
+      isLoadingGameDetail: true,
+      gameDetailError: null,
+    });
+
+    try {
+      const data = await getGameAchievementsApi(game.appId);
+      set({
+        achievementDetail: data,
+        isLoadingGameDetail: false,
+      });
+
+      // Update userGames if present
+      set((state) => ({
+        userGames: state.userGames.map((g) =>
+          g.appId === game.appId
+            ? {
+                ...g,
+                totalAchievements: data.totalAchievements,
+                achievedAchievements: data.achievedAchievements,
+                achievementRate: data.achievementRate,
+              }
+            : g
+        ),
+      }));
+    } catch (err: unknown) {
+      console.error('Failed to fetch game achievements detail:', err);
+      const msg =
+        (err as { response?: { data?: { message?: string } } })?.response?.data?.message ||
+        '도전과제 정보를 불러오지 못했습니다.';
+      set({
+        gameDetailError: msg,
+        isLoadingGameDetail: false,
+      });
+    }
+  },
+
+  closeGameDetailModal: () => {
+    set({
+      isGameDetailModalOpen: false,
+      selectedGameDetail: null,
+      achievementDetail: null,
+      gameDetailError: null,
+    });
+  },
+
+  syncGameAchievements: async (force = true) => {
+    const { selectedGameDetail } = get();
+    if (!selectedGameDetail) return;
+
+    set({ isSyncingAchievements: true, gameDetailError: null });
+    try {
+      const updated = await syncGameAchievementsApi(selectedGameDetail.appId, force);
+      set({
+        achievementDetail: updated,
+        isSyncingAchievements: false,
+      });
+
+      set((state) => ({
+        userGames: state.userGames.map((g) =>
+          g.appId === selectedGameDetail.appId
+            ? {
+                ...g,
+                totalAchievements: updated.totalAchievements,
+                achievedAchievements: updated.achievedAchievements,
+                achievementRate: updated.achievementRate,
+              }
+            : g
+        ),
+      }));
+    } catch (err: unknown) {
+      console.error('Failed to sync game achievements:', err);
+      const msg =
+        (err as { response?: { data?: { message?: string } } })?.response?.data?.message ||
+        '도전과제 동기화에 실패했습니다.';
+      set({
+        gameDetailError: msg,
+        isSyncingAchievements: false,
+      });
+    }
+  },
+
+  setGameDetailModalOpen: (open: boolean) => {
+    if (!open) {
+      get().closeGameDetailModal();
+    }
   },
 }));

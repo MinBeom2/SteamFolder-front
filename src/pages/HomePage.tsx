@@ -7,6 +7,7 @@ import { AddGameModal } from '@/components/modals/AddGameModal';
 import { CreateFolderModal } from '@/components/modals/CreateFolderModal';
 import { EditFolderModal } from '@/components/modals/EditFolderModal';
 import { DirectLoginModal } from '@/components/modals/DirectLoginModal';
+import { GameDetailModal } from '@/components/modals/GameDetailModal';
 import { useShowcaseStore } from '@/store/useShowcaseStore';
 
 export const HomePage: React.FC = () => {
@@ -61,6 +62,9 @@ export const HomePage: React.FC = () => {
         isOpen={isDirectLoginModalOpen}
         onClose={() => setDirectLoginModalOpen(false)}
       />
+
+      {/* Game Detail & Achievement Modal */}
+      <GameDetailModal />
     </div>
   );
 };
