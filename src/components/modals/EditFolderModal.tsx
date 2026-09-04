@@ -65,14 +65,14 @@ const EditFolderForm: React.FC<EditFolderFormProps> = ({ folder, onClose }) => {
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
       {error && (
-        <div className="p-3 bg-red-950/50 border border-red-800/60 rounded-xl text-xs text-red-300">
+        <div className="p-3 bg-red-50 dark:bg-red-950/50 border border-red-200 dark:border-red-800/60 rounded-lg text-xs text-red-700 dark:text-red-300">
           {error}
         </div>
       )}
 
       {/* 1. 폴더 이름 */}
       <div className="space-y-1.5">
-        <label className="block text-xs font-semibold text-slate-300">
+        <label className="block text-xs font-bold text-[var(--text-primary)]">
           폴더 이름
         </label>
         <input
@@ -82,16 +82,16 @@ const EditFolderForm: React.FC<EditFolderFormProps> = ({ folder, onClose }) => {
           placeholder="폴더 이름 입력"
           maxLength={100}
           autoFocus
-          className="w-full px-3.5 py-2.5 bg-[#090d14] border border-slate-800 rounded-xl text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-[#2a475e] focus:ring-1 focus:ring-[#2a475e] transition-all"
+          className="w-full px-3.5 py-2.5 bg-[var(--bg-surface-elevated)] border border-[var(--border-card)] rounded-lg text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[#2a475e] focus:ring-1 focus:ring-[#2a475e] transition-all"
         />
       </div>
 
       {/* Footer with Delete & Save */}
-      <div className="flex items-center justify-between pt-3 border-t border-slate-800/80">
+      <div className="flex items-center justify-between pt-3 border-t border-[var(--border-subtle)]">
         <button
           type="button"
           onClick={handleDelete}
-          className="flex items-center gap-1.5 text-xs text-red-400 hover:text-red-300 py-1.5 px-2 rounded-lg hover:bg-red-500/10 transition-colors cursor-pointer"
+          className="flex items-center gap-1.5 text-xs text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300 py-1.5 px-2 rounded-lg hover:bg-red-500/10 active:scale-[0.98] transition-colors cursor-pointer font-medium"
         >
           <Trash2 className="w-3.5 h-3.5" />
           <span>폴더 삭제</span>
@@ -103,7 +103,7 @@ const EditFolderForm: React.FC<EditFolderFormProps> = ({ folder, onClose }) => {
             variant="ghost"
             size="sm"
             onClick={onClose}
-            className="text-xs text-slate-400 hover:text-slate-200"
+            className="text-xs"
           >
             취소
           </Button>
@@ -112,7 +112,7 @@ const EditFolderForm: React.FC<EditFolderFormProps> = ({ folder, onClose }) => {
             variant="cyan"
             size="sm"
             isLoading={isSubmitting}
-            className="px-6 text-xs font-bold"
+            className="px-5 text-xs font-semibold"
           >
             변경사항 저장
           </Button>

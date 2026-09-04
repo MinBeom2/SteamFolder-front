@@ -49,7 +49,6 @@ export const DesktopCanvas: React.FC<DesktopCanvasProps> = ({ isReadOnly = false
     setCreateFolderModalOpen,
     setEditFolderModalOpen,
     setAddGameModalOpen,
-    setSettingsModalOpen,
     setToastMessage,
     searchQuery,
   } = useShowcaseStore();
@@ -318,10 +317,10 @@ export const DesktopCanvas: React.FC<DesktopCanvasProps> = ({ isReadOnly = false
         {/* Header Title & Actions Bar */}
         <div
           data-interactive="true"
-          className="flex flex-wrap items-center justify-between gap-4 mb-6 pb-4 border-b border-slate-800/80"
+          className="flex flex-wrap items-center justify-between gap-4 mb-6 pb-4 border-b border-[var(--border-subtle)]"
         >
-          <div>
-            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white flex items-center gap-2.5">
+          <div className="flex items-center gap-3">
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-[var(--text-primary)] flex items-center gap-2.5">
               <span>{currentFolder ? currentFolder.name : `${user?.username || '게스트'}님의 쇼케이스`}</span>
             </h1>
           </div>
@@ -333,18 +332,18 @@ export const DesktopCanvas: React.FC<DesktopCanvasProps> = ({ isReadOnly = false
                 variant="secondary"
                 size="sm"
                 onClick={() => setCreateFolderModalOpen(true)}
-                className="text-xs font-semibold text-slate-200 border-slate-700 hover:border-[#2a475e] hover:text-white bg-[#121620]"
-                leftIcon={<FolderPlus className="w-3.5 h-3.5 text-slate-300" />}
+                className="text-xs font-medium px-3"
+                leftIcon={<FolderPlus className="w-3.5 h-3.5" />}
               >
                 폴더 추가
               </Button>
 
               {currentFolderId !== null && (
                 <Button
-                  variant="cyan"
+                  variant="secondary"
                   size="sm"
                   onClick={() => setAddGameModalOpen(true)}
-                  className="text-xs font-bold px-4"
+                  className="text-xs font-medium px-3"
                   leftIcon={<Plus className="w-3.5 h-3.5" />}
                 >
                   게임 추가
@@ -360,7 +359,7 @@ export const DesktopCanvas: React.FC<DesktopCanvasProps> = ({ isReadOnly = false
             <LoadingSpinner size="lg" label="쇼케이스 캔버스 로딩 중..." />
           </div>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4 min-h-[420px] p-4 rounded-2xl bg-[#090d14]/40 border border-slate-800/60 backdrop-blur-sm">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4 min-h-[420px] p-4 rounded-xl bg-[var(--glass-panel-bg)] border border-[var(--border-subtle)] backdrop-blur-sm">
             {/* Render 2D Grid Cells */}
             {Array.from({ length: totalRows }).map((_, rowIndex) =>
               Array.from({ length: 6 }).map((_, colIndex) => {
@@ -381,7 +380,7 @@ export const DesktopCanvas: React.FC<DesktopCanvasProps> = ({ isReadOnly = false
                     onDragOver={(e) => handleCellDragOver(e, colIndex, rowIndex)}
                     onDragLeave={handleCellDragLeave}
                     onDrop={(e) => handleCellDrop(e, colIndex, rowIndex)}
-                    className={`relative min-h-[130px] rounded-xl flex items-center justify-center transition-all ${
+                    className={`relative min-h-[130px] rounded-lg flex items-center justify-center transition-all ${
                       isCellDragOver
                         ? 'border-2 border-dashed border-emerald-400 bg-emerald-500/10'
                         : cellItem
@@ -428,8 +427,8 @@ export const DesktopCanvas: React.FC<DesktopCanvasProps> = ({ isReadOnly = false
 
       {/* Floating Toast Notification Banner */}
       {toastMessage && (
-        <div className="fixed bottom-16 right-8 z-50 px-4 py-2.5 rounded-xl bg-[#0e1420]/95 border border-[#2a475e] text-white text-xs font-semibold shadow-2xl backdrop-blur-md flex items-center gap-2.5 animate-in fade-in slide-in-from-bottom-3 duration-200">
-          <Info className="w-4 h-4 text-[#66c0f4]" />
+        <div className="fixed bottom-16 right-8 z-50 px-4 py-2.5 rounded-lg bg-[var(--bg-surface)] border border-[var(--border-card)] text-[var(--text-primary)] text-xs font-semibold shadow-xl backdrop-blur-md flex items-center gap-2.5 animate-in fade-in slide-in-from-bottom-3 duration-200">
+          <Info className="w-4 h-4 text-[var(--primary-accent)] shrink-0" />
           <span>{toastMessage}</span>
         </div>
       )}
@@ -438,17 +437,9 @@ export const DesktopCanvas: React.FC<DesktopCanvasProps> = ({ isReadOnly = false
       {!isReadOnly && (
         <div
           data-interactive="true"
-          className="relative z-10 max-w-7xl mx-auto w-full pt-8 flex items-center justify-between text-xs text-slate-500 border-t border-slate-800/40"
+          className="relative z-10 max-w-7xl mx-auto w-full pt-8 flex items-center justify-between text-xs text-[var(--text-muted)] border-t border-[var(--border-subtle)]"
         >
           <span>마우스 드래그: 다중 선택 • 아이콘 드래그: 이동 • Ctrl+C/V: 복사/붙여넣기 • Delete: 삭제</span>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setSettingsModalOpen(true)}
-            className="text-xs text-slate-400 hover:text-slate-200"
-          >
-            쇼케이스 테마 & 공개범위 설정
-          </Button>
         </div>
       )}
     </div>

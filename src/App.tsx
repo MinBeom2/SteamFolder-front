@@ -4,19 +4,22 @@ import { HomePage } from '@/pages/HomePage';
 import { GuestShowcasePage } from '@/pages/GuestShowcasePage';
 import { AuthCallbackPage } from '@/pages/AuthCallbackPage';
 import { useAuthStore } from '@/store/useAuthStore';
+import { useThemeStore } from '@/store/useThemeStore';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 
 export const App: React.FC = () => {
   const { initializeAuth, isInitialized } = useAuthStore();
+  const { initializeTheme } = useThemeStore();
 
   useEffect(() => {
+    initializeTheme();
     initializeAuth();
-  }, [initializeAuth]);
+  }, [initializeAuth, initializeTheme]);
 
   // Initial token verification state (prevents page flicker on F5 reload)
   if (!isInitialized) {
     return (
-      <div className="min-h-screen bg-[#07090e] flex flex-col items-center justify-center">
+      <div className="min-h-screen bg-[var(--bg-app,#07090e)] text-[var(--text-primary,#e2e8f0)] flex flex-col items-center justify-center">
         <LoadingSpinner size="lg" label="스팀 인증중..." />
       </div>
     );

@@ -15,7 +15,7 @@ export const GameCard: React.FC<GameCardProps> = ({
   isSelected = false,
   isReadOnly = false,
 }) => {
-  const { openContextMenu, selectItem } = useShowcaseStore();
+  const { openContextMenu, selectItem, openGameDetailModal } = useShowcaseStore();
 
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -27,11 +27,12 @@ export const GameCard: React.FC<GameCardProps> = ({
   const handleDoubleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (game.appId) {
-      window.open(
-        `https://store.steampowered.com/app/${game.appId}`,
-        '_blank',
-        'noopener,noreferrer'
-      );
+      openGameDetailModal({
+        appId: game.appId,
+        name: game.name,
+        headerImage: game.headerImage,
+        genres: game.genres,
+      });
     }
   };
 
@@ -65,15 +66,15 @@ export const GameCard: React.FC<GameCardProps> = ({
       onClick={handleClick}
       onDoubleClick={handleDoubleClick}
       onContextMenu={handleContextMenu}
-      className={`relative flex flex-col items-center gap-1.5 p-2 rounded-2xl cursor-pointer select-none transition-all duration-200 group ${
+      className={`relative flex flex-col items-center gap-1.5 p-2 rounded-lg cursor-pointer select-none transition-all duration-200 group ${
         isSelected
-          ? 'ring-2 ring-[#2a475e] bg-[#1e3a5f]/25 shadow-[0_0_16px_rgba(42,71,94,0.4)] scale-105'
-          : 'hover:scale-105 hover:bg-white/5'
+          ? 'ring-2 ring-[#2a475e] bg-[#1e3a5f]/25 scale-105'
+          : 'hover:scale-105 hover:bg-black/5 dark:hover:bg-white/5'
       }`}
     >
       {/* Game Card Container - Official Steam Header Aspect Ratio (460:215) */}
-      <div className="relative w-36 sm:w-44 aspect-[460/215] rounded-xl bg-[#101520] border border-slate-700/80 p-1 shadow-lg group-hover:border-[#2a475e] group-hover:shadow-[0_0_16px_rgba(42,71,94,0.4)] transition-all overflow-hidden">
-        <div className="w-full h-full rounded-lg overflow-hidden bg-[#07090e]">
+      <div className="relative w-36 sm:w-44 aspect-[460/215] rounded-lg bg-[var(--bg-card)] border border-[var(--border-card)] p-1 shadow-sm group-hover:border-[#2a475e] transition-all overflow-hidden">
+        <div className="w-full h-full rounded-md overflow-hidden bg-[#07090e]">
           <img
             src={game.headerImage}
             alt={game.name}
@@ -85,11 +86,11 @@ export const GameCard: React.FC<GameCardProps> = ({
 
       {/* Card Info */}
       <div className="text-center max-w-[160px] w-full px-1">
-        <h4 className="text-xs font-bold text-slate-100 truncate group-hover:text-white transition-colors">
+        <h4 className="text-xs font-bold text-[var(--text-primary)] truncate group-hover:text-[#66c0f4] transition-colors">
           {game.name}
         </h4>
         {game.genres && game.genres.length > 0 && (
-          <p className="text-[10px] text-slate-400 font-medium truncate">
+          <p className="text-[10px] text-[var(--text-secondary)] font-medium truncate">
             {game.genres.slice(0, 2).join(' • ')}
           </p>
         )}

@@ -82,7 +82,7 @@ export const Breadcrumb: React.FC<BreadcrumbProps> = ({
   };
 
   return (
-    <nav className="flex items-center gap-1.5 text-xs text-slate-400 mb-6 flex-wrap select-none">
+    <nav className="flex items-center gap-1.5 text-xs text-[var(--text-secondary)] mb-6 flex-wrap select-none">
       {activeTrail.map((crumb, idx) => {
         const isLast = idx === activeTrail.length - 1;
         const isDragOver = dragOverIdx === idx;
@@ -90,7 +90,7 @@ export const Breadcrumb: React.FC<BreadcrumbProps> = ({
         return (
           <React.Fragment key={`${crumb.id ?? 'root'}-${idx}`}>
             {idx > 0 && (
-              <ChevronRight className="w-3.5 h-3.5 text-slate-600 shrink-0" />
+              <ChevronRight className="w-3.5 h-3.5 text-[var(--text-muted)] shrink-0" />
             )}
 
             <button
@@ -99,16 +99,16 @@ export const Breadcrumb: React.FC<BreadcrumbProps> = ({
               onDragOver={(e) => handleDragOver(e, idx)}
               onDragLeave={handleDragLeave}
               onDrop={(e) => handleDrop(e, idx)}
-              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg transition-all cursor-pointer ${
+              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md transition-all cursor-pointer ${
                 isLast
-                  ? 'bg-[#1b2838] text-white font-bold border border-[#2a475e] shadow-sm'
-                  : 'hover:bg-white/5 hover:text-slate-200'
+                  ? 'crumb-active font-semibold shadow-xs'
+                  : 'hover:bg-black/5 dark:hover:bg-white/5 hover:text-[var(--text-primary)]'
               } ${isDragOver ? 'ring-2 ring-emerald-400 bg-emerald-500/20' : ''}`}
             >
               {idx === 0 ? (
                 <Home className="w-3.5 h-3.5" />
               ) : (
-                <Folder className="w-3.5 h-3.5 text-slate-300" />
+                <Folder className={`w-3.5 h-3.5 ${isLast ? 'text-current' : 'text-slate-400'}`} />
               )}
               <span>{crumb.name}</span>
             </button>

@@ -441,20 +441,39 @@ export const useShowcaseStore = create<ShowcaseState>((set, get) => ({
   },
 
   createFolder: async (name: string, themeColor?: string, icon?: string) => {
-    const { currentFolderId, items } = get();
+    const { currentFolderId, items, currentFolder } = get();
+    if (currentFolder && currentFolder.depth !== undefined && currentFolder.depth >= 4) {
+      get().setToastMessage('폴더의 깊이는 최대 5개 까지 가능합니다.');
+      throw new Error('폴더의 깊이는 최대 5개 까지 가능합니다.');
+    }
+
     const { x, y } = findNextEmptySlot(items);
 
-    await createFolderApi({
-      name,
-      parentFolderId: currentFolderId,
-      themeColor: themeColor || '#00F0FF',
-      icon: icon || 'folder',
-      positionX: x,
-      positionY: y,
-    });
+    try {
+      await createFolderApi({
+        name,
+        parentFolderId: currentFolderId,
+        themeColor: themeColor || '#00F0FF',
+        icon: icon || 'folder',
+        positionX: x,
+        positionY: y,
+      });
 
-    get().setToastMessage(`'${name}' 폴더가 생성되었습니다.`);
-    await get().refreshCurrentView();
+      get().setToastMessage(`'${name}' 폴더가 생성되었습니다.`);
+      await get().refreshCurrentView();
+    } catch (err: unknown) {
+      console.error('Failed to create folder:', err);
+      const errResponse = (err as { response?: { data?: { code?: string; message?: string } } })?.response?.data;
+      if (
+        errResponse?.code === 'F005' ||
+        errResponse?.message?.includes('깊이') ||
+        errResponse?.message?.includes('5개') ||
+        errResponse?.message?.includes('5단계')
+      ) {
+        get().setToastMessage('폴더의 깊이는 최대 5개 까지 가능합니다.');
+      }
+      throw err;
+    }
   },
 
   updateFolder: async (folderId: number, name?: string, themeColor?: string, icon?: string) => {
@@ -470,13 +489,31 @@ export const useShowcaseStore = create<ShowcaseState>((set, get) => ({
   },
 
   moveFolder: async (folderId: number, targetParentFolderId: number | null, posX?: number, posY?: number) => {
-    await moveFolderApi(folderId, {
-      targetParentFolderId,
-      targetPositionX: posX,
-      targetPositionY: posY,
-    });
-    get().setToastMessage('폴더가 이동되었습니다.');
-    await get().refreshCurrentView();
+    try {
+      await moveFolderApi(folderId, {
+        targetParentFolderId,
+        targetPositionX: posX,
+        targetPositionY: posY,
+      });
+      get().setToastMessage('폴더가 이동되었습니다.');
+      await get().refreshCurrentView();
+    } catch (err: unknown) {
+      console.error('Failed to move folder:', err);
+      const errResponse = (err as { response?: { data?: { code?: string; message?: string } } })?.response?.data;
+      if (
+        errResponse?.code === 'F005' ||
+        errResponse?.message?.includes('깊이') ||
+        errResponse?.message?.includes('5개') ||
+        errResponse?.message?.includes('5단계')
+      ) {
+        get().setToastMessage('폴더의 깊이는 최대 5개 까지 가능합니다.');
+      } else if (errResponse?.message) {
+        get().setToastMessage(errResponse.message);
+      } else {
+        get().setToastMessage('폴더 이동에 실패했습니다.');
+      }
+      throw err;
+    }
   },
 
   addSelectedGamesToFolder: async () => {
@@ -733,7 +770,7 @@ export const useShowcaseStore = create<ShowcaseState>((set, get) => ({
   },
 
   pasteClipboard: async () => {
-    const { clipboard, currentFolderId, items } = get();
+    const { clipboard, currentFolderId, currentFolder, items } = get();
     if (!clipboard || !clipboard.entries || clipboard.entries.length === 0) {
       get().setToastMessage('클립보드가 비어있습니다. 먼저 복사(Ctrl+C)하세요.');
       return;
@@ -742,6 +779,12 @@ export const useShowcaseStore = create<ShowcaseState>((set, get) => ({
     const { action, sourceFolderId, entries } = clipboard;
     const gameEntries = entries.filter((e) => e.type === 'GAME' && e.appId);
     const folderEntries = entries.filter((e) => e.type === 'FOLDER');
+
+    // Preemptive depth validation: If already at depth 4 (5 levels: 0, 1, 2, 3, 4), cannot add subfolder
+    if (folderEntries.length > 0 && currentFolder && currentFolder.depth !== undefined && currentFolder.depth >= 4) {
+      get().setToastMessage('폴더의 깊이는 최대 5개 까지 가능합니다.');
+      return;
+    }
 
     try {
       let pastedCount = 0;
@@ -811,9 +854,21 @@ export const useShowcaseStore = create<ShowcaseState>((set, get) => ({
       if (pastedCount > 0) {
         get().setToastMessage(`${pastedCount}개 항목을 성공적으로 붙여넣었습니다.`);
       }
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Failed to paste items:', err);
-      get().setToastMessage('붙여넣기 처리에 실패했습니다.');
+      const errResponse = (err as { response?: { data?: { code?: string; message?: string } } })?.response?.data;
+      if (
+        errResponse?.code === 'F005' ||
+        errResponse?.message?.includes('깊이') ||
+        errResponse?.message?.includes('5개') ||
+        errResponse?.message?.includes('5단계')
+      ) {
+        get().setToastMessage('폴더의 깊이는 최대 5개 까지 가능합니다.');
+      } else if (errResponse?.message) {
+        get().setToastMessage(errResponse.message);
+      } else {
+        get().setToastMessage('붙여넣기 처리에 실패했습니다.');
+      }
     }
   },
 

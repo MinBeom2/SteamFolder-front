@@ -95,7 +95,7 @@ const MarqueeRow: React.FC<MarqueeRowProps> = ({ games, duration }) => {
         {games.map((game, idx) => (
           <div
             key={`a-${game.appId}-${idx}`}
-            className="w-60 sm:w-72 h-30 sm:h-36 rounded-2xl overflow-hidden shadow-2xl border border-white/10 shrink-0 bg-[#121620]"
+            className="w-60 sm:w-72 h-30 sm:h-36 rounded-lg overflow-hidden shadow-lg border border-white/10 shrink-0 bg-[#121620]"
           >
             <img
               src={game.img}
@@ -114,7 +114,7 @@ const MarqueeRow: React.FC<MarqueeRowProps> = ({ games, duration }) => {
         {games.map((game, idx) => (
           <div
             key={`b-${game.appId}-${idx}`}
-            className="w-60 sm:w-72 h-30 sm:h-36 rounded-2xl overflow-hidden shadow-2xl border border-white/10 shrink-0 bg-[#121620]"
+            className="w-60 sm:w-72 h-30 sm:h-36 rounded-lg overflow-hidden shadow-lg border border-white/10 shrink-0 bg-[#121620]"
           >
             <img
               src={game.img}

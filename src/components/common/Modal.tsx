@@ -49,20 +49,25 @@ export const Modal: React.FC<ModalProps> = ({
 
       {/* Modal Container */}
       <div
-        className={`relative w-full ${maxWidthStyles[maxWidth]} glass-modal rounded-2xl shadow-2xl border border-slate-800/80 overflow-hidden z-10 animate-in fade-in zoom-in-95 duration-200`}
+        className={`relative w-full ${maxWidthStyles[maxWidth]} glass-modal rounded-xl shadow-2xl border border-[var(--border-modal)] overflow-hidden z-10 animate-in fade-in zoom-in-95 duration-200 text-[var(--text-primary)]`}
       >
         {/* Header */}
         {(title || showCloseButton) && (
-          <div className="flex items-center justify-between px-6 py-5 border-b border-slate-800/60 bg-[#121620]/60">
+          <div
+            className={`flex items-center ${
+              title ? 'justify-between px-6 py-4' : 'justify-end px-5 py-3'
+            } border-b border-[var(--border-subtle)] bg-[var(--bg-header)]`}
+          >
             {typeof title === 'string' ? (
-              <h3 className="text-lg font-bold text-slate-100 tracking-tight">{title}</h3>
+              <h3 className="text-lg font-bold text-[var(--text-primary)] tracking-tight">{title}</h3>
             ) : (
               title
             )}
             {showCloseButton && (
               <button
                 onClick={onClose}
-                className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+                className="p-1.5 rounded-md text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/10 active:scale-[0.96] transition-colors cursor-pointer"
+                aria-label="창 닫기"
               >
                 <X className="w-5 h-5" />
               </button>

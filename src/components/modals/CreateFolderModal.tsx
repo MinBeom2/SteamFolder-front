@@ -53,14 +53,14 @@ export const CreateFolderModal: React.FC<CreateFolderModalProps> = ({
     >
       <form onSubmit={handleSubmit} className="space-y-5">
         {error && (
-          <div className="p-3 bg-red-950/50 border border-red-800/60 rounded-xl text-xs text-red-300">
+          <div className="p-3 bg-red-50 dark:bg-red-950/50 border border-red-200 dark:border-red-800/60 rounded-lg text-xs text-red-700 dark:text-red-300">
             {error}
           </div>
         )}
 
         {/* 1. 폴더 이름 */}
         <div className="space-y-1.5">
-          <label className="block text-xs font-semibold text-slate-300">
+          <label className="block text-xs font-bold text-[var(--text-primary)]">
             폴더 이름
           </label>
           <input
@@ -70,18 +70,18 @@ export const CreateFolderModal: React.FC<CreateFolderModalProps> = ({
             placeholder="예: 갓겜, 추천 게임 등"
             maxLength={100}
             autoFocus
-            className="w-full px-3.5 py-2.5 bg-[#090d14] border border-slate-800 rounded-xl text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-[#2a475e] focus:ring-1 focus:ring-[#2a475e] transition-all"
+            className="w-full px-3.5 py-2.5 bg-[var(--bg-surface-elevated)] border border-[var(--border-card)] rounded-lg text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[#2a475e] focus:ring-1 focus:ring-[#2a475e] transition-all"
           />
         </div>
 
         {/* Footer Buttons */}
-        <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-800/80">
+        <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-[var(--border-subtle)]">
           <Button
             type="button"
             variant="ghost"
             size="sm"
             onClick={onClose}
-            className="text-xs text-slate-400 hover:text-slate-200"
+            className="text-xs"
           >
             취소
           </Button>
@@ -90,7 +90,7 @@ export const CreateFolderModal: React.FC<CreateFolderModalProps> = ({
             variant="cyan"
             size="sm"
             isLoading={isSubmitting}
-            className="px-6 text-xs font-bold"
+            className="px-5 text-xs font-semibold"
           >
             폴더 생성
           </Button>

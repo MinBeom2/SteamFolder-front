@@ -3,8 +3,9 @@ import { Modal } from '@/components/common/Modal';
 import { Button } from '@/components/common/Button';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useShowcaseStore } from '@/store/useShowcaseStore';
+import { useThemeStore } from '@/store/useThemeStore';
 import type { User } from '@/types/auth';
-import { RefreshCw } from 'lucide-react';
+import { RefreshCw, Globe, Lock, Sun, Moon } from 'lucide-react';
 
 interface ShowcaseSettingsModalProps {
   isOpen: boolean;
@@ -22,6 +23,7 @@ const ShowcaseSettingsForm: React.FC<ShowcaseSettingsFormProps> = ({
 }) => {
   const { updateVisibility, deleteAccount, isLoading } = useAuthStore();
   const { syncGames, isSyncingGames, cooldownSeconds } = useShowcaseStore();
+  const { theme, setTheme } = useThemeStore();
 
   const [isPublic, setIsPublic] = useState(user.isPublic ?? true);
   const [syncStatus, setSyncStatus] = useState<string | null>(null);
@@ -71,67 +73,126 @@ const ShowcaseSettingsForm: React.FC<ShowcaseSettingsFormProps> = ({
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 text-[var(--text-primary)]">
       {syncStatus && (
         <div
-          className={`p-3 rounded-xl text-xs ${
+          className={`p-3 rounded-lg text-xs ${
             isCooldownActive
-              ? 'bg-amber-950/50 border border-amber-800/60 text-amber-200'
-              : 'bg-[#121b28] border border-[#2a475e] text-slate-200'
+              ? 'bg-amber-50 dark:bg-amber-950/50 border border-amber-300 dark:border-amber-800/60 text-amber-800 dark:text-amber-200'
+              : 'bg-sky-50 dark:bg-[#121b28] border border-sky-200 dark:border-[#2a475e] text-sky-900 dark:text-slate-200 shadow-sm'
           }`}
         >
           {syncStatus}
         </div>
       )}
 
-      {/* 1. 공개 설정 */}
-      <div className="space-y-2">
-        <label className="block text-xs font-semibold text-slate-300">
+      {/* 1. 화면 테마 설정 (다크 모드 / 라이트 모드) */}
+      <div className="space-y-2.5">
+        <label className="block text-xs font-bold text-[var(--text-primary)]">
+          화면 모드 (테마)
+        </label>
+        <div className="relative flex items-center p-1 bg-[var(--bg-surface-elevated)] rounded-lg border border-[var(--border-card)] select-none">
+          {/* Sliding Pill Indicator */}
+          <div
+            className="absolute top-1 bottom-1 w-[calc(50%-4px)] rounded-md toggle-pill-indicator transition-transform duration-300 ease-in-out pointer-events-none"
+            style={{
+              left: '4px',
+              transform: theme === 'dark' ? 'translateX(0%)' : 'translateX(100%)',
+            }}
+          />
+
+          <button
+            type="button"
+            onClick={() => setTheme('dark')}
+            className={`relative z-10 flex-1 py-2.5 text-xs rounded-md transition-colors duration-200 cursor-pointer flex items-center justify-center gap-1.5 ${
+              theme === 'dark'
+                ? 'toggle-item-active'
+                : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] font-medium'
+            }`}
+          >
+            <Moon className="w-3.5 h-3.5 text-indigo-400" />
+            <span>다크 모드</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setTheme('light')}
+            className={`relative z-10 flex-1 py-2.5 text-xs rounded-md transition-colors duration-200 cursor-pointer flex items-center justify-center gap-1.5 ${
+              theme === 'light'
+                ? 'toggle-item-active'
+                : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] font-medium'
+            }`}
+          >
+            <Sun className="w-3.5 h-3.5 text-amber-500" />
+            <span>라이트 모드</span>
+          </button>
+        </div>
+      </div>
+
+      {/* 2. 공개 설정 */}
+      <div className="space-y-2.5 pt-2 border-t border-[var(--border-subtle)]">
+        <label className="block text-xs font-bold text-[var(--text-primary)]">
           쇼케이스 공개 범위
         </label>
-        <div className="grid grid-cols-2 gap-2 p-1 bg-[#090d14] rounded-xl border border-slate-800">
+        <div className="relative flex items-center p-1 bg-[var(--bg-surface-elevated)] rounded-lg border border-[var(--border-card)] select-none">
+          {/* Sliding Pill Indicator */}
+          <div
+            className="absolute top-1 bottom-1 w-[calc(50%-4px)] rounded-md toggle-pill-indicator transition-transform duration-300 ease-in-out pointer-events-none"
+            style={{
+              left: '4px',
+              transform: isPublic ? 'translateX(0%)' : 'translateX(100%)',
+            }}
+          />
+
           <button
             type="button"
             onClick={() => setIsPublic(true)}
-            className={`py-2.5 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
+            className={`relative z-10 flex-1 py-2.5 text-xs rounded-md transition-colors duration-200 cursor-pointer flex items-center justify-center gap-1.5 ${
               isPublic
-                ? 'bg-[#1b2838] text-white border border-[#2a475e] shadow-[0_0_12px_rgba(42,71,94,0.4)]'
-                : 'text-slate-400 hover:text-slate-200'
+                ? 'toggle-item-active'
+                : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] font-medium'
             }`}
           >
-            공개
+            <Globe className="w-3.5 h-3.5" />
+            <span>공개</span>
           </button>
           <button
             type="button"
             onClick={() => setIsPublic(false)}
-            className={`py-2.5 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
+            className={`relative z-10 flex-1 py-2.5 text-xs rounded-md transition-colors duration-200 cursor-pointer flex items-center justify-center gap-1.5 ${
               !isPublic
-                ? 'bg-[#1b2838] text-white border border-[#2a475e] shadow-[0_0_12px_rgba(42,71,94,0.4)]'
-                : 'text-slate-400 hover:text-slate-200'
+                ? 'toggle-item-active'
+                : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] font-medium'
             }`}
           >
-            비공개
+            <Lock className="w-3.5 h-3.5" />
+            <span>비공개</span>
           </button>
         </div>
-        <p className="text-[11px] text-slate-500">
+        <p className="text-[11px] text-[var(--text-secondary)] leading-relaxed">
           {isPublic
-            ? '누구나 내 쇼케이스 링크를 통해 라이브러리를 열람할 수 있습니다.'
-            : '나만 내 쇼케이스에 접근하고 편집할 수 있습니다.'}
+            ? '누구나 쇼케이스 공유 링크를 통해 열람할 수 있습니다.'
+            : '나만이 내 쇼케이스에 접근할 수 있습니다.'}
         </p>
       </div>
 
       {/* 2. 스팀 계정 연동 & 라이브러리 동기화 */}
-      <div className="space-y-3 pt-2 border-t border-slate-800/60">
-        <label className="block text-xs font-semibold text-slate-300">
-          스팀 데이터 동기화
-        </label>
+      <div className="flex items-center justify-between gap-4 pt-4 border-t border-[var(--border-subtle)]">
+        <div className="space-y-0.5">
+          <label className="block text-xs font-bold text-[var(--text-primary)]">
+            스팀 데이터 동기화
+          </label>
+          <p className="text-[11px] text-[var(--text-secondary)]">
+            스팀 프로필 및 게임 라이브러리를 동기화합니다.
+          </p>
+        </div>
         <Button
           type="button"
           variant="secondary"
-          className={`w-full py-2.5 text-xs font-medium border transition-all ${
+          size="sm"
+          className={`shrink-0 py-1.5 px-3 text-xs font-medium border transition-all ${
             isCooldownActive
-              ? 'bg-amber-950/30 border-amber-800/60 text-amber-300 cursor-not-allowed'
-              : 'bg-[#1e293b]/70 border-slate-700/70 hover:bg-[#283548] text-slate-200'
+              ? 'bg-amber-50 dark:bg-amber-950/30 border-amber-300 dark:border-amber-800/60 text-amber-700 dark:text-amber-300 cursor-not-allowed'
+              : ''
           }`}
           onClick={handleSyncSteam}
           disabled={isCooldownActive}
@@ -139,37 +200,37 @@ const ShowcaseSettingsForm: React.FC<ShowcaseSettingsFormProps> = ({
           leftIcon={
             <RefreshCw
               className={`w-3.5 h-3.5 ${
-                isCooldownActive ? 'text-amber-400' : 'text-[#66c0f4]'
+                isCooldownActive ? 'text-amber-500' : 'text-[#66c0f4] dark:text-[#66c0f4] light:text-blue-600'
               }`}
             />
           }
         >
           {isCooldownActive
-            ? `동기화 쿨다운 중 (${formattedCooldown})`
-            : '스팀 프로필 & 라이브러리 동기화 (API)'}
+            ? `쿨다운 (${formattedCooldown})`
+            : '동기화'}
         </Button>
       </div>
 
       {/* 3. 계정 삭제 */}
-      <div className="pt-2 border-t border-slate-800/60 text-center">
+      <div className="pt-3 border-t border-[var(--border-subtle)] text-center">
         <button
           type="button"
           onClick={handleDeleteAccount}
-          className="text-xs text-red-500 hover:text-red-400 font-medium transition-colors cursor-pointer"
+          className="text-xs text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300 font-medium py-1 px-2 rounded-md hover:bg-red-500/10 active:scale-[0.98] transition-colors cursor-pointer"
         >
           계정 삭제 및 스팀 연동 해제
         </button>
       </div>
 
       {/* Modal Footer */}
-      <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-800/80">
+      <div className="flex items-center justify-end gap-2.5 pt-4 border-t border-[var(--border-subtle)]">
         <Button
           type="button"
           variant="ghost"
           size="sm"
           onClick={onClose}
           disabled={isLoading}
-          className="text-xs text-slate-400 hover:text-slate-200"
+          className="text-xs"
         >
           취소
         </Button>
@@ -179,7 +240,7 @@ const ShowcaseSettingsForm: React.FC<ShowcaseSettingsFormProps> = ({
           size="sm"
           onClick={handleSave}
           isLoading={isLoading}
-          className="px-6 text-xs font-bold"
+          className="px-5 text-xs font-semibold"
         >
           저장
         </Button>
@@ -200,7 +261,7 @@ export const ShowcaseSettingsModal: React.FC<ShowcaseSettingsModalProps> = ({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="쇼케이스 설정"
+      title="설정"
       maxWidth="md"
     >
       <ShowcaseSettingsForm

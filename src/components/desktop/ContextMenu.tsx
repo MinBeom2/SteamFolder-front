@@ -78,7 +78,7 @@ export const ContextMenu: React.FC = () => {
     <div
       ref={menuRef}
       style={{ top: `${safeY}px`, left: `${safeX}px` }}
-      className="fixed z-50 w-52 bg-[#0e131d]/95 backdrop-blur-xl border border-slate-700/80 rounded-xl shadow-2xl p-1.5 text-xs text-slate-200 animate-in fade-in zoom-in-95 duration-100 select-none"
+      className="fixed z-50 w-52 bg-[var(--context-menu-bg)] backdrop-blur-xl border border-[var(--border-card)] rounded-lg shadow-2xl p-1 text-xs text-[var(--text-primary)] animate-in fade-in zoom-in-95 duration-100 select-none"
     >
       {type === 'CANVAS' && (
         <div className="space-y-0.5">
@@ -88,13 +88,13 @@ export const ContextMenu: React.FC = () => {
               closeContextMenu();
               setCreateFolderModalOpen(true);
             }}
-            className="w-full flex items-center justify-between px-3 py-2 rounded-lg hover:bg-[#00F0FF]/15 hover:text-[#00F0FF] transition-colors text-left cursor-pointer"
+            className="w-full flex items-center justify-between px-3 py-2 rounded-md hover:bg-black/5 dark:hover:bg-white/5 text-[var(--text-primary)] transition-colors text-left cursor-pointer font-medium"
           >
             <div className="flex items-center gap-2">
-              <FolderPlus className="w-4 h-4 text-[#00F0FF]" />
+              <FolderPlus className="w-4 h-4 text-sky-500" />
               <span>새 폴더 만들기</span>
             </div>
-            <span className="text-[10px] text-slate-500 font-mono">N</span>
+            <span className="text-[10px] text-[var(--text-muted)] font-mono">N</span>
           </button>
 
           {currentFolderId !== null && (
@@ -104,13 +104,13 @@ export const ContextMenu: React.FC = () => {
                 closeContextMenu();
                 setAddGameModalOpen(true);
               }}
-              className="w-full flex items-center justify-between px-3 py-2 rounded-lg hover:bg-[#00F0FF]/15 hover:text-[#00F0FF] transition-colors text-left cursor-pointer"
+              className="w-full flex items-center justify-between px-3 py-2 rounded-md hover:bg-black/5 dark:hover:bg-white/5 text-[var(--text-primary)] transition-colors text-left cursor-pointer font-medium"
             >
               <div className="flex items-center gap-2">
-                <Gamepad2 className="w-4 h-4 text-emerald-400" />
+                <Gamepad2 className="w-4 h-4 text-emerald-500" />
                 <span>게임 추가하기</span>
               </div>
-              <span className="text-[10px] text-slate-500 font-mono">+</span>
+              <span className="text-[10px] text-[var(--text-muted)] font-mono">+</span>
             </button>
           )}
 
@@ -121,17 +121,17 @@ export const ContextMenu: React.FC = () => {
                 closeContextMenu();
                 pasteClipboard();
               }}
-              className="w-full flex items-center justify-between px-3 py-2 rounded-lg hover:bg-[#00F0FF]/15 hover:text-[#00F0FF] transition-colors text-left cursor-pointer"
+              className="w-full flex items-center justify-between px-3 py-2 rounded-md hover:bg-black/5 dark:hover:bg-white/5 text-[var(--text-primary)] transition-colors text-left cursor-pointer font-medium"
             >
               <div className="flex items-center gap-2">
-                <ClipboardPaste className="w-4 h-4 text-amber-400" />
+                <ClipboardPaste className="w-4 h-4 text-amber-500" />
                 <span>붙여넣기</span>
               </div>
-              <span className="text-[10px] text-slate-500 font-mono">Ctrl+V</span>
+              <span className="text-[10px] text-[var(--text-muted)] font-mono">Ctrl+V</span>
             </button>
           )}
 
-          <div className="h-px bg-slate-800 my-1" />
+          <div className="h-px bg-[var(--border-subtle)] my-1" />
 
           <button
             type="button"
@@ -139,20 +139,20 @@ export const ContextMenu: React.FC = () => {
               closeContextMenu();
               refreshCurrentView();
             }}
-            className="w-full flex items-center justify-between px-3 py-2 rounded-lg hover:bg-white/5 text-slate-400 hover:text-slate-200 transition-colors text-left cursor-pointer"
+            className="w-full flex items-center justify-between px-3 py-2 rounded-md hover:bg-black/5 dark:hover:bg-white/5 text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors text-left cursor-pointer font-medium"
           >
             <div className="flex items-center gap-2">
               <RefreshCw className="w-3.5 h-3.5" />
               <span>새로고침</span>
             </div>
-            <span className="text-[10px] text-slate-500 font-mono">F5</span>
+            <span className="text-[10px] text-[var(--text-muted)] font-mono">F5</span>
           </button>
         </div>
       )}
 
       {type === 'FOLDER' && targetItem && (
         <div className="space-y-0.5">
-          <div className="px-3 py-1.5 text-[10px] font-bold text-slate-400 truncate border-b border-slate-800/80 mb-1">
+          <div className="px-3 py-1.5 text-[10px] font-semibold text-[var(--text-muted)] truncate border-b border-[var(--border-subtle)] mb-1">
             📁 {targetItem.name}
           </div>
 
@@ -162,13 +162,13 @@ export const ContextMenu: React.FC = () => {
               closeContextMenu();
               navigate(`/folders/${targetItem.id}`);
             }}
-            className="w-full flex items-center justify-between px-3 py-2 rounded-lg hover:bg-[#00F0FF]/15 hover:text-[#00F0FF] transition-colors text-left cursor-pointer font-medium"
+            className="w-full flex items-center justify-between px-3 py-2 rounded-md hover:bg-black/5 dark:hover:bg-white/5 text-[var(--text-primary)] transition-colors text-left cursor-pointer font-medium"
           >
             <div className="flex items-center gap-2">
-              <FolderOpen className="w-4 h-4 text-[#00F0FF]" />
+              <FolderOpen className="w-4 h-4 text-sky-500" />
               <span>폴더 열기</span>
             </div>
-            <span className="text-[10px] text-slate-500 font-mono">Enter</span>
+            <span className="text-[10px] text-[var(--text-muted)] font-mono">Enter</span>
           </button>
 
           <button
@@ -179,13 +179,13 @@ export const ContextMenu: React.FC = () => {
                 setEditFolderModalOpen(true, targetItem.folderData);
               }
             }}
-            className="w-full flex items-center justify-between px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-left cursor-pointer"
+            className="w-full flex items-center justify-between px-3 py-2 rounded-md hover:bg-black/5 dark:hover:bg-white/5 text-[var(--text-primary)] transition-colors text-left cursor-pointer font-medium"
           >
             <div className="flex items-center gap-2">
-              <Edit3 className="w-4 h-4 text-slate-300" />
+              <Edit3 className="w-4 h-4 text-[var(--text-secondary)]" />
               <span>폴더 설정 / 이름 변경</span>
             </div>
-            <span className="text-[10px] text-slate-500 font-mono">F2</span>
+            <span className="text-[10px] text-[var(--text-muted)] font-mono">F2</span>
           </button>
 
           <button
@@ -195,16 +195,16 @@ export const ContextMenu: React.FC = () => {
               selectItem(`FOLDER_${targetItem.id}`, false);
               cutSelected();
             }}
-            className="w-full flex items-center justify-between px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-left cursor-pointer"
+            className="w-full flex items-center justify-between px-3 py-2 rounded-md hover:bg-black/5 dark:hover:bg-white/5 text-[var(--text-primary)] transition-colors text-left cursor-pointer font-medium"
           >
             <div className="flex items-center gap-2">
-              <Scissors className="w-4 h-4 text-slate-300" />
+              <Scissors className="w-4 h-4 text-[var(--text-secondary)]" />
               <span>잘라내기</span>
             </div>
-            <span className="text-[10px] text-slate-500 font-mono">Ctrl+X</span>
+            <span className="text-[10px] text-[var(--text-muted)] font-mono">Ctrl+X</span>
           </button>
 
-          <div className="h-px bg-slate-800 my-1" />
+          <div className="h-px bg-[var(--border-subtle)] my-1" />
 
           <button
             type="button"
@@ -214,7 +214,7 @@ export const ContextMenu: React.FC = () => {
                 deleteFolder(targetItem.id);
               }
             }}
-            className="w-full flex items-center justify-between px-3 py-2 rounded-lg hover:bg-red-500/20 text-red-400 hover:text-red-300 transition-colors text-left cursor-pointer"
+            className="w-full flex items-center justify-between px-3 py-2 rounded-md hover:bg-red-500/10 text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300 transition-colors text-left cursor-pointer font-medium"
           >
             <div className="flex items-center gap-2">
               <Trash2 className="w-4 h-4" />
@@ -243,10 +243,10 @@ export const ContextMenu: React.FC = () => {
                     });
                   }
                 }}
-                className="w-full flex items-center justify-between px-3 py-2 rounded-lg hover:bg-[#66c0f4]/15 hover:text-[#66c0f4] text-slate-100 transition-colors text-left cursor-pointer font-bold"
+                className="w-full flex items-center justify-between px-3 py-2 rounded-md hover:bg-black/5 dark:hover:bg-white/5 text-[var(--text-primary)] transition-colors text-left cursor-pointer font-medium"
               >
                 <div className="flex items-center gap-2">
-                  <Info className="w-4 h-4 text-[#66c0f4]" />
+                  <Info className="w-4 h-4 text-sky-500" />
                   <span>상세보기</span>
                 </div>
               </button>
@@ -256,10 +256,10 @@ export const ContextMenu: React.FC = () => {
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={() => closeContextMenu()}
-                className="w-full flex items-center justify-between px-3 py-2 rounded-lg hover:bg-white/10 text-slate-300 hover:text-white transition-colors text-left cursor-pointer"
+                className="w-full flex items-center justify-between px-3 py-2 rounded-md hover:bg-black/5 dark:hover:bg-white/5 text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors text-left cursor-pointer font-medium"
               >
                 <div className="flex items-center gap-2">
-                  <ExternalLink className="w-4 h-4 text-slate-400" />
+                  <ExternalLink className="w-4 h-4" />
                   <span>상점 페이지 보기</span>
                 </div>
               </a>
@@ -273,13 +273,13 @@ export const ContextMenu: React.FC = () => {
               selectItem(`GAME_${targetItem.id}`, false);
               copySelected();
             }}
-            className="w-full flex items-center justify-between px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-left cursor-pointer"
+            className="w-full flex items-center justify-between px-3 py-2 rounded-md hover:bg-black/5 dark:hover:bg-white/5 text-[var(--text-primary)] transition-colors text-left cursor-pointer font-medium"
           >
             <div className="flex items-center gap-2">
-              <Copy className="w-4 h-4 text-slate-300" />
+              <Copy className="w-4 h-4 text-[var(--text-secondary)]" />
               <span>복사하기</span>
             </div>
-            <span className="text-[10px] text-slate-500 font-mono">Ctrl+C</span>
+            <span className="text-[10px] text-[var(--text-muted)] font-mono">Ctrl+C</span>
           </button>
 
           <button
@@ -289,16 +289,16 @@ export const ContextMenu: React.FC = () => {
               selectItem(`GAME_${targetItem.id}`, false);
               cutSelected();
             }}
-            className="w-full flex items-center justify-between px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-left cursor-pointer"
+            className="w-full flex items-center justify-between px-3 py-2 rounded-md hover:bg-black/5 dark:hover:bg-white/5 text-[var(--text-primary)] transition-colors text-left cursor-pointer font-medium"
           >
             <div className="flex items-center gap-2">
-              <Scissors className="w-4 h-4 text-slate-300" />
+              <Scissors className="w-4 h-4 text-[var(--text-secondary)]" />
               <span>잘라내기</span>
             </div>
-            <span className="text-[10px] text-slate-500 font-mono">Ctrl+X</span>
+            <span className="text-[10px] text-[var(--text-muted)] font-mono">Ctrl+X</span>
           </button>
 
-          <div className="h-px bg-slate-800 my-1" />
+          <div className="h-px bg-[var(--border-subtle)] my-1" />
 
           <button
             type="button"
@@ -306,7 +306,7 @@ export const ContextMenu: React.FC = () => {
               closeContextMenu();
               removeGameFromFolder(targetItem.id);
             }}
-            className="w-full flex items-center justify-between px-3 py-2 rounded-lg hover:bg-red-500/20 text-red-400 hover:text-red-300 transition-colors text-left cursor-pointer"
+            className="w-full flex items-center justify-between px-3 py-2 rounded-md hover:bg-red-500/10 text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300 transition-colors text-left cursor-pointer font-medium"
           >
             <div className="flex items-center gap-2">
               <Trash2 className="w-4 h-4" />

@@ -25,7 +25,7 @@ export const HomePage: React.FC = () => {
   } = useShowcaseStore();
 
   return (
-    <div className="min-h-screen bg-[#07090e] text-[#e2e8f0] flex flex-col justify-between selection:bg-[#00F0FF]/30 selection:text-white">
+    <div className="min-h-screen bg-[var(--bg-app)] text-[var(--text-primary)] flex flex-col justify-between selection:bg-[#00F0FF]/30 selection:text-white transition-colors duration-200">
       {/* Top Navbar */}
       <Navbar />
 

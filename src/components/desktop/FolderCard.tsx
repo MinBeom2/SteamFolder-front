@@ -115,29 +115,29 @@ export const FolderCard: React.FC<FolderCardProps> = ({
       onClick={handleClick}
       onDoubleClick={handleDoubleClick}
       onContextMenu={handleContextMenu}
-      className={`relative flex flex-col items-center gap-2 p-2.5 rounded-2xl cursor-pointer select-none transition-all duration-200 group ${
+      className={`relative flex flex-col items-center gap-2 p-2 rounded-lg cursor-pointer select-none transition-all duration-200 group ${
         isSelected
-          ? 'ring-2 ring-[#2a475e] bg-[#1e3a5f]/25 shadow-[0_0_16px_rgba(42,71,94,0.4)] scale-105'
+          ? 'ring-2 ring-[#2a475e] bg-[#1e3a5f]/25 scale-105'
           : isDragOver
           ? 'ring-2 ring-emerald-400 bg-emerald-500/20 scale-110'
-          : 'hover:scale-105 hover:bg-white/5'
+          : 'hover:scale-105 hover:bg-black/5 dark:hover:bg-white/5'
       }`}
     >
       {/* Folder Shape Container */}
       <div className="relative w-28 h-24 flex items-center justify-center">
         {/* Folder Top Tab */}
-        <div className="absolute -top-1 left-2 w-10 h-3 rounded-t-md bg-[#131926] border-t border-l border-r border-[#2a475e]/80 transition-colors group-hover:border-[#3d678d]" />
+        <div className="absolute -top-1 left-2 w-10 h-3 rounded-t-sm bg-[var(--folder-top-bg)] border-t border-l border-r border-[#2a475e]/80 transition-colors group-hover:border-[#3d678d]" />
 
         {/* Folder Body */}
-        <div className="relative w-full h-full bg-[#101520]/95 rounded-xl border-2 border-[#2a475e] p-2 flex flex-col justify-center shadow-lg transition-all duration-200 group-hover:border-[#3d678d] group-hover:shadow-[0_0_16px_rgba(42,71,94,0.4)]">
+        <div className="relative w-full h-full bg-[var(--folder-body-bg)] rounded-lg border-2 border-[#2a475e] p-2 flex flex-col justify-center shadow-md transition-all duration-200 group-hover:border-[#3d678d]">
           {/* 2x2 Inner Grid Slots for Mini Thumbnails */}
-          <div className="grid grid-cols-2 gap-1 w-full h-full p-1 bg-[#090d14]/80 rounded-lg overflow-hidden">
+          <div className="grid grid-cols-2 gap-1 w-full h-full p-1 bg-[var(--folder-inner-bg)] rounded-md overflow-hidden border border-[var(--border-subtle)]">
             {[0, 1, 2, 3].map((slotIdx) => {
               const game = previewGames[slotIdx];
               return (
                 <div
                   key={slotIdx}
-                  className="w-full h-full bg-[#1a2233]/70 rounded-[3px] overflow-hidden border border-white/5 flex items-center justify-center"
+                  className="w-full h-full bg-[var(--folder-slot-bg)] rounded-[3px] overflow-hidden border border-[var(--border-subtle)] flex items-center justify-center"
                 >
                   {game ? (
                     <img
@@ -146,7 +146,7 @@ export const FolderCard: React.FC<FolderCardProps> = ({
                       className="w-full h-full object-cover"
                     />
                   ) : (
-                    <div className="w-1.5 h-1.5 rounded-full bg-slate-700/40" />
+                    <div className="w-1.5 h-1.5 rounded-full bg-slate-400 dark:bg-slate-600 opacity-50" />
                   )}
                 </div>
               );
@@ -157,7 +157,7 @@ export const FolderCard: React.FC<FolderCardProps> = ({
 
       {/* Folder Label */}
       <div className="text-center max-w-[130px]">
-        <span className="text-xs font-bold text-slate-100 block truncate group-hover:text-white transition-colors">
+        <span className="text-xs font-bold text-[var(--text-primary)] block truncate group-hover:text-[#66c0f4] transition-colors">
           {folder.name}
         </span>
       </div>

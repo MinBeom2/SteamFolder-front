@@ -23,29 +23,29 @@ export const Button: React.FC<ButtonProps> = ({
   ...props
 }) => {
   const baseStyles =
-    'inline-flex items-center justify-center font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[#07090e] disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer select-none';
+    'inline-flex items-center justify-center font-medium rounded-md transition-all duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/40 focus-visible:ring-offset-1 focus-visible:ring-offset-[var(--bg-app)] disabled:opacity-45 disabled:pointer-events-none cursor-pointer select-none tracking-tight';
 
   const sizeStyles = {
-    sm: 'px-3 py-1.5 text-xs gap-1.5',
-    md: 'px-4 py-2 text-sm gap-2',
-    lg: 'px-6 py-2.5 text-base gap-2.5',
+    sm: 'px-3 py-1.5 text-xs gap-1.5 rounded-md',
+    md: 'px-3.5 py-2 text-sm gap-2 rounded-md',
+    lg: 'px-5 py-2.5 text-sm gap-2 rounded-md',
   };
 
   const variantStyles = {
     primary:
-      'bg-[#21384e] text-white font-semibold border border-[#315372] hover:bg-[#2a475e] hover:border-[#3d678d] hover:shadow-[0_0_15px_rgba(42,71,94,0.4)] focus:ring-[#2a475e]',
+      'btn-variant-steam font-medium',
     cyan:
-      'bg-[#21384e] text-white font-bold border border-[#315372] hover:bg-[#2a475e] hover:border-[#3d678d] hover:shadow-[0_0_15px_rgba(42,71,94,0.4)] focus:ring-[#2a475e]',
+      'btn-variant-cyan font-semibold',
     steam:
-      'bg-[#21384e] text-white font-semibold border border-[#315372] hover:bg-[#2a475e] hover:border-[#3d678d] hover:shadow-[0_0_15px_rgba(42,71,94,0.4)] focus:ring-[#2a475e]',
+      'btn-variant-steam font-medium',
     secondary:
-      'bg-[#1e293b] text-slate-200 border border-slate-700 hover:bg-[#334155] hover:text-white focus:ring-slate-500',
+      'btn-variant-secondary font-medium',
     danger:
-      'bg-red-500/10 text-red-400 border border-red-500/30 hover:bg-red-500/20 hover:text-red-300 focus:ring-red-500',
+      'text-red-500 hover:text-red-600 dark:hover:text-red-400 bg-red-500/5 hover:bg-red-500/10 border border-red-500/20 active:scale-[0.98] font-medium',
     outline:
-      'border border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white focus:ring-slate-400',
+      'border border-[var(--border-card)] text-[var(--text-secondary)] hover:bg-black/5 dark:hover:bg-white/5 hover:text-[var(--text-primary)] active:scale-[0.98] font-medium',
     ghost:
-      'text-slate-400 hover:text-slate-100 hover:bg-white/5 focus:ring-slate-400',
+      'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/5 active:scale-[0.98] font-medium',
   };
 
   return (

@@ -253,14 +253,14 @@ export const AddGameModal: React.FC<AddGameModalProps> = ({
             onClick={handleSync}
             disabled={isCooldownActive}
             isLoading={isSyncingGames}
-            className={`text-[11px] py-1 px-3 border transition-all ${
+            className={`text-xs py-1.5 px-3 border transition-all ${
               isCooldownActive
                 ? 'bg-amber-950/30 border-amber-800/60 text-amber-300 cursor-not-allowed'
-                : 'bg-[#1e293b]/70 border-slate-700 hover:border-[#2a475e] text-slate-300'
+                : ''
             }`}
             leftIcon={
               <RefreshCw
-                className={`w-3 h-3 ${
+                className={`w-3.5 h-3.5 ${
                   isCooldownActive ? 'text-amber-400' : 'text-[#66c0f4]'
                 }`}
               />
@@ -268,7 +268,7 @@ export const AddGameModal: React.FC<AddGameModalProps> = ({
           >
             {isCooldownActive
               ? `쿨다운 중 (${formattedCooldown})`
-              : '스팀 라이브러리 동기화 (API)'}
+              : '라이브러리 동기화'}
           </Button>
         </div>
       }
@@ -277,27 +277,27 @@ export const AddGameModal: React.FC<AddGameModalProps> = ({
       <div className="space-y-4">
         {/* Success Message Banner */}
         {successMessage && (
-          <div className="p-3 bg-[#121b28] border border-[#2a475e] rounded-xl text-xs text-slate-200 flex items-center justify-between animate-in fade-in duration-200">
+          <div className="p-3 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/60 rounded-lg text-xs text-emerald-700 dark:text-emerald-300 flex items-center justify-between animate-in fade-in duration-200">
             <span>{successMessage}</span>
           </div>
         )}
 
         {/* Error Message Banner */}
         {errorMessage && (
-          <div className="p-3 bg-red-950/50 border border-red-800/60 rounded-xl text-xs text-red-300 flex items-center justify-between animate-in fade-in duration-200">
+          <div className="p-3 bg-red-50 dark:bg-red-950/50 border border-red-200 dark:border-red-800/60 rounded-lg text-xs text-red-700 dark:text-red-300 flex items-center justify-between animate-in fade-in duration-200">
             <span>{errorMessage}</span>
           </div>
         )}
 
         {/* 1. Search Bar */}
         <div className="relative">
-          <Search className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+          <Search className="w-4 h-4 text-[var(--text-muted)] absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="보유 게임 검색..."
-            className="w-full pl-10 pr-4 py-2 bg-[#090d14] border border-slate-800 rounded-xl text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-[#2a475e] focus:ring-1 focus:ring-[#2a475e] transition-all"
+            className="w-full pl-10 pr-4 py-2 bg-[var(--bg-surface-elevated)] border border-[var(--border-card)] rounded-lg text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[#2a475e] focus:ring-1 focus:ring-[#2a475e] transition-all"
           />
         </div>
 
@@ -319,10 +319,10 @@ export const AddGameModal: React.FC<AddGameModalProps> = ({
                 key={genre}
                 type="button"
                 onClick={() => handleTagClick(genre)}
-                className={`px-3.5 py-1 rounded-lg text-xs font-semibold transition-all shrink-0 cursor-pointer ${
+                className={`px-2.5 py-1 rounded-md text-xs font-medium tracking-tight transition-colors shrink-0 cursor-pointer active:scale-[0.98] ${
                   isActive
-                    ? 'bg-[#2a475e] text-white border border-[#3b6485] shadow-[0_0_10px_rgba(42,71,94,0.4)]'
-                    : 'bg-[#121620] text-slate-400 border border-slate-800 hover:text-slate-200 hover:border-slate-700'
+                    ? 'bg-[#1b2838] dark:bg-[#1b2838] light:bg-slate-900 text-white border border-[#2b3e54] dark:border-[#2b3e54] light:border-slate-900 shadow-xs'
+                    : 'bg-[var(--bg-surface-elevated)] text-[var(--text-secondary)] border border-[var(--border-card)] hover:text-[var(--text-primary)] hover:border-[var(--border-subtle)]'
                 }`}
               >
                 {genre}
@@ -332,24 +332,24 @@ export const AddGameModal: React.FC<AddGameModalProps> = ({
         </div>
 
         {/* 3. Sort Row (Positioned underneath genre tags) */}
-        <div className="flex items-center justify-between gap-3 pt-1 border-t border-slate-800/60 pb-1">
+        <div className="flex items-center justify-between gap-3 pt-1 border-t border-[var(--border-subtle)] pb-1">
           {/* Left: Filtered games count / Total count */}
-          <div className="flex items-center gap-1.5 text-xs text-slate-400 font-medium">
-            <Layers className="w-3.5 h-3.5 text-slate-400" />
+          <div className="flex items-center gap-1.5 text-xs text-[var(--text-secondary)] font-medium">
+            <Layers className="w-3.5 h-3.5 text-[var(--text-muted)]" />
             <span>
-              총 <strong className="text-slate-200">{totalGamesCount || sortedGames.length}</strong>개 중 <strong className="text-[#66c0f4]">{sortedGames.length}</strong>개 표시
+              총 <strong className="text-[var(--text-primary)]">{totalGamesCount || sortedGames.length}</strong>개 중 <strong className="text-[#66c0f4]">{sortedGames.length}</strong>개 표시
             </span>
           </div>
 
           {/* Right: Clean Sort Buttons (Playtime, Recent, Toggleable Name) */}
-          <div className="flex items-center gap-1 bg-[#090d14] p-1 rounded-xl border border-slate-800 shrink-0">
+          <div className="flex items-center gap-1 bg-[var(--bg-surface-elevated)] p-1 rounded-lg border border-[var(--border-card)] shrink-0">
             <button
               type="button"
               onClick={() => setSortBy('playtime')}
-              className={`px-3 py-1 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 cursor-pointer ${
+              className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors flex items-center gap-1.5 cursor-pointer active:scale-[0.98] ${
                 sortBy === 'playtime'
-                  ? 'bg-[#21384e] text-white border border-[#2e5270] font-bold shadow-sm'
-                  : 'text-slate-400 hover:text-slate-200'
+                  ? 'bg-[#1b2838] dark:bg-[#1b2838] light:bg-white text-white dark:text-white light:text-blue-600 border border-[#2b3e54] dark:border-[#2b3e54] light:border-blue-200 font-semibold shadow-xs'
+                  : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
               }`}
               title="플레이타임이 많은 순으로 정렬"
             >
@@ -360,10 +360,10 @@ export const AddGameModal: React.FC<AddGameModalProps> = ({
             <button
               type="button"
               onClick={() => setSortBy('recent')}
-              className={`px-3 py-1 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 cursor-pointer ${
+              className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors flex items-center gap-1.5 cursor-pointer active:scale-[0.98] ${
                 sortBy === 'recent'
-                  ? 'bg-[#21384e] text-white border border-[#2e5270] font-bold shadow-sm'
-                  : 'text-slate-400 hover:text-slate-200'
+                  ? 'bg-[#1b2838] dark:bg-[#1b2838] light:bg-white text-white dark:text-white light:text-blue-600 border border-[#2b3e54] dark:border-[#2b3e54] light:border-blue-200 font-semibold shadow-xs'
+                  : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
               }`}
               title="최근에 플레이한 순으로 정렬"
             >
@@ -375,25 +375,23 @@ export const AddGameModal: React.FC<AddGameModalProps> = ({
             <button
               type="button"
               onClick={handleNameSortClick}
-              className={`px-3 py-1 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 cursor-pointer ${
+              className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors flex items-center gap-1.5 cursor-pointer active:scale-[0.98] ${
                 sortBy === 'name-asc' || sortBy === 'name-desc'
-                  ? 'bg-[#21384e] text-white border border-[#2e5270] font-bold shadow-sm'
-                  : 'text-slate-400 hover:text-slate-200'
+                  ? 'bg-[#1b2838] dark:bg-[#1b2838] light:bg-white text-white dark:text-white light:text-blue-600 border border-[#2b3e54] dark:border-[#2b3e54] light:border-blue-200 font-semibold shadow-xs'
+                  : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
               }`}
-              title={
-                sortBy === 'name-asc'
-                  ? '현재 이름 오름차순 (클릭 시 역순 정렬)'
-                  : sortBy === 'name-desc'
-                  ? '현재 이름 역순 (클릭 시 오름차순 정렬)'
-                  : '이름순 정렬'
-              }
+              title="클릭 시 이름 가나다순 오름차순/내림차순 토글"
             >
-              {sortBy === 'name-desc' ? (
-                <ArrowDownAZ className="w-3.5 h-3.5 text-white" />
+              {sortBy === 'name-asc' ? (
+                <ArrowUpAZ className="w-3 h-3 text-[#66c0f4]" />
+              ) : sortBy === 'name-desc' ? (
+                <ArrowDownAZ className="w-3 h-3 text-[#66c0f4]" />
               ) : (
-                <ArrowUpAZ className="w-3.5 h-3.5" />
+                <ArrowUpAZ className="w-3 h-3 opacity-60" />
               )}
-              <span>이름순</span>
+              <span>
+                {sortBy === 'name-desc' ? '이름 내림차순' : '이름 가나다순'}
+              </span>
             </button>
           </div>
         </div>
@@ -414,10 +412,10 @@ export const AddGameModal: React.FC<AddGameModalProps> = ({
                 <div
                   key={game.appId}
                   onClick={() => toggleGameSelection(game.appId)}
-                  className={`relative rounded-xl bg-[#121620] border transition-all duration-200 cursor-pointer overflow-hidden group select-none ${
+                  className={`relative rounded-lg bg-[var(--bg-card)] border transition-all duration-200 cursor-pointer overflow-hidden group select-none shadow-xs ${
                     isSelected
-                      ? 'border-[#3d678d] ring-1 ring-[#3d678d] shadow-[0_0_14px_rgba(42,71,94,0.4)]'
-                      : 'border-slate-800/80 hover:border-slate-600'
+                      ? 'border-[#3d678d] ring-1 ring-[#3d678d]'
+                      : 'border-[var(--border-card)] hover:border-[#2a475e]'
                   }`}
                 >
                   {/* Official Steam Header Image (460x215) Container */}
@@ -430,7 +428,7 @@ export const AddGameModal: React.FC<AddGameModalProps> = ({
                     />
                     {/* Top right checkbox */}
                     <div
-                      className={`absolute top-2 right-2 w-5 h-5 rounded-md flex items-center justify-center transition-all ${
+                      className={`absolute top-2 right-2 w-5 h-5 rounded flex items-center justify-center transition-all ${
                         isSelected
                           ? 'bg-[#2a475e] text-white border border-[#3d678d]'
                           : 'bg-black/60 border border-slate-500/60'
@@ -442,20 +440,20 @@ export const AddGameModal: React.FC<AddGameModalProps> = ({
 
                   {/* Card Info */}
                   <div className="p-3">
-                    <h4 className="font-bold text-xs text-slate-100 truncate mb-1.5 group-hover:text-[#66c0f4] transition-colors">
+                    <h4 className="font-bold text-xs text-[var(--text-primary)] truncate mb-1.5 group-hover:text-[#66c0f4] transition-colors">
                       {game.name}
                     </h4>
 
-                    <div className="flex flex-wrap items-center justify-between text-[11px] text-slate-400 gap-1">
+                    <div className="flex flex-wrap items-center justify-between text-[11px] text-[var(--text-secondary)] gap-1">
                       <div className="flex items-center gap-1">
                         <Clock className="w-3 h-3 text-[#66c0f4]" />
-                        <span className="font-medium text-slate-300">
+                        <span className="font-medium text-[var(--text-primary)]">
                           {playtimeHours}시간
                         </span>
                       </div>
 
                       {lastPlayedFormatted && (
-                        <div className="flex items-center gap-1 text-[10px] text-slate-500">
+                        <div className="flex items-center gap-1 text-[10px] text-[var(--text-muted)]">
                           <Calendar className="w-2.5 h-2.5" />
                           <span>{lastPlayedFormatted}</span>
                         </div>
@@ -503,8 +501,8 @@ export const AddGameModal: React.FC<AddGameModalProps> = ({
         )}
 
         {/* Modal Footer */}
-        <div className="flex items-center justify-between pt-3 border-t border-slate-800/80">
-          <span className="text-xs text-slate-400 font-medium">
+        <div className="flex items-center justify-between pt-3 border-t border-[var(--border-subtle)]">
+          <span className="text-xs text-[var(--text-secondary)] font-medium">
             선택된 게임: <strong className="text-[#66c0f4]">{selectedCount}</strong>개
           </span>
           <div className="flex items-center gap-2.5">
@@ -513,7 +511,7 @@ export const AddGameModal: React.FC<AddGameModalProps> = ({
               variant="ghost"
               size="sm"
               onClick={onClose}
-              className="text-xs text-slate-400 hover:text-slate-200"
+              className="text-xs"
             >
               취소
             </Button>
@@ -522,7 +520,7 @@ export const AddGameModal: React.FC<AddGameModalProps> = ({
               variant="cyan"
               size="sm"
               onClick={handleAdd}
-              className="px-5 text-xs font-bold"
+              className="px-5 text-xs font-semibold"
             >
               선택한 게임 추가
             </Button>
