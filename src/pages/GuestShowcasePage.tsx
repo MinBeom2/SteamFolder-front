@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { getPublicShowcaseApi } from '@/api/showcase';
+import { getPublicShowcaseApi, toggleShowcaseLikeApi } from '@/api/showcase';
 import { getFolderDetailApi } from '@/api/folder';
 import type { ShowcaseResponse, FolderResponse, CanvasItem } from '@/types/showcase';
 import { FolderCard } from '@/components/desktop/FolderCard';
@@ -10,13 +10,16 @@ import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { Button } from '@/components/common/Button';
 import { Breadcrumb } from '@/components/desktop/Breadcrumb';
 import { GameDetailModal } from '@/components/modals/GameDetailModal';
+import { DirectLoginModal } from '@/components/modals/DirectLoginModal';
 import { useThemeStore } from '@/store/useThemeStore';
-import { Lock, Sun, Moon } from 'lucide-react';
+import { useAuthStore } from '@/store/useAuthStore';
+import { Lock, Sun, Moon, Heart, Info, Share2, Check } from 'lucide-react';
 
 export const GuestShowcasePage: React.FC = () => {
   const { identifier, folderId } = useParams<{ identifier?: string; folderId?: string }>();
   const navigate = useNavigate();
   const { theme, toggleTheme } = useThemeStore();
+  const { user: currentUser, isAuthenticated } = useAuthStore();
   const targetId = identifier || 'guest';
 
   const [showcase, setShowcase] = useState<ShowcaseResponse | null>(null);
@@ -24,6 +27,24 @@ export const GuestShowcasePage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isPrivate, setIsPrivate] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Like state & interaction
+  const [likeCount, setLikeCount] = useState<number>(0);
+  const [isLiked, setIsLiked] = useState<boolean>(false);
+  const [isLikeLoading, setIsLikeLoading] = useState<boolean>(false);
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState<boolean>(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [isCopied, setIsCopied] = useState<boolean>(false);
+
+  const handleShareClick = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.origin + `/showcase/${encodeURIComponent(targetId)}`);
+      setIsCopied(true);
+      setTimeout(() => setIsCopied(false), 2500);
+    } catch {
+      // fallback
+    }
+  };
 
   // Fetch showcase data and subfolder if folderId in URL
   useEffect(() => {
@@ -35,6 +56,8 @@ export const GuestShowcasePage: React.FC = () => {
       try {
         const sc = await getPublicShowcaseApi(targetId);
         setShowcase(sc);
+        setLikeCount(sc.user.likeCount ?? 0);
+        setIsLiked(sc.user.isLiked ?? false);
 
         if (folderId) {
           const fid = Number(folderId);
@@ -69,6 +92,36 @@ export const GuestShowcasePage: React.FC = () => {
 
   const handleOpenFolder = (folder: FolderResponse) => {
     navigate(`/showcase/${targetId}/folders/${folder.id}`);
+  };
+
+  const handleToggleLike = async () => {
+    if (!showcase) return;
+
+    if (!isAuthenticated || !currentUser) {
+      setIsLoginModalOpen(true);
+      return;
+    }
+
+    if (currentUser.id === showcase.user.id) {
+      setToastMessage('자신의 쇼케이스에는 좋아요를 누를 수 없습니다.');
+      setTimeout(() => setToastMessage(null), 3000);
+      return;
+    }
+
+    setIsLikeLoading(true);
+    try {
+      const res = await toggleShowcaseLikeApi(showcase.user.id);
+      setIsLiked(res.liked);
+      setLikeCount(res.totalLikeCount);
+      setTimeout(() => setToastMessage(null), 2500);
+    } catch (err: unknown) {
+      console.error('Failed to toggle like:', err);
+      const errMsg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
+      setToastMessage(errMsg || '좋아요 처리에 실패했습니다.');
+      setTimeout(() => setToastMessage(null), 3000);
+    } finally {
+      setIsLikeLoading(false);
+    }
   };
 
   // Convert currentFolders and currentGames into CanvasItem list (must be top level hook)
@@ -187,8 +240,8 @@ export const GuestShowcasePage: React.FC = () => {
       <div className="min-h-screen bg-[var(--bg-app)] text-[var(--text-primary)] flex flex-col justify-between selection:bg-[#66c0f4]/20">
         <header className="sticky top-0 z-40 w-full bg-[var(--bg-header)] backdrop-blur-md border-b border-[var(--border-subtle)] px-6 py-3">
           <div className="max-w-7xl mx-auto flex items-center justify-between">
-            <Link to="/" className="flex items-center gap-1 group cursor-pointer shrink-0">
-              <span className="font-bold text-lg tracking-tight text-[var(--text-primary)] group-hover:text-[#66c0f4] transition-colors">
+            <Link to="/" className="flex items-center gap-1 cursor-pointer shrink-0">
+              <span className="font-bold text-lg tracking-tight text-[var(--text-primary)] transition-colors">
                 SteamFolder
               </span>
             </Link>
@@ -225,16 +278,25 @@ export const GuestShowcasePage: React.FC = () => {
         style={{ backgroundColor: themeColor }}
       />
 
+      {/* Floating Feedback Toast */}
+      {toastMessage && (
+        <div className="fixed top-16 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 px-4 py-2.5 rounded-lg bg-[var(--bg-surface)] text-[var(--text-primary)] border border-[var(--border-subtle)] shadow-xl animate-in fade-in slide-in-from-top-2 text-xs font-semibold">
+          <Info className="w-4 h-4 text-[#66c0f4]" />
+          <span>{toastMessage}</span>
+        </div>
+      )}
+
       {/* Top Guest Navbar */}
       <header className="sticky top-0 z-40 w-full bg-[var(--bg-header)] backdrop-blur-md border-b border-[var(--border-subtle)] px-6 py-3 transition-colors">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-1 group cursor-pointer shrink-0">
-            <span className="font-bold text-lg tracking-tight text-[var(--text-primary)] group-hover:text-[#66c0f4] transition-colors">
+          <Link to="/" className="flex items-center gap-1 cursor-pointer shrink-0">
+            <span className="font-bold text-lg tracking-tight text-[var(--text-primary)] transition-colors">
               SteamFolder
             </span>
           </Link>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2.5">
+
             {/* Dark / Light Mode Toggle Button */}
             <button
               type="button"
@@ -269,19 +331,56 @@ export const GuestShowcasePage: React.FC = () => {
             <div>
               <h1 className="text-xl sm:text-2xl font-bold text-[var(--text-primary)] tracking-tight flex items-center gap-2">
                 <span>{showcase.user.username}님의 쇼케이스</span>
+                <Button
+                  variant="steam"
+                  size="sm"
+                  onClick={handleShareClick}
+                  className="h-7 text-xs font-medium px-2.5 ml-1 shadow-xs cursor-pointer"
+                  leftIcon={
+                    isCopied ? (
+                      <Check className="w-3.5 h-3.5 text-emerald-400" />
+                    ) : (
+                      <Share2 className="w-3.5 h-3.5" />
+                    )
+                  }
+                >
+                  {isCopied ? '링크 복사됨!' : '공유'}
+                </Button>
               </h1>
             </div>
           </div>
 
-          {/* Plain Text Stats */}
-          <div className="flex items-center gap-4 sm:gap-6 text-xs sm:text-sm text-[var(--text-secondary)] font-medium">
-            <div>
-              보유 게임 <span className="text-[var(--text-primary)] font-bold ml-1">{showcase.stats.totalOwnedGames}개</span>
+          {/* Plain Text Stats & Like Action Button */}
+          <div className="flex items-center gap-4 sm:gap-6 flex-wrap">
+            <div className="flex items-center gap-4 sm:gap-6 text-xs sm:text-sm text-[var(--text-secondary)] font-medium">
+              <div>
+                보유 게임 <span className="text-[var(--text-primary)] font-bold ml-1">{showcase.stats.totalOwnedGames}개</span>
+              </div>
+              <span className="text-[var(--text-muted)]">•</span>
+              <div>
+                총 플레이 시간 <span className="text-[var(--text-primary)] font-bold ml-1">{playtimeHours}시간</span>
+              </div>
             </div>
-            <span className="text-[var(--text-muted)]">•</span>
-            <div>
-              총 플레이 시간 <span className="text-[var(--text-primary)] font-bold ml-1">{playtimeHours}시간</span>
-            </div>
+
+            {/* Like Toggle Button */}
+            <button
+              type="button"
+              onClick={handleToggleLike}
+              disabled={isLikeLoading}
+              className={`h-9 px-3.5 rounded-lg border text-xs sm:text-sm font-semibold transition-all cursor-pointer shadow-xs active:scale-95 flex items-center gap-1.5 ${
+                isLiked
+                  ? 'bg-rose-500/15 border-rose-500/40 text-rose-400 hover:bg-rose-500/25'
+                  : 'bg-[var(--nav-btn-bg)] border-[var(--nav-btn-border)] text-[var(--text-secondary)] hover:text-rose-400 hover:border-rose-400/40'
+              }`}
+              title={isLiked ? '좋아요 취소' : '쇼케이스 좋아요'}
+            >
+              <Heart
+                className={`w-4 h-4 transition-transform duration-200 ${
+                  isLiked ? 'fill-rose-500 text-rose-500 scale-110' : 'text-current'
+                }`}
+              />
+              <span>{likeCount}</span>
+            </button>
           </div>
         </div>
 
@@ -356,6 +455,12 @@ export const GuestShowcasePage: React.FC = () => {
 
       {/* Game Detail & Achievement Modal */}
       <GameDetailModal />
+
+      {/* Direct Login Modal for Guest Interaction */}
+      <DirectLoginModal
+        isOpen={isLoginModalOpen}
+        onClose={() => setIsLoginModalOpen(false)}
+      />
     </div>
   );
 };

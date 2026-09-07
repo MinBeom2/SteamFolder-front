@@ -1,8 +1,15 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
+import { useAuthStore } from '@/store/useAuthStore';
 
 export const GuestBanner: React.FC = () => {
+  const { isAuthenticated } = useAuthStore();
+
+  if (isAuthenticated) {
+    return null;
+  }
+
   return (
     <div className="fixed bottom-0 inset-x-0 z-40 bg-[var(--bg-header)] backdrop-blur-md border-t border-[var(--border-subtle)] py-3.5 px-6 text-center shadow-lg transition-colors">
       <div className="max-w-4xl mx-auto flex items-center justify-center gap-2 text-xs font-medium text-[var(--text-secondary)]">

@@ -101,7 +101,7 @@ export const Breadcrumb: React.FC<BreadcrumbProps> = ({
               onDrop={(e) => handleDrop(e, idx)}
               className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md transition-all cursor-pointer ${
                 isLast
-                  ? 'crumb-active font-semibold shadow-xs'
+                  ? 'crumb-active font-semibold shadow-xs bg-[#ebf2f7] text-[#1a5b8c] border border-[#c6d8e6] dark:bg-[#66c0f4]/15 dark:text-[#66c0f4] dark:border-[#66c0f4]/35'
                   : 'hover:bg-black/5 dark:hover:bg-white/5 hover:text-[var(--text-primary)]'
               } ${isDragOver ? 'ring-2 ring-emerald-400 bg-emerald-500/20' : ''}`}
             >

@@ -12,6 +12,9 @@ import {
   Plus,
   FolderPlus,
   Info,
+  Share2,
+  Check,
+  Lock,
 } from 'lucide-react';
 
 interface DesktopCanvasProps {
@@ -31,6 +34,7 @@ export const DesktopCanvas: React.FC<DesktopCanvasProps> = ({ isReadOnly = false
 
   const { user, isAuthenticated } = useAuthStore();
   const {
+    showcase,
     currentFolderId,
     currentFolder,
     items,
@@ -54,6 +58,22 @@ export const DesktopCanvas: React.FC<DesktopCanvasProps> = ({ isReadOnly = false
   } = useShowcaseStore();
 
   const [dragOverCell, setDragOverCell] = useState<{ x: number; y: number } | null>(null);
+
+  const [isCopied, setIsCopied] = useState(false);
+
+  const handleShareClick = async () => {
+    if (!user) return;
+    const identifier = user.username || user.steamId;
+    const shareUrl = `${window.location.origin}/showcase/${encodeURIComponent(identifier)}`;
+
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      setIsCopied(true);
+      setTimeout(() => setIsCopied(false), 2500);
+    } catch {
+      navigate(`/showcase/${encodeURIComponent(identifier)}`);
+    }
+  };
 
   // Windows-style Marquee Selection State
   const canvasRef = useRef<HTMLDivElement>(null);
@@ -320,9 +340,33 @@ export const DesktopCanvas: React.FC<DesktopCanvasProps> = ({ isReadOnly = false
           className="flex flex-wrap items-center justify-between gap-4 mb-6 pb-4 border-b border-[var(--border-subtle)]"
         >
           <div className="flex items-center gap-3">
-            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-[var(--text-primary)] flex items-center gap-2.5">
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-[var(--text-primary)] flex items-center gap-2 sm:gap-2.5">
+              {!currentFolder && isAuthenticated && (user?.isPublic === false || showcase?.user?.isPublic === false) && (
+                <span title="비공개 쇼케이스" className="flex items-center text-[var(--text-secondary)] shrink-0">
+                  <Lock className="w-5 h-5" aria-hidden="true" />
+                </span>
+              )}
               <span>{currentFolder ? currentFolder.name : `${user?.username || '게스트'}님의 쇼케이스`}</span>
             </h1>
+
+            {/* Showcase Share Button (루트 쇼케이스에서 노출) */}
+            {isAuthenticated && user && !currentFolder && !isReadOnly && (
+              <Button
+                variant="steam"
+                size="sm"
+                onClick={handleShareClick}
+                className="h-7 text-xs font-medium px-2.5 shadow-xs cursor-pointer"
+                leftIcon={
+                  isCopied ? (
+                    <Check className="w-3.5 h-3.5 text-emerald-400" />
+                  ) : (
+                    <Share2 className="w-3.5 h-3.5" />
+                  )
+                }
+              >
+                {isCopied ? '링크 복사됨!' : '공유'}
+              </Button>
+            )}
           </div>
 
           {/* Action Buttons: [폴더 추가] and [게임 추가] */}

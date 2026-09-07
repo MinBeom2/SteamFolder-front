@@ -3,44 +3,52 @@ import { Modal } from '@/components/common/Modal';
 import { Button } from '@/components/common/Button';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useShowcaseStore } from '@/store/useShowcaseStore';
-import { useThemeStore } from '@/store/useThemeStore';
 import type { User } from '@/types/auth';
-import { RefreshCw, Globe, Lock, Sun, Moon } from 'lucide-react';
+import { RefreshCw, Globe, Lock } from 'lucide-react';
 
 interface ShowcaseSettingsModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-interface ShowcaseSettingsFormProps {
+export interface ShowcaseSettingsFormProps {
   user: User;
-  onClose: () => void;
+  onClose?: () => void;
+  showCancelButton?: boolean;
 }
 
-const ShowcaseSettingsForm: React.FC<ShowcaseSettingsFormProps> = ({
+export const ShowcaseSettingsForm: React.FC<ShowcaseSettingsFormProps> = ({
   user,
   onClose,
 }) => {
-  const { updateVisibility, deleteAccount, isLoading } = useAuthStore();
+  const { updateVisibility, deleteAccount } = useAuthStore();
   const { syncGames, isSyncingGames, cooldownSeconds } = useShowcaseStore();
-  const { theme, setTheme } = useThemeStore();
 
   const [isPublic, setIsPublic] = useState(user.isPublic ?? true);
   const [syncStatus, setSyncStatus] = useState<string | null>(null);
+  const [isUpdatingVisibility, setIsUpdatingVisibility] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
 
   const isCooldownActive = cooldownSeconds > 0;
   const cooldownMin = Math.floor(cooldownSeconds / 60);
   const cooldownSec = cooldownSeconds % 60;
-  const formattedCooldown = `${cooldownMin}분 ${
+  const formattedCooldown = `${cooldownMin}: ${
     cooldownSec < 10 ? '0' + cooldownSec : cooldownSec
-  }초`;
+  }`;
 
-  const handleSave = async () => {
+  const handleToggleVisibility = async (nextPublic: boolean) => {
+    if (isPublic === nextPublic || isUpdatingVisibility) return;
+    setIsPublic(nextPublic);
+    setIsUpdatingVisibility(true);
     try {
-      await updateVisibility(isPublic);
-      onClose();
+      await updateVisibility(nextPublic);
+      setSaveSuccess(true);
+      setTimeout(() => setSaveSuccess(false), 2000);
     } catch (err) {
-      console.error('Failed to save settings:', err);
+      console.error('Failed to update visibility:', err);
+      setIsPublic(!nextPublic);
+    } finally {
+      setIsUpdatingVisibility(false);
     }
   };
 
@@ -68,7 +76,7 @@ const ShowcaseSettingsForm: React.FC<ShowcaseSettingsFormProps> = ({
   const handleDeleteAccount = async () => {
     if (window.confirm('정말로 계정을 삭제하고 연동을 해제하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) {
       await deleteAccount();
-      onClose();
+      onClose?.();
     }
   };
 
@@ -86,53 +94,23 @@ const ShowcaseSettingsForm: React.FC<ShowcaseSettingsFormProps> = ({
         </div>
       )}
 
-      {/* 1. 화면 테마 설정 (다크 모드 / 라이트 모드) */}
+      {/* 1. 공개 설정 */}
       <div className="space-y-2.5">
-        <label className="block text-xs font-bold text-[var(--text-primary)]">
-          화면 모드 (테마)
-        </label>
-        <div className="relative flex items-center p-1 bg-[var(--bg-surface-elevated)] rounded-lg border border-[var(--border-card)] select-none">
-          {/* Sliding Pill Indicator */}
-          <div
-            className="absolute top-1 bottom-1 w-[calc(50%-4px)] rounded-md toggle-pill-indicator transition-transform duration-300 ease-in-out pointer-events-none"
-            style={{
-              left: '4px',
-              transform: theme === 'dark' ? 'translateX(0%)' : 'translateX(100%)',
-            }}
-          />
-
-          <button
-            type="button"
-            onClick={() => setTheme('dark')}
-            className={`relative z-10 flex-1 py-2.5 text-xs rounded-md transition-colors duration-200 cursor-pointer flex items-center justify-center gap-1.5 ${
-              theme === 'dark'
-                ? 'toggle-item-active'
-                : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] font-medium'
-            }`}
-          >
-            <Moon className="w-3.5 h-3.5 text-indigo-400" />
-            <span>다크 모드</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => setTheme('light')}
-            className={`relative z-10 flex-1 py-2.5 text-xs rounded-md transition-colors duration-200 cursor-pointer flex items-center justify-center gap-1.5 ${
-              theme === 'light'
-                ? 'toggle-item-active'
-                : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] font-medium'
-            }`}
-          >
-            <Sun className="w-3.5 h-3.5 text-amber-500" />
-            <span>라이트 모드</span>
-          </button>
+        <div className="flex items-center justify-between">
+          <label className="block text-xs font-bold text-[var(--text-primary)]">
+            쇼케이스 공개 범위
+          </label>
+          {isUpdatingVisibility && (
+            <span className="text-[11px] text-[var(--text-secondary)] animate-pulse">
+              저장 중...
+            </span>
+          )}
+          {saveSuccess && !isUpdatingVisibility && (
+            <span className="text-[11px] font-medium text-emerald-500 animate-in fade-in">
+              ✓ 자동 저장됨
+            </span>
+          )}
         </div>
-      </div>
-
-      {/* 2. 공개 설정 */}
-      <div className="space-y-2.5 pt-2 border-t border-[var(--border-subtle)]">
-        <label className="block text-xs font-bold text-[var(--text-primary)]">
-          쇼케이스 공개 범위
-        </label>
         <div className="relative flex items-center p-1 bg-[var(--bg-surface-elevated)] rounded-lg border border-[var(--border-card)] select-none">
           {/* Sliding Pill Indicator */}
           <div
@@ -145,7 +123,8 @@ const ShowcaseSettingsForm: React.FC<ShowcaseSettingsFormProps> = ({
 
           <button
             type="button"
-            onClick={() => setIsPublic(true)}
+            disabled={isUpdatingVisibility}
+            onClick={() => handleToggleVisibility(true)}
             className={`relative z-10 flex-1 py-2.5 text-xs rounded-md transition-colors duration-200 cursor-pointer flex items-center justify-center gap-1.5 ${
               isPublic
                 ? 'toggle-item-active'
@@ -157,7 +136,8 @@ const ShowcaseSettingsForm: React.FC<ShowcaseSettingsFormProps> = ({
           </button>
           <button
             type="button"
-            onClick={() => setIsPublic(false)}
+            disabled={isUpdatingVisibility}
+            onClick={() => handleToggleVisibility(false)}
             className={`relative z-10 flex-1 py-2.5 text-xs rounded-md transition-colors duration-200 cursor-pointer flex items-center justify-center gap-1.5 ${
               !isPublic
                 ? 'toggle-item-active'
@@ -206,7 +186,7 @@ const ShowcaseSettingsForm: React.FC<ShowcaseSettingsFormProps> = ({
           }
         >
           {isCooldownActive
-            ? `쿨다운 (${formattedCooldown})`
+            ? `${formattedCooldown}`
             : '동기화'}
         </Button>
       </div>
@@ -220,30 +200,6 @@ const ShowcaseSettingsForm: React.FC<ShowcaseSettingsFormProps> = ({
         >
           계정 삭제 및 스팀 연동 해제
         </button>
-      </div>
-
-      {/* Modal Footer */}
-      <div className="flex items-center justify-end gap-2.5 pt-4 border-t border-[var(--border-subtle)]">
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          onClick={onClose}
-          disabled={isLoading}
-          className="text-xs"
-        >
-          취소
-        </Button>
-        <Button
-          type="submit"
-          variant="cyan"
-          size="sm"
-          onClick={handleSave}
-          isLoading={isLoading}
-          className="px-5 text-xs font-semibold"
-        >
-          저장
-        </Button>
       </div>
     </div>
   );

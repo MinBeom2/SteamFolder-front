@@ -120,16 +120,16 @@ export const FolderCard: React.FC<FolderCardProps> = ({
           ? 'ring-2 ring-[#2a475e] bg-[#1e3a5f]/25 scale-105'
           : isDragOver
           ? 'ring-2 ring-emerald-400 bg-emerald-500/20 scale-110'
-          : 'hover:scale-105 hover:bg-black/5 dark:hover:bg-white/5'
+          : 'hover:scale-105 hover:bg-[#1a5b8c]/5 dark:hover:bg-white/5'
       }`}
     >
       {/* Folder Shape Container */}
       <div className="relative w-28 h-24 flex items-center justify-center">
         {/* Folder Top Tab */}
-        <div className="absolute -top-1 left-2 w-10 h-3 rounded-t-sm bg-[var(--folder-top-bg)] border-t border-l border-r border-[#2a475e]/80 transition-colors group-hover:border-[#3d678d]" />
+        <div className="absolute -top-1 left-2 w-10 h-3 rounded-t-sm bg-[var(--folder-top-bg)] border-t border-l border-r border-[var(--border-card)] transition-colors group-hover:border-[#1a5b8c] dark:group-hover:border-[#66c0f4]" />
 
         {/* Folder Body */}
-        <div className="relative w-full h-full bg-[var(--folder-body-bg)] rounded-lg border-2 border-[#2a475e] p-2 flex flex-col justify-center shadow-md transition-all duration-200 group-hover:border-[#3d678d]">
+        <div className="relative w-full h-full bg-[var(--folder-body-bg)] rounded-lg border border-[var(--border-card)] p-2 flex flex-col justify-center shadow-md transition-all duration-200 group-hover:border-[#1a5b8c] dark:group-hover:border-[#66c0f4]">
           {/* 2x2 Inner Grid Slots for Mini Thumbnails */}
           <div className="grid grid-cols-2 gap-1 w-full h-full p-1 bg-[var(--folder-inner-bg)] rounded-md overflow-hidden border border-[var(--border-subtle)]">
             {[0, 1, 2, 3].map((slotIdx) => {
@@ -157,7 +157,7 @@ export const FolderCard: React.FC<FolderCardProps> = ({
 
       {/* Folder Label */}
       <div className="text-center max-w-[130px]">
-        <span className="text-xs font-bold text-[var(--text-primary)] block truncate group-hover:text-[#66c0f4] transition-colors">
+        <span className="text-xs font-bold text-[var(--text-primary)] block truncate transition-colors group-hover:text-[#1a5b8c] dark:group-hover:text-[#66c0f4]">
           {folder.name}
         </span>
       </div>

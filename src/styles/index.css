@@ -321,9 +321,9 @@ html[data-theme="light"] .btn-variant-secondary:hover {
 html.dark .crumb-active,
 html[data-theme="dark"] .crumb-active,
 :root:not(.light) .crumb-active {
-  background-color: #2a475e;
+  background-color: rgba(102, 192, 244, 0.15);
   color: #66c0f4;
-  border: 1px solid #3b6485;
+  border: 1px solid rgba(102, 192, 244, 0.35);
 }
 
 html.light .crumb-active,

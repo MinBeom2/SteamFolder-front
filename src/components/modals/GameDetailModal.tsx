@@ -141,7 +141,7 @@ export const GameDetailModal: React.FC = () => {
         ) : total === 0 ? (
           <div className="py-6 text-center text-xs text-[var(--text-muted)] space-y-1.5 bg-[var(--bg-surface-elevated)] rounded-lg border border-[var(--border-subtle)]">
             <Trophy className="w-6 h-6 text-slate-400 dark:text-slate-600 mx-auto stroke-1" />
-            <p>이 게임에는 등록된 스팀 도전과제(업적)가 없습니다.</p>
+            <p>이 게임에는 등록된 도전과제가 없습니다.</p>
           </div>
         ) : (
           <div className="rounded-lg bg-[var(--bg-surface-elevated)] border border-[var(--border-card)] p-4 space-y-2.5 shadow-sm">

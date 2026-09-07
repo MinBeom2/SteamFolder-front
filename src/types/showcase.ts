@@ -34,6 +34,14 @@ export interface ShowcaseUserDto {
   avatarUrl: string;
   themeColor: string;
   isPublic: boolean;
+  likeCount?: number;
+  isLiked?: boolean;
+}
+
+export interface ShowcaseLikeResponse {
+  targetUserId: number;
+  liked: boolean;
+  totalLikeCount: number;
 }
 
 export interface ShowcaseStatsDto {
@@ -106,5 +114,28 @@ export interface ClipboardItem {
   sourceFolderId: number | null;
   entries: ClipboardEntry[];
 }
+
+// Liked Showcase Models
+export interface LikedShowcaseItemDto {
+  likeId: number;
+  userId: number;
+  steamId: string;
+  username: string;
+  avatarUrl: string;
+  themeColor: string;
+  likeCount: number;
+  totalGamesCount: number;
+  isLiked: boolean;
+  likedAt: string;
+}
+
+export interface LikedShowcasePageResponse {
+  content: LikedShowcaseItemDto[];
+  nextCursor: number | null;
+  hasNext: boolean;
+  totalElements: number;
+  pageSize: number;
+}
+
 
 

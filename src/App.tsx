@@ -2,6 +2,8 @@ import React, { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { HomePage } from '@/pages/HomePage';
 import { GuestShowcasePage } from '@/pages/GuestShowcasePage';
+import { ShowcaseRankingPage } from '@/pages/ShowcaseRankingPage';
+import { MyPage } from '@/pages/MyPage';
 import { AuthCallbackPage } from '@/pages/AuthCallbackPage';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useThemeStore } from '@/store/useThemeStore';
@@ -30,6 +32,8 @@ export const App: React.FC = () => {
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/folders/:folderId" element={<HomePage />} />
+        <Route path="/rankings" element={<ShowcaseRankingPage />} />
+        <Route path="/mypage" element={<MyPage />} />
         <Route path="/guest" element={<GuestShowcasePage />} />
         <Route path="/showcase/:identifier" element={<GuestShowcasePage />} />
         <Route path="/showcase/:identifier/folders/:folderId" element={<GuestShowcasePage />} />

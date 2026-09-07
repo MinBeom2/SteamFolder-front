@@ -2,7 +2,6 @@ import React from 'react';
 import { Navbar } from '@/components/layout/Navbar';
 import { DesktopCanvas } from '@/components/desktop/DesktopCanvas';
 import { ContextMenu } from '@/components/desktop/ContextMenu';
-import { ShowcaseSettingsModal } from '@/components/modals/ShowcaseSettingsModal';
 import { AddGameModal } from '@/components/modals/AddGameModal';
 import { CreateFolderModal } from '@/components/modals/CreateFolderModal';
 import { EditFolderModal } from '@/components/modals/EditFolderModal';
@@ -12,12 +11,10 @@ import { useShowcaseStore } from '@/store/useShowcaseStore';
 
 export const HomePage: React.FC = () => {
   const {
-    isSettingsModalOpen,
     isAddGameModalOpen,
     isDirectLoginModalOpen,
     isCreateFolderModalOpen,
     isEditFolderModalOpen,
-    setSettingsModalOpen,
     setAddGameModalOpen,
     setDirectLoginModalOpen,
     setCreateFolderModalOpen,
@@ -51,11 +48,6 @@ export const HomePage: React.FC = () => {
       <AddGameModal
         isOpen={isAddGameModalOpen}
         onClose={() => setAddGameModalOpen(false)}
-      />
-
-      <ShowcaseSettingsModal
-        isOpen={isSettingsModalOpen}
-        onClose={() => setSettingsModalOpen(false)}
       />
 
       <DirectLoginModal

@@ -1,0 +1,80 @@
+.scroll-list-container {
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+}
+
+.scroll-list {
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+.scroll-list::-webkit-scrollbar {
+  width: 8px;
+}
+
+.scroll-list::-webkit-scrollbar-track {
+  background: var(--bg-surface, #120F17);
+  border-radius: 4px;
+}
+
+.scroll-list::-webkit-scrollbar-thumb {
+  background: var(--border-card, #2F293A);
+  border-radius: 4px;
+}
+
+.scroll-list::-webkit-scrollbar-thumb:hover {
+  background: var(--text-secondary, #4B4556);
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.item {
+  padding: 16px;
+  background-color: var(--glass-panel-bg, #2F293A);
+  border: 1px solid var(--border-subtle, transparent);
+  border-radius: 12px;
+  margin-bottom: 1rem;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.item.selected {
+  background-color: var(--nav-btn-bg, #2F293A);
+  border-color: var(--border-card, #66c0f4);
+}
+
+.item-text {
+  color: var(--text-primary, white);
+  margin: 0;
+}
+
+.top-gradient {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 50px;
+  background: linear-gradient(to bottom, var(--bg-app, #120F17), transparent);
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+  z-index: 20;
+}
+
+.bottom-gradient {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 80px;
+  background: linear-gradient(to top, var(--bg-app, #120F17), transparent);
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+  z-index: 20;
+}
