@@ -149,6 +149,8 @@ interface ShowcaseState {
     name: string;
     headerImage?: string;
     genres?: string[];
+    playtimeForever?: number;
+    lastPlayedAt?: string;
   }) => Promise<void>;
   closeGameDetailModal: () => void;
   syncGameAchievements: (force?: boolean) => Promise<void>;
@@ -231,6 +233,8 @@ const buildCanvasItems = (
     appId: g.appId,
     headerImage: g.headerImage,
     genres: g.genres,
+    playtimeForever: g.playtimeForever,
+    lastPlayedAt: g.lastPlayedAt,
     gameData: g,
   }));
 
@@ -1037,8 +1041,12 @@ export const useShowcaseStore = create<ShowcaseState>((set, get) => ({
     name: string;
     headerImage?: string;
     genres?: string[];
+    playtimeForever?: number;
+    lastPlayedAt?: string;
   }) => {
     const matchingUserGame = get().userGames.find((g) => g.appId === game.appId);
+    const playtimeForever = game.playtimeForever ?? matchingUserGame?.playtimeForever;
+    const lastPlayedAt = game.lastPlayedAt ?? matchingUserGame?.lastPlayedAt;
 
     set({
       isGameDetailModalOpen: true,
@@ -1047,8 +1055,8 @@ export const useShowcaseStore = create<ShowcaseState>((set, get) => ({
         name: game.name,
         headerImage: game.headerImage,
         genres: game.genres,
-        playtimeForever: matchingUserGame?.playtimeForever,
-        lastPlayedAt: matchingUserGame?.lastPlayedAt,
+        playtimeForever,
+        lastPlayedAt,
       },
       achievementDetail: null,
       isLoadingGameDetail: true,
@@ -1057,10 +1065,17 @@ export const useShowcaseStore = create<ShowcaseState>((set, get) => ({
 
     try {
       const data = await getGameAchievementsApi(game.appId);
-      set({
+      set((state) => ({
         achievementDetail: data,
         isLoadingGameDetail: false,
-      });
+        selectedGameDetail: state.selectedGameDetail
+          ? {
+              ...state.selectedGameDetail,
+              playtimeForever: data.playtimeForever ?? state.selectedGameDetail.playtimeForever,
+              lastPlayedAt: (data.lastPlayedAt ?? state.selectedGameDetail.lastPlayedAt) || undefined,
+            }
+          : null,
+      }));
 
       // Update userGames if present
       set((state) => ({

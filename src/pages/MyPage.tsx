@@ -11,7 +11,7 @@ import {
 } from '@/api/showcase';
 import type { ShowcaseResponse, LikedShowcaseItemDto } from '@/types/showcase';
 import { useAuthStore } from '@/store/useAuthStore';
-import { Heart, Trophy, ChevronRight } from 'lucide-react';
+import { Heart, Trophy } from 'lucide-react';
 
 export const MyPage: React.FC = () => {
   const navigate = useNavigate();
@@ -237,8 +237,13 @@ export const MyPage: React.FC = () => {
         <div className="w-full mt-4 flex flex-col gap-5">
           <div className="flex items-center justify-between pb-3 border-b border-[var(--border-subtle)]">
             <div className="flex items-center gap-2.5">
-              <h2 className="text-lg sm:text-xl font-bold text-[var(--text-primary)] tracking-tight">
-                내가 좋아요 누른 쇼케이스
+              <h2 className="text-lg sm:text-xl font-bold text-[var(--text-primary)] tracking-tight flex items-center gap-2">
+                <span>내가 좋아요 누른 쇼케이스</span>
+                {totalLikedCount > 0 && (
+                  <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-rose-500/15 text-rose-400 border border-rose-500/20">
+                    {totalLikedCount}
+                  </span>
+                )}
               </h2>
             </div>
 

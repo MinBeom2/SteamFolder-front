@@ -2,7 +2,6 @@ import React from 'react';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useShowcaseStore } from '@/store/useShowcaseStore';
 import { useThemeStore } from '@/store/useThemeStore';
-import { SteamLoginButton } from '@/components/auth/SteamLoginButton';
 import { ShowcaseSettingsModal } from '@/components/modals/ShowcaseSettingsModal';
 import {
   Sun,
@@ -113,7 +112,6 @@ export const Navbar: React.FC = () => {
                   <Moon className="w-4 h-4 text-indigo-400 hover:-rotate-12 transition-transform" />
                 )}
               </button>
-              <SteamLoginButton size="sm" />
             </div>
           )}
         </div>

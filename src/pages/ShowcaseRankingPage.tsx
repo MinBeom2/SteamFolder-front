@@ -11,6 +11,7 @@ import { useAuthStore } from '@/store/useAuthStore';
 import {
   Heart,
   Info,
+  Lock,
 } from 'lucide-react';
 
 export const ShowcaseRankingPage: React.FC = () => {
@@ -145,7 +146,14 @@ export const ShowcaseRankingPage: React.FC = () => {
   const cardHoverClass =
     'hover:scale-[1.075] hover:z-20 hover:border-[var(--border-card)]';
 
-  const renderRankBadge = (rank: number) => {
+  const renderRankBadge = (rank: number | null) => {
+    if (rank === null) {
+      return (
+        <span className="w-8 sm:w-10 flex items-center justify-center shrink-0 select-none text-[var(--text-secondary)]">
+          <Lock className="w-5 h-5 text-slate-400" />
+        </span>
+      );
+    }
     return (
       <span className="w-8 sm:w-10 text-center font-black text-lg sm:text-xl shrink-0 select-none text-[var(--text-secondary)]">
         {rank}
@@ -181,7 +189,7 @@ export const ShowcaseRankingPage: React.FC = () => {
             <LoadingSpinner size="lg" label="인기 랭킹 로딩 중..." />
           </div>
         ) : error ? (
-          <div className="py-20 text-center text-sm text-red-400 bg-red-500/10 rounded-xl border border-red-500/20 p-6">
+          <div className="py-20 text-center text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-500/10 rounded-xl border border-red-200 dark:border-red-500/20 p-6">
             {error}
           </div>
         ) : rankings.length === 0 ? (
@@ -298,10 +306,16 @@ export const ShowcaseRankingPage: React.FC = () => {
       {/* Sticky Bottom Floating Bar: My Ranking */}
       {isAuthenticated && myRanking && (
         <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-40 w-auto px-4 sm:px-5 py-2.5 rounded-full bg-[var(--bg-surface)]/95 border border-[var(--border-card)] shadow-2xl backdrop-blur-xl flex items-center gap-3 animate-in fade-in slide-in-from-bottom-4 select-none">
-          {/* 1. 이미지 좌측에 다른 유저처럼 숫자만 */}
-          <span className="font-black text-sm sm:text-base text-[var(--text-secondary)] select-none">
-            {myRanking.rank}
-          </span>
+          {/* 1. 이미지 좌측에 다른 유저처럼 숫자만 (비공개 시 자물쇠 아이콘) */}
+          {myRanking.isPublic === false || myRanking.rank == null ? (
+            <span title="비공개 쇼케이스" className="flex items-center text-[var(--text-secondary)] select-none">
+              <Lock className="w-4 h-4 text-slate-400" />
+            </span>
+          ) : (
+            <span className="font-black text-sm sm:text-base text-[var(--text-secondary)] select-none">
+              {myRanking.rank}
+            </span>
+          )}
 
           {/* 2. 실제 내 프로필 이미지 */}
           <img

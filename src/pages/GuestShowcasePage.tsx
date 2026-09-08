@@ -88,8 +88,6 @@ export const GuestShowcasePage: React.FC = () => {
     fetchShowcaseData();
   }, [targetId, folderId, navigate]);
 
-  const themeColor = showcase?.user.themeColor || '#00F0FF';
-
   const handleOpenFolder = (folder: FolderResponse) => {
     navigate(`/showcase/${targetId}/folders/${folder.id}`);
   };
@@ -271,12 +269,8 @@ export const GuestShowcasePage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[var(--bg-app)] text-[var(--text-primary)] flex flex-col justify-between pb-20 selection:bg-[#66c0f4]/20 transition-colors duration-200">
-      {/* Background Dot Matrix Pattern & Glowing Center */}
+      {/* Background Dot Matrix Pattern */}
       <div className="absolute inset-0 desktop-dot-bg opacity-40 pointer-events-none" />
-      <div
-        className="fixed top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[350px] rounded-full blur-[140px] opacity-15 pointer-events-none transition-all duration-500"
-        style={{ backgroundColor: themeColor }}
-      />
 
       {/* Floating Feedback Toast */}
       {toastMessage && (
@@ -330,6 +324,11 @@ export const GuestShowcasePage: React.FC = () => {
             />
             <div>
               <h1 className="text-xl sm:text-2xl font-bold text-[var(--text-primary)] tracking-tight flex items-center gap-2">
+                {!showcase.user.isPublic && (
+                  <span title="비공개 쇼케이스 (링크 공유됨)" className="flex items-center text-[var(--text-secondary)] shrink-0">
+                    <Lock className="w-5 h-5 text-slate-400" aria-hidden="true" />
+                  </span>
+                )}
                 <span>{showcase.user.username}님의 쇼케이스</span>
                 <Button
                   variant="steam"

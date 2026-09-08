@@ -240,6 +240,8 @@ export const ContextMenu: React.FC = () => {
                       name: targetItem.name,
                       headerImage: targetItem.headerImage,
                       genres: targetItem.genres,
+                      playtimeForever: targetItem.playtimeForever,
+                      lastPlayedAt: targetItem.lastPlayedAt,
                     });
                   }
                 }}

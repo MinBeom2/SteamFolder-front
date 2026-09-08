@@ -32,6 +32,8 @@ export const GameCard: React.FC<GameCardProps> = ({
         name: game.name,
         headerImage: game.headerImage,
         genres: game.genres,
+        playtimeForever: game.playtimeForever ?? item.playtimeForever,
+        lastPlayedAt: game.lastPlayedAt ?? item.lastPlayedAt,
       });
     }
   };

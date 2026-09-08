@@ -1,5 +1,6 @@
 import React from 'react';
 import { SteamLoginButton } from '@/components/auth/SteamLoginButton';
+import { useThemeStore } from '@/store/useThemeStore';
 
 const ROW1_GAMES = [
   { appId: 1245620, name: 'Elden Ring', img: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1245620/header.jpg' },
@@ -79,10 +80,15 @@ const ROW5_GAMES = [
 interface MarqueeRowProps {
   games: typeof ROW1_GAMES;
   duration: number;
+  isDark: boolean;
 }
 
 // 100% Mathematically Seamless Infinite Marquee Row Component
-const MarqueeRow: React.FC<MarqueeRowProps> = ({ games, duration }) => {
+const MarqueeRow: React.FC<MarqueeRowProps> = ({ games, duration, isDark }) => {
+  const cardClassName = isDark
+    ? 'w-60 sm:w-72 h-30 sm:h-36 rounded-lg overflow-hidden shadow-lg border border-white/10 shrink-0 bg-[#121620]'
+    : 'w-60 sm:w-72 h-30 sm:h-36 rounded-lg overflow-hidden shadow-md border border-slate-200/80 shrink-0 bg-white';
+
   return (
     <div
       className="flex w-max shrink-0 will-change-transform"
@@ -93,10 +99,7 @@ const MarqueeRow: React.FC<MarqueeRowProps> = ({ games, duration }) => {
       {/* Primary List A */}
       <div className="flex gap-4 sm:gap-5 shrink-0 pr-4 sm:pr-5">
         {games.map((game, idx) => (
-          <div
-            key={`a-${game.appId}-${idx}`}
-            className="w-60 sm:w-72 h-30 sm:h-36 rounded-lg overflow-hidden shadow-lg border border-white/10 shrink-0 bg-[#121620]"
-          >
+          <div key={`a-${game.appId}-${idx}`} className={cardClassName}>
             <img
               src={game.img}
               alt={game.name}
@@ -112,10 +115,7 @@ const MarqueeRow: React.FC<MarqueeRowProps> = ({ games, duration }) => {
       {/* Clone List B: Exactly matches List A with padding-right for a zero-stutter seamless loop */}
       <div className="flex gap-4 sm:gap-5 shrink-0 pr-4 sm:pr-5">
         {games.map((game, idx) => (
-          <div
-            key={`b-${game.appId}-${idx}`}
-            className="w-60 sm:w-72 h-30 sm:h-36 rounded-lg overflow-hidden shadow-lg border border-white/10 shrink-0 bg-[#121620]"
-          >
+          <div key={`b-${game.appId}-${idx}`} className={cardClassName}>
             <img
               src={game.img}
               alt={game.name}
@@ -132,8 +132,15 @@ const MarqueeRow: React.FC<MarqueeRowProps> = ({ games, duration }) => {
 };
 
 export const LandingHeroMarquee: React.FC = () => {
+  const { theme } = useThemeStore();
+  const isDark = theme === 'dark';
+
   return (
-    <div className="relative min-h-screen -mt-[61px] pt-[61px] w-full flex flex-col items-center justify-center overflow-hidden bg-[#07090e]">
+    <div
+      className={`relative flex-1 w-full h-full flex flex-col items-center justify-center overflow-hidden transition-colors duration-200 ${
+        isDark ? 'bg-[#07090e]' : 'bg-white'
+      }`}
+    >
       {/* Hardware-accelerated GPU translation for 100% seamless zero-jitter infinite scrolling */}
       <style>{`
         @keyframes marqueeSeamless {
@@ -146,33 +153,55 @@ export const LandingHeroMarquee: React.FC = () => {
         }
       `}</style>
 
-      {/* Background Marquee Lanes: Rotated -15deg (Counter-Clockwise) & Scaled to fill all corners */}
-      <div className="absolute -inset-[30vw] flex flex-col justify-center gap-3.5 sm:gap-5 opacity-50 blur-[3px] pointer-events-none select-none overflow-hidden -rotate-[15deg] scale-125 origin-center">
-        <MarqueeRow games={ROW1_GAMES} duration={52} />
-        <MarqueeRow games={ROW2_GAMES} duration={66} />
-        <MarqueeRow games={ROW3_GAMES} duration={46} />
-        <MarqueeRow games={ROW4_GAMES} duration={60} />
-        <MarqueeRow games={ROW5_GAMES} duration={50} />
-        <MarqueeRow games={ROW1_GAMES} duration={56} />
-        <MarqueeRow games={ROW2_GAMES} duration={44} />
-        <MarqueeRow games={ROW3_GAMES} duration={62} />
-        <MarqueeRow games={ROW4_GAMES} duration={48} />
+      {/* Background Marquee Lanes: Rotated -15deg (Counter-Clockwise) & Scaled to fill all corners without any gaps */}
+      <div
+        className={`absolute -inset-[50vw] flex flex-col justify-center gap-3.5 sm:gap-5 pointer-events-none select-none overflow-hidden -rotate-[15deg] scale-125 origin-center transition-opacity duration-300 ${
+          isDark
+            ? 'opacity-50 blur-[3px]'
+            : 'opacity-35 blur-[2.5px] brightness-105'
+        }`}
+      >
+        <MarqueeRow games={ROW1_GAMES} duration={52} isDark={isDark} />
+        <MarqueeRow games={ROW2_GAMES} duration={66} isDark={isDark} />
+        <MarqueeRow games={ROW3_GAMES} duration={46} isDark={isDark} />
+        <MarqueeRow games={ROW4_GAMES} duration={60} isDark={isDark} />
+        <MarqueeRow games={ROW5_GAMES} duration={50} isDark={isDark} />
+        <MarqueeRow games={ROW1_GAMES} duration={56} isDark={isDark} />
+        <MarqueeRow games={ROW2_GAMES} duration={44} isDark={isDark} />
+        <MarqueeRow games={ROW3_GAMES} duration={62} isDark={isDark} />
+        <MarqueeRow games={ROW4_GAMES} duration={48} isDark={isDark} />
+        <MarqueeRow games={ROW5_GAMES} duration={54} isDark={isDark} />
+        <MarqueeRow games={ROW1_GAMES} duration={42} isDark={isDark} />
+        <MarqueeRow games={ROW2_GAMES} duration={58} isDark={isDark} />
+        <MarqueeRow games={ROW3_GAMES} duration={48} isDark={isDark} />
+        <MarqueeRow games={ROW4_GAMES} duration={64} isDark={isDark} />
       </div>
 
-      {/* Full-Screen Radial Gradient: Deep dark translucency in center, smoothly softening towards edges */}
+      {/* Full-Screen Radial Gradient Overlay: Seamlessly matches theme */}
       <div
-        className="absolute inset-0 pointer-events-none"
+        className="absolute inset-0 pointer-events-none transition-all duration-300"
         style={{
-          background:
-            'radial-gradient(ellipse 75% 70% at 50% 50%, rgba(7, 9, 14, 0.94) 0%, rgba(7, 9, 14, 0.82) 35%, rgba(7, 9, 14, 0.55) 65%, rgba(7, 9, 14, 0.25) 100%)',
+          background: isDark
+            ? 'radial-gradient(ellipse 75% 70% at 50% 50%, rgba(7, 9, 14, 0.94) 0%, rgba(7, 9, 14, 0.82) 35%, rgba(7, 9, 14, 0.55) 65%, rgba(7, 9, 14, 0.25) 100%)'
+            : 'radial-gradient(ellipse 75% 70% at 50% 50%, rgba(255, 255, 255, 0.96) 0%, rgba(255, 255, 255, 0.88) 35%, rgba(255, 255, 255, 0.65) 65%, rgba(255, 255, 255, 0.35) 100%)',
         }}
       />
 
       {/* Center Hero Content (Frameless, Integrated directly into the full-screen radial glow) */}
       <div className="relative z-10 max-w-xl mx-auto px-6 py-12 text-center space-y-6 animate-in fade-in zoom-in-95 duration-300">
-        <h1 className="text-3xl sm:text-5xl font-bold tracking-tight text-white leading-tight drop-shadow-lg">
+        <h1
+          className={`text-3xl sm:text-5xl font-bold tracking-tight leading-tight transition-colors duration-200 ${
+            isDark
+              ? 'text-white drop-shadow-lg'
+              : 'text-[#171d25] drop-shadow-xs'
+          }`}
+        >
           스팀 라이브러리를 <br />
-          <span className="text-[#66c0f4]">
+          <span
+            className={`transition-colors duration-200 ${
+              isDark ? 'text-[#66c0f4]' : 'text-[#1a5b8c]'
+            }`}
+          >
             나만의 쇼케이스
           </span>
           로
@@ -185,3 +214,4 @@ export const LandingHeroMarquee: React.FC = () => {
     </div>
   );
 };
+export default LandingHeroMarquee;

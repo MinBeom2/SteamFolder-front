@@ -6,6 +6,8 @@ export interface FolderGameDto {
   positionX: number;
   positionY: number;
   genres?: string[];
+  playtimeForever?: number;
+  lastPlayedAt?: string;
 }
 
 export interface FolderResponse {
@@ -66,6 +68,8 @@ export interface FolderGameDetailResponse {
   positionX: number;
   positionY: number;
   genres?: string[];
+  playtimeForever?: number;
+  lastPlayedAt?: string;
   createdAt?: string;
 }
 
@@ -89,6 +93,8 @@ export interface CanvasItem {
   appId?: number;
   headerImage?: string;
   genres?: string[];
+  playtimeForever?: number;
+  lastPlayedAt?: string;
   playtimeHours?: number;
   gameData?: FolderGameDto;
 }

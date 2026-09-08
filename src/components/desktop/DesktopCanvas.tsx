@@ -162,8 +162,6 @@ export const DesktopCanvas: React.FC<DesktopCanvasProps> = ({ isReadOnly = false
     setEditFolderModalOpen,
   ]);
 
-  const themeColor = user?.themeColor || '#00F0FF';
-
   // Filter items by search query if any
   const filteredItems = useMemo(() => {
     if (!searchQuery.trim()) return items;
@@ -321,12 +319,8 @@ export const DesktopCanvas: React.FC<DesktopCanvasProps> = ({ isReadOnly = false
         />
       )}
 
-      {/* Background Dot Matrix Pattern & Glowing Center */}
+      {/* Background Dot Matrix Pattern */}
       <div className="absolute inset-0 desktop-dot-bg opacity-40 pointer-events-none" />
-      <div
-        className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[350px] rounded-full blur-[140px] opacity-15 pointer-events-none transition-all duration-500"
-        style={{ backgroundColor: themeColor }}
-      />
 
       <div className="relative z-10 max-w-7xl mx-auto w-full">
         {/* Breadcrumb Navigation */}

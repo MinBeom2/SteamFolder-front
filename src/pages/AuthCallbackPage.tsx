@@ -3,8 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuthStore } from '@/store/useAuthStore';
 import { loginWithSteamApi } from '@/api/auth';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
-import { AlertCircle } from 'lucide-react';
-import { Button } from '@/components/common/Button';
+import { X } from 'lucide-react';
 
 export const AuthCallbackPage: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -49,24 +48,24 @@ export const AuthCallbackPage: React.FC = () => {
   }, [searchParams, setAuth, navigate]);
 
   return (
-    <div className="min-h-screen bg-[#07090e] flex flex-col items-center justify-center p-6 text-center">
+    <div className="min-h-screen bg-[var(--bg-app)] text-[var(--text-primary)] flex flex-col items-center justify-center p-6 text-center transition-colors duration-200">
       {error ? (
-        <div className="max-w-md w-full glass-modal p-8 rounded-2xl border border-red-800/60 space-y-4 animate-in fade-in zoom-in-95">
-          <div className="w-12 h-12 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center mx-auto text-red-400">
-            <AlertCircle className="w-6 h-6" />
-          </div>
-          <h2 className="text-lg font-bold text-white">로그인 실패</h2>
-          <p className="text-xs text-slate-300 leading-relaxed bg-[#090d14] p-3 rounded-lg border border-slate-800 font-mono">
+        <div className="relative max-w-md w-full glass-modal p-8 sm:p-10 rounded-2xl border border-[var(--border-modal)] shadow-2xl space-y-3 animate-in fade-in zoom-in-95">
+          {/* Top-right Close (X) Button */}
+          <button
+            type="button"
+            onClick={() => navigate('/')}
+            className="absolute top-4 right-4 p-1.5 rounded-md text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/10 active:scale-[0.96] transition-colors cursor-pointer"
+            aria-label="창 닫기"
+          >
+            <X className="w-5 h-5" />
+          </button>
+
+          <h2 className="text-xl font-bold text-[var(--text-primary)] tracking-tight">로그인 실패</h2>
+
+          <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
             {error}
           </p>
-          <Button
-            variant="cyan"
-            size="sm"
-            onClick={() => navigate('/')}
-            className="w-full mt-4"
-          >
-            홈으로 돌아가기
-          </Button>
         </div>
       ) : (
         <div className="space-y-4">

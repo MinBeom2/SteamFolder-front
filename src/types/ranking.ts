@@ -1,11 +1,12 @@
 export interface ShowcaseRankingItemDto {
-  rank: number;
+  rank: number | null;
   userId: number;
   username: string;
   avatarUrl: string;
   likeCount: number;
   totalGamesCount: number;
   isLiked: boolean;
+  isPublic?: boolean;
 }
 
 export interface ShowcaseRankingResponse {

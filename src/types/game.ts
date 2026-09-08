@@ -47,6 +47,8 @@ export interface GameAchievementDetail {
   totalAchievements: number;
   achievedAchievements: number;
   achievementRate: number; // 0.0 ~ 100.0 %
+  playtimeForever?: number;
+  lastPlayedAt?: string | null;
   syncedAt?: string | null;
   achievements: AchievementItem[];
 }
