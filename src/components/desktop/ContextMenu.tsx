@@ -242,6 +242,10 @@ export const ContextMenu: React.FC = () => {
                       genres: targetItem.genres,
                       playtimeForever: targetItem.playtimeForever,
                       lastPlayedAt: targetItem.lastPlayedAt,
+                      totalAchievements: targetItem.totalAchievements,
+                      achievedAchievements: targetItem.achievedAchievements,
+                      achievementRate: targetItem.achievementRate,
+                      isReadOnly: false,
                     });
                   }
                 }}

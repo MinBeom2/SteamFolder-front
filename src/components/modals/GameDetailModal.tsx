@@ -51,6 +51,7 @@ export const GameDetailModal: React.FC = () => {
       ? Math.round(selectedGameDetail.playtimeForever / 60)
       : null;
   const lastPlayedStr = formatLastPlayed(selectedGameDetail.lastPlayedAt);
+  const isReadOnly = Boolean(selectedGameDetail.isReadOnly);
 
   return (
     <Modal
@@ -65,7 +66,7 @@ export const GameDetailModal: React.FC = () => {
     >
       <div className="space-y-4 text-[var(--text-primary)]">
         {/* Error Banner */}
-        {gameDetailError && (
+        {gameDetailError && !isReadOnly && (
           <div className="p-3 bg-red-50 dark:bg-red-950/50 border border-red-200 dark:border-red-800/60 rounded-lg text-xs text-red-700 dark:text-red-300 flex items-center justify-between animate-in fade-in duration-200">
             <span>{gameDetailError}</span>
             <Button
@@ -134,7 +135,17 @@ export const GameDetailModal: React.FC = () => {
         </div>
 
         {/* 3. Integrated Achievement Progress Section (도전과제 달성률 및 현황 통합) */}
-        {isLoadingGameDetail ? (
+        {isReadOnly && !achievementDetail ? (
+          <div className="py-6 px-4 text-center space-y-2 bg-[var(--bg-surface-elevated)] rounded-lg border border-[var(--border-subtle)] shadow-xs">
+            <div className="flex items-center justify-center gap-2 text-xs font-medium text-[var(--text-secondary)]">
+              <Trophy className="w-4 h-4 text-[var(--text-muted)] stroke-1" />
+              <span>도전과제 달성 현황</span>
+            </div>
+            <p className="text-xs text-[var(--text-muted)]">
+              소유자가 아직 이 게임의 도전과제를 동기화하지 않았습니다.
+            </p>
+          </div>
+        ) : isLoadingGameDetail ? (
           <div className="py-8 flex flex-col items-center justify-center gap-2.5 bg-[var(--bg-surface-elevated)] rounded-lg border border-[var(--border-card)]">
             <LoadingSpinner size="md" label="스팀 도전과제 달성률 조회 중..." />
           </div>
@@ -198,9 +209,11 @@ export const GameDetailModal: React.FC = () => {
         )}
 
         {/* Auto-refresh Notice (No bottom 닫기 button) */}
-        <p className="text-[11px] text-[var(--text-muted)] text-center pt-1">
-          상세보기 열람 시 자동 갱신되며, 게임별 60분의 쿨타임이 적용됩니다.
-        </p>
+        {!isReadOnly && (
+          <p className="text-[11px] text-[var(--text-muted)] text-center pt-1">
+            상세보기 열람 시 자동 갱신되며, 게임별 60분의 쿨타임이 적용됩니다.
+          </p>
+        )}
       </div>
     </Modal>
   );

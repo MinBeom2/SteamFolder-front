@@ -34,6 +34,10 @@ export const GameCard: React.FC<GameCardProps> = ({
         genres: game.genres,
         playtimeForever: game.playtimeForever ?? item.playtimeForever,
         lastPlayedAt: game.lastPlayedAt ?? item.lastPlayedAt,
+        totalAchievements: game.totalAchievements ?? item.totalAchievements,
+        achievedAchievements: game.achievedAchievements ?? item.achievedAchievements,
+        achievementRate: game.achievementRate ?? item.achievementRate,
+        isReadOnly,
       });
     }
   };

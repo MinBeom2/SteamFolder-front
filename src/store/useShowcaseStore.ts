@@ -33,6 +33,7 @@ import {
   getGameAchievementsApi,
   syncGameAchievementsApi,
 } from '@/api/game';
+import { useAuthStore } from '@/store/useAuthStore';
 
 interface ContextMenuState {
   isOpen: boolean;
@@ -88,6 +89,10 @@ interface ShowcaseState {
     genres?: string[];
     playtimeForever?: number;
     lastPlayedAt?: string;
+    totalAchievements?: number | null;
+    achievedAchievements?: number | null;
+    achievementRate?: number | null;
+    isReadOnly?: boolean;
   } | null;
   achievementDetail: GameAchievementDetail | null;
   isLoadingGameDetail: boolean;
@@ -151,6 +156,10 @@ interface ShowcaseState {
     genres?: string[];
     playtimeForever?: number;
     lastPlayedAt?: string;
+    totalAchievements?: number | null;
+    achievedAchievements?: number | null;
+    achievementRate?: number | null;
+    isReadOnly?: boolean;
   }) => Promise<void>;
   closeGameDetailModal: () => void;
   syncGameAchievements: (force?: boolean) => Promise<void>;
@@ -235,6 +244,9 @@ const buildCanvasItems = (
     genres: g.genres,
     playtimeForever: g.playtimeForever,
     lastPlayedAt: g.lastPlayedAt,
+    totalAchievements: g.totalAchievements,
+    achievedAchievements: g.achievedAchievements,
+    achievementRate: g.achievementRate,
     gameData: g,
   }));
 
@@ -1043,10 +1055,31 @@ export const useShowcaseStore = create<ShowcaseState>((set, get) => ({
     genres?: string[];
     playtimeForever?: number;
     lastPlayedAt?: string;
+    totalAchievements?: number | null;
+    achievedAchievements?: number | null;
+    achievementRate?: number | null;
+    isReadOnly?: boolean;
   }) => {
+    const isGuestOrReadOnly = Boolean(game.isReadOnly || !useAuthStore.getState().isAuthenticated);
+
     const matchingUserGame = get().userGames.find((g) => g.appId === game.appId);
     const playtimeForever = game.playtimeForever ?? matchingUserGame?.playtimeForever;
     const lastPlayedAt = game.lastPlayedAt ?? matchingUserGame?.lastPlayedAt;
+
+    // 소유자가 이미 동기화해 둔 업적 정보가 있는 경우 즉시 객체 구성 (스팀 API 호출 0회)
+    const cachedAchievements: GameAchievementDetail | null =
+      game.totalAchievements !== null && game.totalAchievements !== undefined
+        ? {
+            appId: game.appId,
+            gameName: game.name,
+            totalAchievements: game.totalAchievements,
+            achievedAchievements: game.achievedAchievements ?? 0,
+            achievementRate: game.achievementRate ?? 0,
+            playtimeForever,
+            lastPlayedAt,
+            achievements: [],
+          }
+        : null;
 
     set({
       isGameDetailModalOpen: true,
@@ -1057,11 +1090,20 @@ export const useShowcaseStore = create<ShowcaseState>((set, get) => ({
         genres: game.genres,
         playtimeForever,
         lastPlayedAt,
+        totalAchievements: game.totalAchievements,
+        achievedAchievements: game.achievedAchievements,
+        achievementRate: game.achievementRate,
+        isReadOnly: isGuestOrReadOnly,
       },
-      achievementDetail: null,
-      isLoadingGameDetail: true,
+      achievementDetail: cachedAchievements,
+      isLoadingGameDetail: !isGuestOrReadOnly,
       gameDetailError: null,
     });
+
+    // 게스트이거나 읽기 전용(타인 쇼케이스)인 경우 /users/me API 호출 건너뛰기
+    if (isGuestOrReadOnly) {
+      return;
+    }
 
     try {
       const data = await getGameAchievementsApi(game.appId);
@@ -1073,6 +1115,9 @@ export const useShowcaseStore = create<ShowcaseState>((set, get) => ({
               ...state.selectedGameDetail,
               playtimeForever: data.playtimeForever ?? state.selectedGameDetail.playtimeForever,
               lastPlayedAt: (data.lastPlayedAt ?? state.selectedGameDetail.lastPlayedAt) || undefined,
+              totalAchievements: data.totalAchievements,
+              achievedAchievements: data.achievedAchievements,
+              achievementRate: data.achievementRate,
             }
           : null,
       }));

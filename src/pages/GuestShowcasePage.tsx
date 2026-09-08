@@ -160,6 +160,11 @@ export const GuestShowcasePage: React.FC = () => {
           appId: g.appId,
           headerImage: g.headerImage,
           genres: g.genres,
+          playtimeForever: g.playtimeForever,
+          lastPlayedAt: g.lastPlayedAt,
+          totalAchievements: g.totalAchievements,
+          achievedAchievements: g.achievedAchievements,
+          achievementRate: g.achievementRate,
           gameData: g,
         });
       });

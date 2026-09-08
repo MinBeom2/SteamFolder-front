@@ -8,6 +8,9 @@ export interface FolderGameDto {
   genres?: string[];
   playtimeForever?: number;
   lastPlayedAt?: string;
+  totalAchievements?: number | null;
+  achievedAchievements?: number | null;
+  achievementRate?: number | null;
 }
 
 export interface FolderResponse {
@@ -70,6 +73,9 @@ export interface FolderGameDetailResponse {
   genres?: string[];
   playtimeForever?: number;
   lastPlayedAt?: string;
+  totalAchievements?: number | null;
+  achievedAchievements?: number | null;
+  achievementRate?: number | null;
   createdAt?: string;
 }
 
@@ -96,6 +102,9 @@ export interface CanvasItem {
   playtimeForever?: number;
   lastPlayedAt?: string;
   playtimeHours?: number;
+  totalAchievements?: number | null;
+  achievedAchievements?: number | null;
+  achievementRate?: number | null;
   gameData?: FolderGameDto;
 }
 
