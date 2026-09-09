@@ -8,6 +8,7 @@ interface ModalProps {
   children: React.ReactNode;
   maxWidth?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl';
   showCloseButton?: boolean;
+  zIndex?: number;
 }
 
 export const Modal: React.FC<ModalProps> = ({
@@ -17,6 +18,7 @@ export const Modal: React.FC<ModalProps> = ({
   children,
   maxWidth = 'md',
   showCloseButton = true,
+  zIndex = 50,
 }) => {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -40,7 +42,10 @@ export const Modal: React.FC<ModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div
+      className="fixed inset-0 flex items-center justify-center p-4"
+      style={{ zIndex }}
+    >
       {/* Backdrop */}
       <div
         className="fixed inset-0 bg-black/80 backdrop-blur-md transition-opacity duration-200"

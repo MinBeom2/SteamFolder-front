@@ -3,6 +3,7 @@ import { Modal } from '@/components/common/Modal';
 import { Button } from '@/components/common/Button';
 import { useShowcaseStore } from '@/store/useShowcaseStore';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
+import { getErrorMessage } from '@/utils/error';
 import {
   Search,
   Check,
@@ -223,9 +224,7 @@ export const AddGameModal: React.FC<AddGameModalProps> = ({
       onClose();
     } catch (err: unknown) {
       console.error('Failed to add games to folder:', err);
-      const msg =
-        (err as { response?: { data?: { message?: string } } })?.response
-          ?.data?.message || '폴더에 게임을 추가하지 못했습니다.';
+      const msg = getErrorMessage(err, '폴더에 게임을 추가하지 못했습니다.');
       setErrorMessage(msg);
     }
   };
@@ -319,10 +318,10 @@ export const AddGameModal: React.FC<AddGameModalProps> = ({
                 key={genre}
                 type="button"
                 onClick={() => handleTagClick(genre)}
-                className={`px-2.5 py-1 rounded-md text-xs font-medium tracking-tight transition-colors shrink-0 cursor-pointer active:scale-[0.98] ${
+                className={`px-2.5 py-1 rounded-md text-xs tracking-tight transition-all shrink-0 cursor-pointer active:scale-[0.98] ${
                   isActive
-                    ? 'bg-[#1b2838] dark:bg-[#1b2838] light:bg-slate-900 text-white border border-[#2b3e54] dark:border-[#2b3e54] light:border-slate-900 shadow-xs'
-                    : 'bg-[var(--bg-surface-elevated)] text-[var(--text-secondary)] border border-[var(--border-card)] hover:text-[var(--text-primary)] hover:border-[var(--border-subtle)]'
+                    ? 'bg-[#1a5b8c] text-white border border-[#1a5b8c] dark:bg-[#66c0f4] dark:text-[#111827] dark:border-[#66c0f4] font-bold shadow-xs dark:shadow-[0_0_10px_rgba(102,192,244,0.3)]'
+                    : 'bg-[var(--bg-surface-elevated)] text-[var(--text-secondary)] border border-[var(--border-card)] hover:text-[var(--text-primary)] hover:border-[var(--border-subtle)] font-medium'
                 }`}
               >
                 {genre}
@@ -348,12 +347,12 @@ export const AddGameModal: React.FC<AddGameModalProps> = ({
               onClick={() => setSortBy('playtime')}
               className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors flex items-center gap-1.5 cursor-pointer active:scale-[0.98] ${
                 sortBy === 'playtime'
-                  ? 'bg-[#1b2838] dark:bg-[#1b2838] light:bg-white text-white dark:text-white light:text-blue-600 border border-[#2b3e54] dark:border-[#2b3e54] light:border-blue-200 font-semibold shadow-xs'
+                  ? 'bg-white text-[#1a5b8c] border border-blue-200 dark:bg-[#1b2838] dark:text-[#66c0f4] dark:border-[#66c0f4]/40 font-semibold shadow-xs'
                   : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
               }`}
               title="플레이타임이 많은 순으로 정렬"
             >
-              <Clock className="w-3 h-3" />
+              <Clock className={`w-3 h-3 ${sortBy === 'playtime' ? 'text-[#1a5b8c] dark:text-[#66c0f4]' : ''}`} />
               <span>플레이타임순</span>
             </button>
 
@@ -362,12 +361,12 @@ export const AddGameModal: React.FC<AddGameModalProps> = ({
               onClick={() => setSortBy('recent')}
               className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors flex items-center gap-1.5 cursor-pointer active:scale-[0.98] ${
                 sortBy === 'recent'
-                  ? 'bg-[#1b2838] dark:bg-[#1b2838] light:bg-white text-white dark:text-white light:text-blue-600 border border-[#2b3e54] dark:border-[#2b3e54] light:border-blue-200 font-semibold shadow-xs'
+                  ? 'bg-white text-[#1a5b8c] border border-blue-200 dark:bg-[#1b2838] dark:text-[#66c0f4] dark:border-[#66c0f4]/40 font-semibold shadow-xs'
                   : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
               }`}
               title="최근에 플레이한 순으로 정렬"
             >
-              <Calendar className="w-3 h-3" />
+              <Calendar className={`w-3 h-3 ${sortBy === 'recent' ? 'text-[#1a5b8c] dark:text-[#66c0f4]' : ''}`} />
               <span>최근 플레이순</span>
             </button>
 
@@ -377,15 +376,15 @@ export const AddGameModal: React.FC<AddGameModalProps> = ({
               onClick={handleNameSortClick}
               className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors flex items-center gap-1.5 cursor-pointer active:scale-[0.98] ${
                 sortBy === 'name-asc' || sortBy === 'name-desc'
-                  ? 'bg-[#1b2838] dark:bg-[#1b2838] light:bg-white text-white dark:text-white light:text-blue-600 border border-[#2b3e54] dark:border-[#2b3e54] light:border-blue-200 font-semibold shadow-xs'
+                  ? 'bg-white text-[#1a5b8c] border border-blue-200 dark:bg-[#1b2838] dark:text-[#66c0f4] dark:border-[#66c0f4]/40 font-semibold shadow-xs'
                   : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
               }`}
               title="클릭 시 이름 가나다순 오름차순/내림차순 토글"
             >
               {sortBy === 'name-asc' ? (
-                <ArrowUpAZ className="w-3 h-3 text-[#66c0f4]" />
+                <ArrowUpAZ className={`w-3 h-3 ${sortBy === 'name-asc' ? 'text-[#1a5b8c] dark:text-[#66c0f4]' : 'text-[#66c0f4]'}`} />
               ) : sortBy === 'name-desc' ? (
-                <ArrowDownAZ className="w-3 h-3 text-[#66c0f4]" />
+                <ArrowDownAZ className={`w-3 h-3 ${sortBy === 'name-desc' ? 'text-[#1a5b8c] dark:text-[#66c0f4]' : 'text-[#66c0f4]'}`} />
               ) : (
                 <ArrowUpAZ className="w-3 h-3 opacity-60" />
               )}

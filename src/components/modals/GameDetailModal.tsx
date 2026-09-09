@@ -7,7 +7,6 @@ import {
   Trophy,
   Calendar,
   Clock,
-  Tag,
 } from 'lucide-react';
 
 export const GameDetailModal: React.FC = () => {
@@ -58,6 +57,7 @@ export const GameDetailModal: React.FC = () => {
       isOpen={isGameDetailModalOpen}
       onClose={closeGameDetailModal}
       maxWidth="lg"
+      zIndex={70}
       title={
         <h3 className="text-base sm:text-lg font-bold text-[var(--text-primary)] tracking-tight truncate max-w-[280px] sm:max-w-md">
           {selectedGameDetail.name}
@@ -81,14 +81,14 @@ export const GameDetailModal: React.FC = () => {
         )}
 
         {/* 1. Full-width Game Header Image Banner */}
-        <div className="w-full aspect-[460/215] max-h-[240px] rounded-lg overflow-hidden bg-[#07090e] border border-[var(--border-subtle)] shadow-sm">
+        <div className="w-full aspect-[460/215] max-h-[220px] rounded-lg overflow-hidden bg-[#07090e] border border-[var(--border-subtle)] shadow-sm flex items-center justify-center">
           <img
             src={
               selectedGameDetail.headerImage ||
               `https://cdn.akamai.steamstatic.com/steam/apps/${selectedGameDetail.appId}/header.jpg`
             }
             alt={selectedGameDetail.name}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-contain"
           />
         </div>
 
@@ -98,10 +98,9 @@ export const GameDetailModal: React.FC = () => {
             {selectedGameDetail.genres.map((g) => (
               <span
                 key={g}
-                className="px-2.5 py-1 rounded-md text-[11px] font-medium bg-[var(--bg-surface-elevated)] text-[var(--text-secondary)] border border-[var(--border-subtle)] flex items-center gap-1.5"
+                className="px-2.5 py-1 rounded-md text-[11px] font-medium bg-[var(--bg-surface-elevated)] text-[var(--text-secondary)] border border-[var(--border-subtle)]"
               >
-                <Tag className="w-3 h-3 text-[var(--primary-accent)]" />
-                <span>{g}</span>
+                {g}
               </span>
             ))}
           </div>

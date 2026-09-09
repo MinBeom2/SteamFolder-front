@@ -11,9 +11,10 @@ import { Button } from '@/components/common/Button';
 import { Breadcrumb } from '@/components/desktop/Breadcrumb';
 import { GameDetailModal } from '@/components/modals/GameDetailModal';
 import { DirectLoginModal } from '@/components/modals/DirectLoginModal';
+import { GuestUserGamesModal } from '@/components/modals/GuestUserGamesModal';
 import { useThemeStore } from '@/store/useThemeStore';
 import { useAuthStore } from '@/store/useAuthStore';
-import { Lock, Sun, Moon, Heart, Info, Share2, Check } from 'lucide-react';
+import { Lock, Sun, Moon, Heart, Info, Share2, Check, Gamepad2, ChevronRight } from 'lucide-react';
 
 export const GuestShowcasePage: React.FC = () => {
   const { identifier, folderId } = useParams<{ identifier?: string; folderId?: string }>();
@@ -33,6 +34,7 @@ export const GuestShowcasePage: React.FC = () => {
   const [isLiked, setIsLiked] = useState<boolean>(false);
   const [isLikeLoading, setIsLikeLoading] = useState<boolean>(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState<boolean>(false);
+  const [isGamesModalOpen, setIsGamesModalOpen] = useState<boolean>(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [isCopied, setIsCopied] = useState<boolean>(false);
 
@@ -354,16 +356,27 @@ export const GuestShowcasePage: React.FC = () => {
             </div>
           </div>
 
-          {/* Plain Text Stats & Like Action Button */}
-          <div className="flex items-center gap-4 sm:gap-6 flex-wrap">
-            <div className="flex items-center gap-4 sm:gap-6 text-xs sm:text-sm text-[var(--text-secondary)] font-medium">
-              <div>
-                보유 게임 <span className="text-[var(--text-primary)] font-bold ml-1">{showcase.stats.totalOwnedGames}개</span>
-              </div>
-              <span className="text-[var(--text-muted)]">•</span>
-              <div>
-                총 플레이 시간 <span className="text-[var(--text-primary)] font-bold ml-1">{playtimeHours}시간</span>
-              </div>
+          {/* Profile Stats & Actions */}
+          <div className="flex items-center gap-3 sm:gap-4 flex-wrap">
+            {/* Owned Games Button (방안 1: 칩/뱃지형) */}
+            <button
+              type="button"
+              onClick={() => setIsGamesModalOpen(true)}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[var(--bg-card)] border border-[var(--border-card)] hover:border-[#66c0f4] hover:text-[#66c0f4] text-xs sm:text-sm font-semibold transition-all cursor-pointer shadow-xs active:scale-95 group"
+              title="보유 게임 전체 목록 열기"
+            >
+              <Gamepad2 className="w-4 h-4 text-[#66c0f4] shrink-0" />
+              <span className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors">보유 게임</span>
+              <strong className="text-[var(--text-primary)] group-hover:text-[#66c0f4] transition-colors">
+                {showcase.stats.totalOwnedGames}개
+              </strong>
+              <ChevronRight className="w-3.5 h-3.5 text-[var(--text-muted)] group-hover:text-[#66c0f4] group-hover:translate-x-0.5 transition-transform shrink-0" />
+            </button>
+
+            <span className="text-[var(--text-muted)] hidden sm:inline">•</span>
+
+            <div className="text-xs sm:text-sm text-[var(--text-secondary)] font-medium">
+              총 플레이 시간 <span className="text-[var(--text-primary)] font-bold ml-1">{playtimeHours}시간</span>
             </div>
 
             {/* Like Toggle Button */}
@@ -456,6 +469,16 @@ export const GuestShowcasePage: React.FC = () => {
 
       {/* Bottom CTA Banner */}
       <GuestBanner />
+
+      {/* Guest User Games Modal */}
+      {showcase && (
+        <GuestUserGamesModal
+          isOpen={isGamesModalOpen}
+          onClose={() => setIsGamesModalOpen(false)}
+          identifier={targetId}
+          username={showcase.user.username}
+        />
+      )}
 
       {/* Game Detail & Achievement Modal */}
       <GameDetailModal />

@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Modal } from '@/components/common/Modal';
 import { Button } from '@/components/common/Button';
 import { useShowcaseStore } from '@/store/useShowcaseStore';
+import { getErrorMessage } from '@/utils/error';
 
 interface CreateFolderModalProps {
   isOpen: boolean;
@@ -17,6 +18,13 @@ export const CreateFolderModal: React.FC<CreateFolderModalProps> = ({
   const [name, setName] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (isOpen) {
+      setName('');
+      setError(null);
+    }
+  }, [isOpen]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,9 +43,7 @@ export const CreateFolderModal: React.FC<CreateFolderModalProps> = ({
       onClose();
     } catch (err: unknown) {
       console.error('Failed to create folder:', err);
-      const msg =
-        (err as { response?: { data?: { message?: string } } })?.response
-          ?.data?.message || '폴더 생성에 실패했습니다.';
+      const msg = getErrorMessage(err, '폴더 생성에 실패했습니다.');
       setError(msg);
     } finally {
       setIsSubmitting(false);
@@ -48,7 +54,7 @@ export const CreateFolderModal: React.FC<CreateFolderModalProps> = ({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={currentFolder ? `하위 폴더 만들기 (${currentFolder.name} 내)` : '새 폴더 만들기'}
+      title={currentFolder ? `새 폴더 만들기` : '새 폴더 만들기'}
       maxWidth="md"
     >
       <form onSubmit={handleSubmit} className="space-y-5">

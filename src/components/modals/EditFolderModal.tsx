@@ -4,6 +4,7 @@ import { Button } from '@/components/common/Button';
 import { useShowcaseStore } from '@/store/useShowcaseStore';
 import type { FolderResponse } from '@/types/showcase';
 import { Trash2 } from 'lucide-react';
+import { getErrorMessage } from '@/utils/error';
 
 interface EditFolderModalProps {
   isOpen: boolean;
@@ -38,9 +39,7 @@ const EditFolderForm: React.FC<EditFolderFormProps> = ({ folder, onClose }) => {
       onClose();
     } catch (err: unknown) {
       console.error('Failed to update folder:', err);
-      const msg =
-        (err as { response?: { data?: { message?: string } } })?.response
-          ?.data?.message || '폴더 정보 수정에 실패했습니다.';
+      const msg = getErrorMessage(err, '폴더 정보 수정에 실패했습니다.');
       setError(msg);
     } finally {
       setIsSubmitting(false);

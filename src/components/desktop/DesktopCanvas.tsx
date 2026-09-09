@@ -63,12 +63,14 @@ export const DesktopCanvas: React.FC<DesktopCanvasProps> = ({ isReadOnly = false
 
   const handleShareClick = async () => {
     if (!user) return;
-    const identifier = user.username || user.steamId;
+    const identifier = user.username || user.steamId || showcase?.user?.username || showcase?.user?.steamId;
+    if (!identifier) return;
     const shareUrl = `${window.location.origin}/showcase/${encodeURIComponent(identifier)}`;
 
     try {
       await navigator.clipboard.writeText(shareUrl);
       setIsCopied(true);
+      setToastMessage('쇼케이스 링크가 클립보드에 복사되었습니다.');
       setTimeout(() => setIsCopied(false), 2500);
     } catch {
       navigate(`/showcase/${encodeURIComponent(identifier)}`);
@@ -328,50 +330,54 @@ export const DesktopCanvas: React.FC<DesktopCanvasProps> = ({ isReadOnly = false
           <Breadcrumb isReadOnly={isReadOnly} />
         </div>
 
-        {/* Header Title & Actions Bar */}
+        {/* Controls & Actions Bar */}
         <div
           data-interactive="true"
-          className="flex flex-wrap items-center justify-between gap-4 mb-6 pb-4 border-b border-[var(--border-subtle)]"
+          className="flex flex-wrap items-center justify-between gap-4 -mt-2 mb-6"
         >
+          {/* Left: Folder Title (if inside folder) + Share Button + Private Lock */}
           <div className="flex items-center gap-3">
-            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-[var(--text-primary)] flex items-center gap-2 sm:gap-2.5">
-              {!currentFolder && isAuthenticated && (user?.isPublic === false || showcase?.user?.isPublic === false) && (
-                <span title="비공개 쇼케이스" className="flex items-center text-[var(--text-secondary)] shrink-0">
-                  <Lock className="w-5 h-5" aria-hidden="true" />
-                </span>
-              )}
-              <span>{currentFolder ? currentFolder.name : `${user?.username || '게스트'}님의 쇼케이스`}</span>
-            </h1>
+            {currentFolder && (
+              <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-[var(--text-primary)] flex items-center gap-2 sm:gap-2.5">
+                <span>{currentFolder.name}</span>
+              </h1>
+            )}
 
-            {/* Showcase Share Button (루트 쇼케이스에서 노출) */}
-            {isAuthenticated && user && !currentFolder && !isReadOnly && (
-              <Button
-                variant="steam"
-                size="sm"
-                onClick={handleShareClick}
-                className="h-7 text-xs font-medium px-2.5 shadow-xs cursor-pointer"
-                leftIcon={
-                  isCopied ? (
-                    <Check className="w-3.5 h-3.5 text-emerald-400" />
-                  ) : (
-                    <Share2 className="w-3.5 h-3.5" />
-                  )
-                }
-              >
-                {isCopied ? '링크 복사됨!' : '공유'}
-              </Button>
+            {isAuthenticated && user && !isReadOnly && (
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="steam"
+                  size="sm"
+                  onClick={handleShareClick}
+                  className="h-8 text-xs sm:text-[13px] font-medium px-3 shadow-xs cursor-pointer gap-1.5"
+                  leftIcon={
+                    isCopied ? (
+                      <Check className="w-4 h-4 text-emerald-400" />
+                    ) : (
+                      <Share2 className="w-4 h-4" />
+                    )
+                  }
+                >
+                  {isCopied ? '링크 복사됨!' : '공유'}
+                </Button>
+                {!currentFolder && (user?.isPublic === false || showcase?.user?.isPublic === false) && (
+                  <span title="비공개 쇼케이스" className="flex items-center text-[var(--text-secondary)] shrink-0">
+                    <Lock className="w-4 h-4 text-slate-400" aria-hidden="true" />
+                  </span>
+                )}
+              </div>
             )}
           </div>
 
-          {/* Action Buttons: [폴더 추가] and [게임 추가] */}
+          {/* Right: Action Buttons ([폴더 추가], [게임 추가]) */}
           {!isReadOnly && (
             <div className="flex items-center gap-2">
               <Button
                 variant="secondary"
                 size="sm"
                 onClick={() => setCreateFolderModalOpen(true)}
-                className="text-xs font-medium px-3"
-                leftIcon={<FolderPlus className="w-3.5 h-3.5" />}
+                className="h-8 text-xs sm:text-[13px] font-medium px-3.5 shadow-xs cursor-pointer gap-1.5"
+                leftIcon={<FolderPlus className="w-4 h-4" />}
               >
                 폴더 추가
               </Button>
@@ -381,8 +387,8 @@ export const DesktopCanvas: React.FC<DesktopCanvasProps> = ({ isReadOnly = false
                   variant="secondary"
                   size="sm"
                   onClick={() => setAddGameModalOpen(true)}
-                  className="text-xs font-medium px-3"
-                  leftIcon={<Plus className="w-3.5 h-3.5" />}
+                  className="h-8 text-xs sm:text-[13px] font-medium px-3.5 shadow-xs cursor-pointer gap-1.5"
+                  leftIcon={<Plus className="w-4 h-4" />}
                 >
                   게임 추가
                 </Button>

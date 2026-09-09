@@ -459,7 +459,6 @@ export const useShowcaseStore = create<ShowcaseState>((set, get) => ({
   createFolder: async (name: string, themeColor?: string, icon?: string) => {
     const { currentFolderId, items, currentFolder } = get();
     if (currentFolder && currentFolder.depth !== undefined && currentFolder.depth >= 4) {
-      get().setToastMessage('폴더의 깊이는 최대 5개 까지 가능합니다.');
       throw new Error('폴더의 깊이는 최대 5개 까지 가능합니다.');
     }
 
@@ -479,15 +478,6 @@ export const useShowcaseStore = create<ShowcaseState>((set, get) => ({
       await get().refreshCurrentView();
     } catch (err: unknown) {
       console.error('Failed to create folder:', err);
-      const errResponse = (err as { response?: { data?: { code?: string; message?: string } } })?.response?.data;
-      if (
-        errResponse?.code === 'F005' ||
-        errResponse?.message?.includes('깊이') ||
-        errResponse?.message?.includes('5개') ||
-        errResponse?.message?.includes('5단계')
-      ) {
-        get().setToastMessage('폴더의 깊이는 최대 5개 까지 가능합니다.');
-      }
       throw err;
     }
   },

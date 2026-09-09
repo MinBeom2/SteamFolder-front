@@ -94,7 +94,6 @@ export const ContextMenu: React.FC = () => {
               <FolderPlus className="w-4 h-4 text-sky-500" />
               <span>새 폴더 만들기</span>
             </div>
-            <span className="text-[10px] text-[var(--text-muted)] font-mono">N</span>
           </button>
 
           {currentFolderId !== null && (
@@ -110,7 +109,6 @@ export const ContextMenu: React.FC = () => {
                 <Gamepad2 className="w-4 h-4 text-emerald-500" />
                 <span>게임 추가하기</span>
               </div>
-              <span className="text-[10px] text-[var(--text-muted)] font-mono">+</span>
             </button>
           )}
 

@@ -11,7 +11,7 @@ import {
 } from '@/api/showcase';
 import type { ShowcaseResponse, LikedShowcaseItemDto } from '@/types/showcase';
 import { useAuthStore } from '@/store/useAuthStore';
-import { Heart, Trophy } from 'lucide-react';
+import { Heart } from 'lucide-react';
 
 export const MyPage: React.FC = () => {
   const navigate = useNavigate();
@@ -262,15 +262,6 @@ export const MyPage: React.FC = () => {
               <p className="text-xs text-[var(--text-secondary)]">
                 다른 유저들의 멋진 쇼케이스를 둘러보고 마음에 드는 쇼케이스에 좋아요를 눌러보세요!
               </p>
-              <div className="pt-2">
-                <Link
-                  to="/ranking"
-                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[var(--nav-btn-bg)] border border-[var(--nav-btn-border)] text-xs font-semibold text-[var(--text-primary)] hover:border-[#66c0f4]/50 hover:text-[#66c0f4] transition-all cursor-pointer shadow-xs"
-                >
-                  <Trophy className="w-4 h-4 text-amber-400" />
-                  <span>쇼케이스 랭킹 보러가기</span>
-                </Link>
-              </div>
             </div>
           ) : (
             <AnimatedList<LikedShowcaseItemDto>
