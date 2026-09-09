@@ -28,6 +28,7 @@ import {
 import {
   getUserGamesApi,
   getUserGamesCursorApi,
+  filterUserGamesApi,
   syncSteamGamesApi,
   getSyncCooldownApi,
   getGameAchievementsApi,
@@ -63,6 +64,7 @@ interface ShowcaseState {
   cooldownSeconds: number;
   searchQuery: string;
   selectedGenre: string;
+  selectedGameAppIds: number[];
 
   // Selection & Clipboard & Toast
   selectedItemKeys: string[]; // e.g. ["FOLDER_1", "GAME_5"]
@@ -137,6 +139,7 @@ interface ShowcaseState {
   setSearchQuery: (query: string) => void;
   setSelectedGenre: (genre: string) => void;
   fetchUserGames: (reset?: boolean) => Promise<void>;
+  filterUserGames: (genres?: string[], sort?: string) => Promise<void>;
   loadMoreGames: () => Promise<void>;
   syncGames: () => Promise<SyncResult>;
   checkCooldown: () => Promise<CooldownStatus | null>;
@@ -288,6 +291,7 @@ export const useShowcaseStore = create<ShowcaseState>((set, get) => ({
   cooldownSeconds: 0,
   searchQuery: '',
   selectedGenre: '전체',
+  selectedGameAppIds: [],
 
   selectedItemKeys: [],
   clipboard: null,
@@ -523,24 +527,27 @@ export const useShowcaseStore = create<ShowcaseState>((set, get) => ({
   },
 
   addSelectedGamesToFolder: async () => {
-    const { currentFolderId, userGames } = get();
+    const { currentFolderId, selectedGameAppIds, userGames } = get();
     if (currentFolderId === null) {
       get().setToastMessage('게임을 추가하려면 먼저 폴더 안으로 이동해 주세요!');
       return;
     }
 
-    const selectedGames = userGames.filter((g) => g.selected);
-    if (selectedGames.length === 0) return;
+    const appIdsSet = new Set(selectedGameAppIds);
+    userGames.filter((g) => g.selected).forEach((g) => appIdsSet.add(g.appId));
 
-    const appIds = selectedGames.map((g) => g.appId);
+    if (appIdsSet.size === 0) return;
+
+    const appIds = Array.from(appIdsSet);
     await batchAddFolderGamesApi(currentFolderId, { appIds });
 
     set((state) => ({
+      selectedGameAppIds: [],
       userGames: state.userGames.map((g) => ({ ...g, selected: false })),
       isAddGameModalOpen: false,
     }));
 
-    get().setToastMessage(`${selectedGames.length}개의 게임이 폴더에 추가되었습니다.`);
+    get().setToastMessage(`${appIds.length}개의 게임이 폴더에 추가되었습니다.`);
     await get().refreshCurrentView();
   },
 
@@ -962,6 +969,32 @@ export const useShowcaseStore = create<ShowcaseState>((set, get) => ({
     }
   },
 
+  filterUserGames: async (genres?: string[], sort: string = 'playtime') => {
+    set({ isLoadingGames: true });
+    try {
+      const selectedSet = new Set(get().selectedGameAppIds);
+      get().userGames.filter((g) => g.selected).forEach((g) => selectedSet.add(g.appId));
+
+      const data = await filterUserGamesApi(genres, sort);
+      const formattedGames: UserGame[] = (data.games || []).map((g) => ({
+        ...g,
+        selected: selectedSet.has(g.appId),
+      }));
+
+      set({
+        userGames: formattedGames,
+        selectedGameAppIds: Array.from(selectedSet),
+        gamesCursor: null,
+        hasMoreGames: false,
+        totalGamesCount: data.totalCount,
+        isLoadingGames: false,
+      });
+    } catch (err) {
+      console.error('Failed to filter user games:', err);
+      set({ isLoadingGames: false });
+    }
+  },
+
   loadMoreGames: async () => {
     const { hasMoreGames, isLoadingMoreGames, isLoadingGames, gamesCursor, userGames } = get();
     if (!hasMoreGames || isLoadingMoreGames || isLoadingGames) return;
@@ -1008,11 +1041,20 @@ export const useShowcaseStore = create<ShowcaseState>((set, get) => ({
   },
 
   toggleGameSelection: (appId: number) => {
-    set((state) => ({
-      userGames: state.userGames.map((game) =>
-        game.appId === appId ? { ...game, selected: !game.selected } : game
-      ),
-    }));
+    set((state) => {
+      const nextSelected = new Set(state.selectedGameAppIds);
+      if (nextSelected.has(appId)) {
+        nextSelected.delete(appId);
+      } else {
+        nextSelected.add(appId);
+      }
+      return {
+        selectedGameAppIds: Array.from(nextSelected),
+        userGames: state.userGames.map((game) =>
+          game.appId === appId ? { ...game, selected: nextSelected.has(appId) } : game
+        ),
+      };
+    });
   },
 
   setSettingsModalOpen: (open: boolean) => {
@@ -1025,8 +1067,11 @@ export const useShowcaseStore = create<ShowcaseState>((set, get) => ({
   setAddGameModalOpen: (open: boolean) => {
     set({ isAddGameModalOpen: open });
     if (open) {
+      set({ selectedGameAppIds: [] });
       get().fetchUserGames();
       get().checkCooldown();
+    } else {
+      set({ selectedGameAppIds: [] });
     }
   },
 

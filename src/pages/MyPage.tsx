@@ -11,7 +11,9 @@ import {
 } from '@/api/showcase';
 import type { ShowcaseResponse, LikedShowcaseItemDto } from '@/types/showcase';
 import { useAuthStore } from '@/store/useAuthStore';
-import { Heart } from 'lucide-react';
+import { Heart, ChevronRight } from 'lucide-react';
+import { GuestUserGamesModal } from '@/components/modals/GuestUserGamesModal';
+import { GameDetailModal } from '@/components/modals/GameDetailModal';
 
 export const MyPage: React.FC = () => {
   const navigate = useNavigate();
@@ -20,6 +22,7 @@ export const MyPage: React.FC = () => {
   // Profile data
   const [showcase, setShowcase] = useState<ShowcaseResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isGamesModalOpen, setIsGamesModalOpen] = useState(false);
 
   // Liked showcases data
   const [likedShowcases, setLikedShowcases] = useState<LikedShowcaseItemDto[]>([]);
@@ -212,13 +215,21 @@ export const MyPage: React.FC = () => {
 
               <span className="text-[var(--border-subtle)] hidden sm:inline">|</span>
 
-              <div className="flex items-baseline gap-1.5">
-                <span className="text-[var(--text-secondary)]">보유 게임</span>
-                <span className="text-base sm:text-lg font-bold text-[var(--text-primary)]">
-                  {showcase?.stats.totalOwnedGames ?? 0}
+              {/* Owned Games Button (Chip/Badge style matching Guest view) */}
+              <button
+                type="button"
+                onClick={() => setIsGamesModalOpen(true)}
+                className="flex items-center gap-1.5 px-3 py-1 -my-1 rounded-lg bg-[var(--bg-card)] border border-[var(--border-card)] hover:border-[#66c0f4] hover:text-[#66c0f4] text-xs sm:text-sm font-semibold transition-all cursor-pointer shadow-xs active:scale-95 group"
+                title="보유 게임 전체 목록 열기"
+              >
+                <span className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors">
+                  보유 게임
                 </span>
-                <span className="text-xs text-[var(--text-secondary)]">개</span>
-              </div>
+                <strong className="text-[var(--text-primary)] group-hover:text-[#66c0f4] transition-colors">
+                  {showcase?.stats.totalOwnedGames ?? 0}개
+                </strong>
+                <ChevronRight className="w-3.5 h-3.5 text-[var(--text-muted)] group-hover:text-[#66c0f4] group-hover:translate-x-0.5 transition-transform shrink-0" />
+              </button>
 
               <span className="text-[var(--border-subtle)] hidden sm:inline">|</span>
 
@@ -343,6 +354,20 @@ export const MyPage: React.FC = () => {
           )}
         </div>
       </main>
+
+      {/* User Owned Games Modal (Same as Guest view) */}
+      {(showcase || user) && (
+        <GuestUserGamesModal
+          isOpen={isGamesModalOpen}
+          onClose={() => setIsGamesModalOpen(false)}
+          identifier={user.steamId || user.username}
+          username={user.username}
+          isReadOnly={false}
+        />
+      )}
+
+      {/* Game Detail & Achievement Modal */}
+      <GameDetailModal />
     </div>
   );
 };

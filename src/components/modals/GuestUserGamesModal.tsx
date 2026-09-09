@@ -3,6 +3,7 @@ import { Modal } from '@/components/common/Modal';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { useShowcaseStore } from '@/store/useShowcaseStore';
 import { getPublicShowcaseGamesApi } from '@/api/showcase';
+import { getGameAchievementsApi } from '@/api/game';
 import type { UserGame } from '@/types/game';
 import {
   Search,
@@ -11,6 +12,7 @@ import {
   ArrowDownAZ,
   Calendar,
   Trophy,
+  ExternalLink,
 } from 'lucide-react';
 
 interface GuestUserGamesModalProps {
@@ -18,6 +20,7 @@ interface GuestUserGamesModalProps {
   onClose: () => void;
   identifier: string;
   username: string;
+  isReadOnly?: boolean;
 }
 
 type SortOption = 'playtime' | 'recent' | 'name-asc' | 'name-desc';
@@ -29,13 +32,10 @@ const GENRE_TAGS = [
   '전략',
   '어드벤처',
   '시뮬레이션',
+  '스포츠',
   '인디',
   '캐주얼',
-  '스포츠',
-  '레이싱',
-  '생존',
-  '멀티플레이',
-  '스토리',
+  '앞서 해보기',
 ];
 
 export const GuestUserGamesModal: React.FC<GuestUserGamesModalProps> = ({
@@ -43,14 +43,14 @@ export const GuestUserGamesModal: React.FC<GuestUserGamesModalProps> = ({
   onClose,
   identifier,
   username,
+  isReadOnly = true,
 }) => {
-  const { openGameDetailModal } = useShowcaseStore();
+  const { achievementDetail } = useShowcaseStore();
+  const [syncingAppIds, setSyncingAppIds] = useState<Set<number>>(new Set());
 
   const [games, setGames] = useState<UserGame[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const [cursor, setCursor] = useState<number | null>(null);
-  const [hasNext, setHasNext] = useState(false);
+  const [displayLimit, setDisplayLimit] = useState(24);
 
   const [search, setSearch] = useState('');
   const [activeGenre, setActiveGenre] = useState('전체');
@@ -64,27 +64,38 @@ export const GuestUserGamesModal: React.FC<GuestUserGamesModalProps> = ({
   const hasMovedRef = useRef(false);
   const [isGrabbed, setIsGrabbed] = useState(false);
 
-  // Infinite scroll observer sentry ref
+  // Scroll container and observer sentinel refs
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
   const observerTargetRef = useRef<HTMLDivElement>(null);
 
-  // Initial load when modal opens
+  // Reset states when modal is closed
+  useEffect(() => {
+    if (!isOpen) {
+      setSearch('');
+      setActiveGenre('전체');
+      setSortBy('playtime');
+      setDisplayLimit(24);
+    }
+  }, [isOpen]);
+
+  // Fetch games from server with dynamic JPA specification filter & DB sort
   useEffect(() => {
     if (!isOpen || !identifier) return;
 
     let isMounted = true;
-    const fetchInitialGames = async () => {
+    const fetchGames = async () => {
       setIsLoading(true);
-      setSearch('');
-      setActiveGenre('전체');
-      setSortBy('playtime');
+      setDisplayLimit(24);
+      if (scrollContainerRef.current) {
+        scrollContainerRef.current.scrollTop = 0;
+      }
 
       try {
-        const pageData = await getPublicShowcaseGamesApi(identifier, null, 24);
+        const genres = activeGenre === '전체' ? undefined : [activeGenre];
+        const data = await getPublicShowcaseGamesApi(identifier, genres, sortBy);
         if (!isMounted) return;
 
-        setGames(pageData.content || []);
-        setCursor(pageData.nextCursor);
-        setHasNext(pageData.hasNext);
+        setGames(data.games || data.content || []);
       } catch (err) {
         console.error('Failed to load guest user games:', err);
       } finally {
@@ -92,62 +103,20 @@ export const GuestUserGamesModal: React.FC<GuestUserGamesModalProps> = ({
       }
     };
 
-    fetchInitialGames();
+    fetchGames();
 
     return () => {
       isMounted = false;
     };
-  }, [isOpen, identifier]);
+  }, [isOpen, identifier, activeGenre, sortBy]);
 
-  // Load more games when reaching bottom
-  const loadMore = async () => {
-    if (!hasNext || isLoadingMore || isLoading || !identifier) return;
-
-    setIsLoadingMore(true);
-    try {
-      const pageData = await getPublicShowcaseGamesApi(identifier, cursor, 24);
-      if (pageData && pageData.content) {
-        setGames((prev) => {
-          const existingIds = new Set(prev.map((g) => g.appId));
-          const newUnique = pageData.content.filter((g) => !existingIds.has(g.appId));
-          return [...prev, ...newUnique];
-        });
-        setCursor(pageData.nextCursor);
-        setHasNext(pageData.hasNext);
-      } else {
-        setHasNext(false);
-      }
-    } catch (err) {
-      console.error('Failed to load more guest games:', err);
-    } finally {
-      setIsLoadingMore(false);
-    }
-  };
-
-  // Infinite scroll observer setup
+  // Reset scroll and limit when search keyword changes
   useEffect(() => {
-    if (!isOpen) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting && hasNext && !isLoadingMore && !isLoading) {
-          loadMore();
-        }
-      },
-      { threshold: 0.1, rootMargin: '120px' }
-    );
-
-    const currentTarget = observerTargetRef.current;
-    if (currentTarget) {
-      observer.observe(currentTarget);
+    setDisplayLimit(24);
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTop = 0;
     }
-
-    return () => {
-      if (currentTarget) {
-        observer.unobserve(currentTarget);
-      }
-    };
-  }, [isOpen, hasNext, isLoadingMore, isLoading, cursor]);
+  }, [search]);
 
   // Drag to scroll handlers
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -181,15 +150,24 @@ export const GuestUserGamesModal: React.FC<GuestUserGamesModalProps> = ({
   const handleTagClick = (genre: string) => {
     if (hasMovedRef.current) return;
     setActiveGenre(genre);
+    setDisplayLimit(24);
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTop = 0;
+    }
+  };
+
+  const handleSortChange = (newSort: SortOption) => {
+    setSortBy(newSort);
+    setDisplayLimit(24);
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTop = 0;
+    }
   };
 
   // Toggle Name sort between Ascending and Descending
   const handleNameSortClick = () => {
-    if (sortBy === 'name-asc') {
-      setSortBy('name-desc');
-    } else {
-      setSortBy('name-asc');
-    }
+    const nextSort = sortBy === 'name-asc' ? 'name-desc' : 'name-asc';
+    handleSortChange(nextSort);
   };
 
   // 1. Filter by search keyword and genre
@@ -223,29 +201,110 @@ export const GuestUserGamesModal: React.FC<GuestUserGamesModalProps> = ({
     return 0;
   });
 
+  const visibleGames = sortedGames.slice(0, displayLimit);
+  const hasMore = displayLimit < sortedGames.length;
+
+  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
+    if (scrollHeight - scrollTop - clientHeight < 150) {
+      if (hasMore) {
+        setDisplayLimit((prev) => Math.min(prev + 24, sortedGames.length));
+      }
+    }
+  };
+
+  // Infinite scroll observer setup with scrollContainerRef as root
+  useEffect(() => {
+    if (!isOpen || !hasMore) return;
+
+    const scrollContainer = scrollContainerRef.current;
+    if (!scrollContainer) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          setDisplayLimit((prev) => Math.min(prev + 24, sortedGames.length));
+        }
+      },
+      { root: scrollContainer, threshold: 0.1, rootMargin: '100px' }
+    );
+
+    const currentTarget = observerTargetRef.current;
+    if (currentTarget) {
+      observer.observe(currentTarget);
+    }
+
+    return () => {
+      if (currentTarget) {
+        observer.unobserve(currentTarget);
+      }
+    };
+  }, [isOpen, hasMore, sortedGames.length, displayLimit]);
+
   const formatLastPlayed = (dateStr?: string) => {
     if (!dateStr) return null;
     const date = new Date(dateStr);
     if (isNaN(date.getTime())) return null;
     const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    return `${year}.${month}.${day}`;
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
+    const currentYear = new Date().getFullYear();
+    if (year === currentYear) {
+      return `${month}월 ${day}일`;
+    }
+    return `${year}년 ${month}월 ${day}일`;
   };
 
-  const handleCardClick = (game: UserGame) => {
-    openGameDetailModal({
-      appId: game.appId,
-      name: game.name,
-      headerImage: game.headerImage,
-      genres: game.genres,
-      playtimeForever: game.playtimeForever,
-      lastPlayedAt: game.lastPlayedAt,
-      totalAchievements: game.totalAchievements,
-      achievedAchievements: game.achievedAchievements,
-      achievementRate: game.achievementRate,
-      isReadOnly: true,
-    });
+  // Sync live updated achievement details to currently displayed games
+  useEffect(() => {
+    if (!achievementDetail) return;
+    setGames((prev) =>
+      prev.map((g) =>
+        g.appId === achievementDetail.appId
+          ? {
+              ...g,
+              totalAchievements: achievementDetail.totalAchievements,
+              achievedAchievements: achievementDetail.achievedAchievements,
+              achievementRate: achievementDetail.achievementRate,
+            }
+          : g
+      )
+    );
+  }, [achievementDetail]);
+
+  const handleCardClick = async (game: UserGame) => {
+    // 1. 읽기 전용(게스트 모드)이거나 이미 동기화 진행 중인 경우 건너뜀
+    if (isReadOnly || syncingAppIds.has(game.appId)) return;
+
+    // 2. 이미 도전과제 데이터가 로드되어 있는 경우(쿨타임/캐시 유효 상태) 동기화 표시 없이 건너뜀
+    if (game.totalAchievements !== undefined && game.totalAchievements !== null) return;
+
+    setSyncingAppIds((prev) => new Set(prev).add(game.appId));
+    try {
+      const data = await getGameAchievementsApi(game.appId);
+      if (data) {
+        setGames((prev) =>
+          prev.map((g) =>
+            g.appId === game.appId
+              ? {
+                  ...g,
+                  totalAchievements: data.totalAchievements,
+                  achievedAchievements: data.achievedAchievements,
+                  achievementRate: data.achievementRate,
+                }
+              : g
+          )
+        );
+      }
+    } catch (err) {
+      console.error('Failed to sync achievements for game:', game.appId, err);
+    } finally {
+      setSyncingAppIds((prev) => {
+        const next = new Set(prev);
+        next.delete(game.appId);
+        return next;
+      });
+    }
   };
 
   return (
@@ -302,7 +361,7 @@ export const GuestUserGamesModal: React.FC<GuestUserGamesModalProps> = ({
         <div className="grid grid-cols-3 gap-1 bg-[var(--bg-surface-elevated)] p-1 rounded-lg border border-[var(--border-card)] w-full">
           <button
             type="button"
-            onClick={() => setSortBy('playtime')}
+            onClick={() => handleSortChange('playtime')}
             className={`w-full py-2 rounded-md text-xs sm:text-sm font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer active:scale-[0.98] ${
               sortBy === 'playtime'
                 ? 'bg-white text-[#1a5b8c] border border-blue-200 dark:bg-[#1b2838] dark:text-[#66c0f4] dark:border-[#66c0f4]/40 font-bold shadow-xs'
@@ -316,7 +375,7 @@ export const GuestUserGamesModal: React.FC<GuestUserGamesModalProps> = ({
 
           <button
             type="button"
-            onClick={() => setSortBy('recent')}
+            onClick={() => handleSortChange('recent')}
             className={`w-full py-2 rounded-md text-xs sm:text-sm font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer active:scale-[0.98] ${
               sortBy === 'recent'
                 ? 'bg-white text-[#1a5b8c] border border-blue-200 dark:bg-[#1b2838] dark:text-[#66c0f4] dark:border-[#66c0f4]/40 font-bold shadow-xs'
@@ -357,82 +416,168 @@ export const GuestUserGamesModal: React.FC<GuestUserGamesModalProps> = ({
             <LoadingSpinner size="md" label="게임 목록 불러오는 중..." />
           </div>
         ) : (
-          <div className="flex flex-col gap-2 max-h-[460px] overflow-y-auto pr-1 select-none">
-            {sortedGames.map((game) => {
-              const playtimeHours = Math.round((game.playtimeForever || 0) / 60);
+          <div
+            ref={scrollContainerRef}
+            onScroll={handleScroll}
+            className="flex flex-col gap-3 max-h-[500px] overflow-y-auto pr-3.5 sm:pr-4 select-none"
+          >
+            {visibleGames.map((game) => {
+              const playtimeHours = (Math.round(((game.playtimeForever || 0) / 60) * 10) / 10).toFixed(1);
+              const playtimeDisplay = `${playtimeHours}시간`;
               const lastPlayedFormatted = formatLastPlayed(game.lastPlayedAt);
+              const total = game.totalAchievements ?? 0;
+              const achieved = game.achievedAchievements ?? 0;
+              const rate = game.achievementRate ?? 0;
+              const isPerfect = total > 0 && achieved === total;
+              const isSyncing = syncingAppIds.has(game.appId);
 
               return (
                 <div
                   key={game.appId}
                   onClick={() => handleCardClick(game)}
-                  className="group relative flex items-center justify-between gap-3 sm:gap-4 p-2.5 sm:p-3 rounded-xl transition-colors cursor-pointer bg-[var(--bg-card)] border border-[var(--border-card)] hover:border-[#66c0f4] hover:bg-[var(--bg-surface-elevated)] shadow-xs"
-                  title="클릭 시 게임 상세 및 도전과제 확인"
+                  className={`group relative flex flex-col gap-3 p-3.5 sm:p-4 rounded-xl transition-all bg-[var(--bg-card)] border border-[var(--border-card)] hover:border-[#66c0f4] hover:bg-[var(--bg-surface-elevated)] shadow-xs ${
+                    !isReadOnly ? 'cursor-pointer' : 'cursor-default'
+                  }`}
+                  title={!isReadOnly ? '클릭 시 스팀 도전과제 정보 동기화' : undefined}
                 >
-                  {/* Left: Capsule Image + Title & Genres */}
-                  <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
-                    <div className="w-24 sm:w-32 aspect-[460/215] rounded-lg overflow-hidden shrink-0 bg-[#07090e] border border-[var(--border-subtle)]">
-                      <img
-                        src={game.headerImage}
-                        alt={game.name}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
-                        loading="lazy"
-                      />
+                  {/* Upper Row: Capsule Image + Title & Playtime Stats + Store Link */}
+                  <div className="flex items-start justify-between gap-3 sm:gap-4 min-w-0">
+                    {/* Left: Capsule Image + Info Block */}
+                    <div className="flex items-start gap-3.5 sm:gap-4 min-w-0 flex-1">
+                      <div className="w-36 sm:w-52 md:w-60 aspect-[460/215] rounded-lg overflow-hidden shrink-0 bg-[#07090e] border border-[var(--border-subtle)] shadow-xs">
+                        <img
+                          src={game.headerImage}
+                          alt={game.name}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+                          loading="lazy"
+                        />
+                      </div>
+
+                      {/* Title at top, Playtime Stats below in place of tags */}
+                      <div className="flex flex-col justify-between self-stretch min-w-0 flex-1 py-0.5">
+                        <span className="font-bold text-base sm:text-lg md:text-xl text-[var(--text-primary)] group-hover:text-[#66c0f4] transition-colors truncate">
+                          {game.name}
+                        </span>
+
+                        {/* Steam Style: 전체 플레이 시간 & 최근 플레이 in place of genre tags */}
+                        <div className="flex items-center gap-5 sm:gap-8 pt-2">
+                          <div className="flex flex-col">
+                            <span className="text-[11px] sm:text-xs text-[var(--text-muted)] font-medium">
+                              전체 플레이 시간
+                            </span>
+                            <span className="text-xs sm:text-sm font-bold text-[var(--text-primary)]">
+                              {playtimeDisplay}
+                            </span>
+                          </div>
+
+                          {lastPlayedFormatted && (
+                            <div className="flex flex-col min-w-[65px]">
+                              <span className="text-[11px] sm:text-xs text-[var(--text-muted)] font-medium">
+                                최근 플레이
+                              </span>
+                              <span className="text-xs sm:text-sm font-bold text-[var(--text-primary)]">
+                                {lastPlayedFormatted}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
                     </div>
 
-                    <div className="flex flex-col justify-center min-w-0 flex-1">
-                      <span className="font-bold text-sm sm:text-base text-[var(--text-primary)] group-hover:text-[#66c0f4] transition-colors truncate">
-                        {game.name}
-                      </span>
-                      {game.genres && game.genres.length > 0 && (
-                        <div className="flex items-center gap-1.5 mt-1 overflow-hidden">
-                          {game.genres.slice(0, 3).map((g) => (
-                            <span
-                              key={g}
-                              className="text-[10px] px-1.5 py-0.5 rounded bg-[var(--bg-surface-elevated)] text-[var(--text-muted)] border border-[var(--border-subtle)] shrink-0"
+                    {/* Right: Steam Store Button */}
+                    <div className="shrink-0 pt-0.5">
+                      <a
+                        href={`https://store.steampowered.com/app/${game.appId}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={(e) => e.stopPropagation()}
+                        className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium bg-[var(--bg-surface-elevated)] border border-[var(--border-card)] text-[var(--text-secondary)] hover:text-[#66c0f4] hover:border-[#66c0f4]/50 active:scale-95 transition-all shadow-xs shrink-0 cursor-pointer group/store"
+                        title="스팀 공식 상점 페이지 열기 (새 창)"
+                      >
+                        <ExternalLink className="w-3.5 h-3.5 text-[var(--text-muted)] group-hover/store:text-[#66c0f4] transition-colors" />
+                        <span>스팀 상점</span>
+                      </a>
+                    </div>
+                  </div>
+
+                  {/* Bottom Row: Achievement Progress Section (Matching GameDetailModal design) */}
+                  {isSyncing ? (
+                    <div className="rounded-lg bg-[var(--bg-surface-elevated)] border border-[var(--border-card)] py-3 px-4 flex items-center justify-center gap-2 text-xs text-[var(--text-secondary)] animate-pulse">
+                      <LoadingSpinner size="sm" label="스팀 업적 동기화 중..." />
+                    </div>
+                  ) : game.totalAchievements === 0 ? (
+                    <div className="rounded-lg bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] py-2.5 px-3 flex items-center gap-2 text-xs text-[var(--text-muted)]">
+                      <Trophy className="w-4 h-4 text-slate-400 dark:text-slate-600 stroke-1 shrink-0" />
+                      <span>이 게임에는 등록된 도전과제가 없습니다.</span>
+                    </div>
+                  ) : game.achievementRate !== undefined && game.achievementRate !== null ? (
+                    <div className="rounded-lg bg-[var(--bg-surface-elevated)] border border-[var(--border-card)] p-3 space-y-2 shadow-2xs">
+                      <div className="flex items-center justify-between text-xs sm:text-sm">
+                        <span className="flex items-center gap-2 font-medium text-[var(--text-secondary)]">
+
+                          <span>도전과제 달성 현황</span>
+                        </span>
+
+                        <div className="flex items-center gap-2">
+                          <span className="font-bold text-[var(--text-primary)]">
+                            <strong
+                              className={
+                                isPerfect
+                                  ? 'text-emerald-500 dark:text-emerald-400'
+                                  : 'text-[#66c0f4]'
+                              }
                             >
-                              {g}
-                            </span>
-                          ))}
+                              {achieved}
+                            </strong>{' '}
+                            / {total}
+                          </span>
+                          <span
+                            className={`text-xs font-bold px-1.5 py-0.5 rounded ${
+                              isPerfect
+                                ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20'
+                                : 'bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/20'
+                            }`}
+                          >
+                            {rate.toFixed(1)}%
+                          </span>
                         </div>
+                      </div>
+
+                      <div className="w-full h-2.5 bg-black/10 dark:bg-black/40 rounded-full overflow-hidden border border-[var(--border-card)] p-0.5">
+                        <div
+                          className={`h-full rounded-full transition-all duration-500 ${
+                            isPerfect
+                              ? 'bg-emerald-500 dark:bg-emerald-400'
+                              : 'bg-[#66c0f4]'
+                          }`}
+                          style={{ width: `${Math.min(100, Math.max(0, rate))}%` }}
+                        />
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="rounded-lg bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] py-2.5 px-3 flex items-center justify-between text-xs text-[var(--text-muted)] group-hover:border-[#66c0f4]/40 transition-colors">
+                      <div className="flex items-center gap-2">
+                        <span>도전과제 미동기화</span>
+                      </div>
+                      {!isReadOnly && (
+                        <span className="text-[11px] text-[#66c0f4] font-medium flex items-center gap-1">
+                          클릭하여 업적 불러오기
+                        </span>
                       )}
                     </div>
-                  </div>
-
-                  {/* Right: Stats (Achievements, Playtime, Last Played) */}
-                  <div className="flex items-center gap-3 sm:gap-5 shrink-0">
-                    {game.achievementRate !== undefined && game.achievementRate !== null && game.achievementRate > 0 && (
-                      <div className="hidden sm:flex items-center gap-1 text-xs font-bold text-amber-400 bg-amber-500/10 px-2 py-1 rounded-md border border-amber-500/20">
-                        <Trophy className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-                        <span>{Math.round(game.achievementRate)}%</span>
-                      </div>
-                    )}
-
-                    <div className="flex items-center gap-1.5 text-xs sm:text-sm">
-                      <Clock className="w-3.5 h-3.5 text-[#66c0f4] shrink-0" />
-                      <span className="font-semibold text-[var(--text-primary)]">
-                        {playtimeHours}시간
-                      </span>
-                    </div>
-
-                    {lastPlayedFormatted && (
-                      <div className="hidden md:flex items-center gap-1.5 text-xs text-[var(--text-muted)] min-w-[75px] justify-end">
-                        <Calendar className="w-3.5 h-3.5 shrink-0" />
-                        <span>{lastPlayedFormatted}</span>
-                      </div>
-                    )}
-                  </div>
+                  )}
                 </div>
               );
             })}
 
             {/* Bottom Sentinel Element for Infinite Scroll */}
-            <div ref={observerTargetRef} className="h-2 w-full" />
+            {hasMore && <div ref={observerTargetRef} className="h-2 w-full" />}
 
             {/* Loading More Indicator */}
-            {isLoadingMore && (
-              <div className="py-4 flex items-center justify-center gap-2 text-xs text-slate-400">
+            {hasMore && (
+              <div className="py-4 flex items-center justify-center gap-2 text-xs text-[var(--text-muted)]">
                 <LoadingSpinner size="sm" label="게임 더 불러오는 중..." />
+                <span>({visibleGames.length} / {sortedGames.length})</span>
               </div>
             )}
 

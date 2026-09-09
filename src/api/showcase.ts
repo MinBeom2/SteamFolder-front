@@ -5,7 +5,7 @@ import type {
   ShowcaseLikeResponse,
   LikedShowcasePageResponse,
 } from '@/types/showcase';
-import type { CursorPageResponse, UserGame } from '@/types/game';
+import type { FilteredGamesResponse } from '@/types/game';
 
 /**
  * 1. 로그인한 본인의 전체 쇼케이스 뷰 조회 API
@@ -60,18 +60,18 @@ export const getMyLikedShowcasesApi = async (
 };
 
 /**
- * 5. 게스트 및 공개 쇼케이스 유저의 보유 게임 목록 페이징 조회 API
+ * 5. 게스트 및 공개 쇼케이스 유저의 보유 게임 목록 조회 API (장르 필터링 및 DB 정렬 지원)
  */
 export const getPublicShowcaseGamesApi = async (
   identifier: string,
-  cursor?: number | null,
-  size: number = 24
-): Promise<CursorPageResponse<UserGame>> => {
-  const params: Record<string, unknown> = { size };
-  if (cursor !== undefined && cursor !== null) {
-    params.cursor = cursor;
+  genres?: string[],
+  sort: string = 'playtime'
+): Promise<FilteredGamesResponse> => {
+  const params: Record<string, unknown> = { sort };
+  if (genres && genres.length > 0) {
+    params.genres = genres.join(',');
   }
-  const response = await apiClient.get<ApiResponse<CursorPageResponse<UserGame>>>(
+  const response = await apiClient.get<ApiResponse<FilteredGamesResponse>>(
     `/api/v1/showcases/${encodeURIComponent(identifier)}/games`,
     { params }
   );

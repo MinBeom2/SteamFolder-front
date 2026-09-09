@@ -22,6 +22,12 @@ export interface CursorPageResponse<T> {
   pageSize: number;
 }
 
+export interface FilteredGamesResponse {
+  totalCount: number;
+  games: UserGame[];
+  content?: UserGame[];
+}
+
 export interface SyncResult {
   syncedGameCount: number;
   newlyAddedCount: number;

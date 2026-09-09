@@ -45,6 +45,7 @@ export const AddGameModal: React.FC<AddGameModalProps> = ({
 }) => {
   const {
     userGames,
+    selectedGameAppIds,
     isLoadingGames,
     isLoadingMoreGames,
     hasMoreGames,
@@ -56,6 +57,7 @@ export const AddGameModal: React.FC<AddGameModalProps> = ({
     toggleGameSelection,
     addSelectedGamesToFolder,
     loadMoreGames,
+    filterUserGames,
   } = useShowcaseStore();
 
   const [search, setSearch] = useState('');
@@ -82,12 +84,27 @@ export const AddGameModal: React.FC<AddGameModalProps> = ({
     cooldownSec < 10 ? '0' + cooldownSec : cooldownSec
   }초`;
 
-  // On open, fetch latest cooldown
+  // On open/close, fetch latest cooldown or reset local search & alerts
   useEffect(() => {
     if (isOpen) {
       checkCooldown();
+      setErrorMessage(null);
+      setSuccessMessage(null);
+    } else {
+      setSearch('');
+      setActiveGenre('전체');
+      setSortBy('playtime');
+      setErrorMessage(null);
+      setSuccessMessage(null);
     }
   }, [isOpen, checkCooldown]);
+
+  // Fetch games from server with dynamic JPA specification filter & sort
+  useEffect(() => {
+    if (!isOpen) return;
+    const genres = activeGenre === '전체' ? undefined : [activeGenre];
+    filterUserGames(genres, sortBy);
+  }, [isOpen, activeGenre, sortBy, filterUserGames]);
 
   // Infinite scroll observer setup
   useEffect(() => {
@@ -130,6 +147,8 @@ export const AddGameModal: React.FC<AddGameModalProps> = ({
     try {
       const res = await syncGames();
       setSuccessMessage(`스팀 게임 ${res.syncedGameCount}개가 성공적으로 동기화되었습니다!`);
+      const genres = activeGenre === '전체' ? undefined : [activeGenre];
+      await filterUserGames(genres, sortBy);
     } catch (err: unknown) {
       console.error('Failed to sync games:', err);
       const resData = (err as { response?: { data?: { code?: string; message?: string } } })?.response?.data;
@@ -182,41 +201,18 @@ export const AddGameModal: React.FC<AddGameModalProps> = ({
     }
   };
 
-  // 1. Filter by search & genre
+  // 1. Filter by search keyword (Genre & Sort are processed on server by DB Specification)
   const filteredGames = userGames.filter((game) => {
-    const matchesSearch = game.name
-      .toLowerCase()
-      .includes(search.toLowerCase());
-    const matchesGenre =
-      activeGenre === '전체' ||
-      (game.genres &&
-        game.genres.some((g) =>
-          g.toLowerCase().includes(activeGenre.toLowerCase())
-        ));
-    return matchesSearch && matchesGenre;
+    return (
+      search.trim() === '' ||
+      game.name.toLowerCase().includes(search.toLowerCase())
+    );
   });
 
-  // 2. Sort by selected option
-  const sortedGames = [...filteredGames].sort((a, b) => {
-    if (sortBy === 'playtime') {
-      return (b.playtimeForever || 0) - (a.playtimeForever || 0);
-    }
-    if (sortBy === 'recent') {
-      const timeA = a.lastPlayedAt ? new Date(a.lastPlayedAt).getTime() : 0;
-      const timeB = b.lastPlayedAt ? new Date(b.lastPlayedAt).getTime() : 0;
-      if (timeB !== timeA) return timeB - timeA;
-      return (b.playtimeForever || 0) - (a.playtimeForever || 0);
-    }
-    if (sortBy === 'name-asc') {
-      return a.name.localeCompare(b.name, 'ko');
-    }
-    if (sortBy === 'name-desc') {
-      return b.name.localeCompare(a.name, 'ko');
-    }
-    return 0;
-  });
+  // 2. The games list is already sorted by DB Specification on the backend
+  const sortedGames = filteredGames;
 
-  const selectedCount = userGames.filter((g) => g.selected).length;
+  const selectedCount = selectedGameAppIds.length;
 
   const handleAdd = async () => {
     try {
@@ -245,7 +241,7 @@ export const AddGameModal: React.FC<AddGameModalProps> = ({
       onClose={onClose}
       title={
         <div className="flex items-center justify-between w-full pr-4">
-          <span className="font-bold text-slate-100">게임 추가하기</span>
+          <span className="text-lg font-bold text-[var(--text-primary)] tracking-tight">게임 추가하기</span>
           <Button
             variant="secondary"
             size="sm"
@@ -276,15 +272,20 @@ export const AddGameModal: React.FC<AddGameModalProps> = ({
       <div className="space-y-4">
         {/* Success Message Banner */}
         {successMessage && (
-          <div className="p-3 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/60 rounded-lg text-xs text-emerald-700 dark:text-emerald-300 flex items-center justify-between animate-in fade-in duration-200">
-            <span>{successMessage}</span>
+          <div className="flex justify-center">
+            <div className="px-4 py-2 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60 rounded-lg text-xs text-emerald-700 dark:text-emerald-300 flex items-center justify-center gap-2 animate-in fade-in duration-200 w-fit text-center">
+              <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+              <span>{successMessage}</span>
+            </div>
           </div>
         )}
 
         {/* Error Message Banner */}
         {errorMessage && (
-          <div className="p-3 bg-red-50 dark:bg-red-950/50 border border-red-200 dark:border-red-800/60 rounded-lg text-xs text-red-700 dark:text-red-300 flex items-center justify-between animate-in fade-in duration-200">
-            <span>{errorMessage}</span>
+          <div className="flex justify-center">
+            <div className="px-4 py-2 bg-red-50 dark:bg-red-950/50 border border-red-200 dark:border-red-800/60 rounded-lg text-xs text-red-700 dark:text-red-300 flex items-center justify-center gap-2 animate-in fade-in duration-200 w-fit text-center">
+              <span>{errorMessage}</span>
+            </div>
           </div>
         )}
 

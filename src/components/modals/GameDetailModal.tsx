@@ -7,6 +7,7 @@ import {
   Trophy,
   Calendar,
   Clock,
+  ExternalLink,
 } from 'lucide-react';
 
 export const GameDetailModal: React.FC = () => {
@@ -59,9 +60,21 @@ export const GameDetailModal: React.FC = () => {
       maxWidth="lg"
       zIndex={70}
       title={
-        <h3 className="text-base sm:text-lg font-bold text-[var(--text-primary)] tracking-tight truncate max-w-[280px] sm:max-w-md">
-          {selectedGameDetail.name}
-        </h3>
+        <div className="flex items-center gap-2.5 min-w-0 pr-2">
+          <h3 className="text-base sm:text-lg font-bold text-[var(--text-primary)] tracking-tight truncate">
+            {selectedGameDetail.name}
+          </h3>
+          <a
+            href={`https://store.steampowered.com/app/${selectedGameDetail.appId}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1.5 px-2 py-0.5 rounded-md text-xs font-medium bg-[var(--bg-surface-elevated)] border border-[var(--border-card)] text-[var(--text-secondary)] hover:text-[#66c0f4] hover:border-[#66c0f4]/50 active:scale-95 transition-all shadow-xs shrink-0 cursor-pointer group"
+            title="스팀 공식 상점 페이지 열기 (새 창)"
+          >
+            <ExternalLink className="w-3.5 h-3.5 text-[var(--text-muted)] group-hover:text-[#66c0f4] transition-colors" />
+            <span>스팀 상점</span>
+          </a>
+        </div>
       }
     >
       <div className="space-y-4 text-[var(--text-primary)]">

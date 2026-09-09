@@ -3,10 +3,29 @@ import type { ApiResponse } from '@/types/auth';
 import type {
   UserGame,
   CursorPageResponse,
+  FilteredGamesResponse,
   SyncResult,
   CooldownStatus,
   GameAchievementDetail,
 } from '@/types/game';
+
+/**
+ * 유저 보유 게임 다중 조건(장르) 동적 필터링 및 DB Specification 정렬 API
+ */
+export const filterUserGamesApi = async (
+  genres?: string[],
+  sort: string = 'playtime'
+): Promise<FilteredGamesResponse> => {
+  const params: Record<string, unknown> = { sort };
+  if (genres && genres.length > 0) {
+    params.genres = genres.join(',');
+  }
+  const response = await apiClient.get<ApiResponse<FilteredGamesResponse>>(
+    '/api/v1/users/me/games/filter',
+    { params }
+  );
+  return response.data.data;
+};
 
 /**
  * No-Offset 커서 기반 유저 보유 게임 라이브러리 목록 페이징 조회 API
