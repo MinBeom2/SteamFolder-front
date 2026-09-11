@@ -50,7 +50,7 @@ export const AuthCallbackPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-[var(--bg-app)] text-[var(--text-primary)] flex flex-col items-center justify-center p-6 text-center transition-colors duration-200">
       {error ? (
-        <div className="relative max-w-md w-full glass-modal p-8 sm:p-10 rounded-2xl border border-[var(--border-modal)] shadow-2xl space-y-3 animate-in fade-in zoom-in-95">
+        <div className="relative max-w-md w-full glass-modal p-8 sm:p-10 rounded-2xl border border-[var(--border-modal)] space-y-3 animate-in fade-in zoom-in-95">
           {/* Top-right Close (X) Button */}
           <button
             type="button"
