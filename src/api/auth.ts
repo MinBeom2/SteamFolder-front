@@ -76,3 +76,11 @@ export const updateVisibilityApi = async (
 export const deleteAccountApi = async (): Promise<void> => {
   await apiClient.delete<ApiResponse<void>>('/api/v1/users/me');
 };
+
+/**
+ * 작업 공간 초기화 API
+ * 폴더와 폴더에 배치된 게임만 삭제하며 Steam 보유 게임/업적은 유지합니다.
+ */
+export const resetWorkspaceApi = async (): Promise<void> => {
+  await apiClient.delete<ApiResponse<void>>('/api/v1/users/me/workspace');
+};
