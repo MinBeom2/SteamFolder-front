@@ -7,12 +7,14 @@ interface BreadcrumbProps {
   isReadOnly?: boolean;
   basePath?: string;
   trail?: Array<{ id: number | null; name: string }>;
+  className?: string;
 }
 
 export const Breadcrumb: React.FC<BreadcrumbProps> = ({
   isReadOnly = false,
   basePath,
   trail,
+  className = 'mb-8',
 }) => {
   const navigate = useNavigate();
   const {
@@ -82,7 +84,7 @@ export const Breadcrumb: React.FC<BreadcrumbProps> = ({
   };
 
   return (
-    <nav className="flex items-center gap-1.5 text-xs text-[var(--text-secondary)] mb-6 flex-wrap select-none">
+    <nav className={`${className} flex select-none flex-wrap items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.08em] text-[var(--text-secondary)]`}>
       {activeTrail.map((crumb, idx) => {
         const isLast = idx === activeTrail.length - 1;
         const isDragOver = dragOverIdx === idx;
@@ -99,10 +101,10 @@ export const Breadcrumb: React.FC<BreadcrumbProps> = ({
               onDragOver={(e) => handleDragOver(e, idx)}
               onDragLeave={handleDragLeave}
               onDrop={(e) => handleDrop(e, idx)}
-              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md transition-all cursor-pointer ${
+              className={`flex cursor-pointer items-center gap-1.5 border-b px-1 py-1.5 transition-colors ${
                 isLast
-                  ? 'crumb-active font-semibold shadow-xs bg-[#ebf2f7] text-[#1a5b8c] border border-[#c6d8e6] dark:bg-[#66c0f4]/15 dark:text-[#66c0f4] dark:border-[#66c0f4]/35'
-                  : 'hover:bg-black/5 dark:hover:bg-white/5 hover:text-[var(--text-primary)]'
+                  ? 'border-[var(--primary-accent)] text-[var(--primary-accent)]'
+                  : 'border-transparent hover:border-[var(--border-card)] hover:text-[var(--text-primary)]'
               } ${isDragOver ? 'ring-2 ring-emerald-400 bg-emerald-500/20' : ''}`}
             >
               {idx === 0 ? (

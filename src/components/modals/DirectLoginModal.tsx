@@ -57,7 +57,7 @@ export const DirectLoginModal: React.FC<DirectLoginModalProps> = ({
         steamId: steamId.trim(),
         username: username.trim() || 'PixelHunter',
         avatarUrl: avatarUrl.trim() || null,
-        themeColor: '#00F0FF',
+        themeColor: '#66C0F4',
         isNewUser: false,
       });
       setSuccessMessage('데모 모드로 로그인되었습니다!');
@@ -75,15 +75,15 @@ export const DirectLoginModal: React.FC<DirectLoginModalProps> = ({
       onClose={onClose}
       title={
         <div className="flex items-center gap-2">
-          <Sparkles className="w-5 h-5 text-[#00F0FF]" />
-          <span className="font-bold text-slate-100">
+          <Sparkles className="w-5 h-5 text-[var(--primary-accent)]" />
+          <span className="font-bold text-[var(--text-primary)]">
             개발 및 테스트용 간편 로그인
           </span>
         </div>
       }
     >
       <form onSubmit={handleDirectLogin} className="space-y-4">
-        <p className="text-xs text-slate-400 leading-relaxed">
+        <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
           로컬 개발 환경에서 실제 스팀 서버 리다이렉트 없이 바로 테스트 계정으로 로그인하고 JWT 토큰을 발급받을 수 있습니다.
         </p>
 
@@ -102,46 +102,46 @@ export const DirectLoginModal: React.FC<DirectLoginModalProps> = ({
         )}
 
         <div className="space-y-1.5">
-          <label className="block text-xs font-semibold text-slate-300">
+          <label className="block text-xs font-semibold text-[var(--text-secondary)]">
             Steam ID (64-bit) <span className="text-red-400">*</span>
           </label>
           <input
             type="text"
             value={steamId}
             onChange={(e) => setSteamId(e.target.value)}
-            className="w-full px-3.5 py-2 text-sm bg-[#090d14] border border-slate-800 rounded-lg text-slate-100 placeholder-slate-500 focus:outline-none focus:border-[#2a475e] focus:ring-1 focus:ring-[#2a475e]"
+            className="w-full px-3.5 py-2 text-sm bg-[var(--bg-surface-elevated)] border border-[var(--border-card)] rounded-[3px] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--primary-accent)]"
             placeholder="76561198028793194"
             required
           />
         </div>
 
         <div className="space-y-1.5">
-          <label className="block text-xs font-semibold text-slate-300">
+          <label className="block text-xs font-semibold text-[var(--text-secondary)]">
             유저 닉네임 (선택)
           </label>
           <input
             type="text"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
-            className="w-full px-3.5 py-2 text-sm bg-[#090d14] border border-slate-800 rounded-lg text-slate-100 placeholder-slate-500 focus:outline-none focus:border-[#2a475e] focus:ring-1 focus:ring-[#2a475e]"
+            className="w-full px-3.5 py-2 text-sm bg-[var(--bg-surface-elevated)] border border-[var(--border-card)] rounded-[3px] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--primary-accent)]"
             placeholder="PixelHunter"
           />
         </div>
 
         <div className="space-y-1.5">
-          <label className="block text-xs font-semibold text-slate-300">
+          <label className="block text-xs font-semibold text-[var(--text-secondary)]">
             프로필 아바타 이미지 URL (선택)
           </label>
           <input
             type="text"
             value={avatarUrl}
             onChange={(e) => setAvatarUrl(e.target.value)}
-            className="w-full px-3.5 py-2 text-sm bg-[#090d14] border border-slate-800 rounded-lg text-slate-100 placeholder-slate-500 focus:outline-none focus:border-[#2a475e] focus:ring-1 focus:ring-[#2a475e]"
+            className="w-full px-3.5 py-2 text-sm bg-[var(--bg-surface-elevated)] border border-[var(--border-card)] rounded-[3px] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--primary-accent)]"
             placeholder="https://avatars.steamstatic.com/..."
           />
         </div>
 
-        <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-800">
+        <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-[var(--border-subtle)]">
           <Button
             type="button"
             variant="ghost"

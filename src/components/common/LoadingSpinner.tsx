@@ -24,13 +24,13 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
   return (
     <div className={`flex flex-col items-center justify-center gap-3 ${className}`}>
       <div className="relative flex items-center justify-center">
-        <Loader2 className={`${sizeMap[size]} animate-spin text-[#00F0FF]`} />
+        <Loader2 className={`${sizeMap[size]} animate-spin text-[var(--primary-accent)]`} />
         {glow && (
-          <div className="absolute inset-0 blur-md opacity-40 bg-[#00F0FF] rounded-full animate-pulse pointer-events-none" />
+          <div className="absolute inset-0 blur-md opacity-20 bg-[var(--primary-accent)] rounded-full animate-pulse pointer-events-none" />
         )}
       </div>
       {label && (
-        <p className="text-xs sm:text-sm text-slate-400 font-medium tracking-wide">
+        <p className="text-xs sm:text-sm text-[var(--text-muted)] font-medium tracking-wide">
           {label}
         </p>
       )}

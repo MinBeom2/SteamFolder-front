@@ -28,9 +28,9 @@ const AnimatedItem: React.FC<AnimatedItemProps> = ({
       data-index={index}
       onMouseEnter={onMouseEnter}
       onClick={onClick}
-      initial={{ scale: 0.7, opacity: 0 }}
-      animate={inView ? { scale: 1, opacity: 1 } : { scale: 0.7, opacity: 0 }}
-      transition={{ duration: 0.2, delay }}
+      initial={{ y: 20, opacity: 0 }}
+      animate={inView ? { y: 0, opacity: 1 } : { y: 14, opacity: 0 }}
+      transition={{ type: 'spring', stiffness: 150, damping: 22, mass: 0.8, delay }}
       style={{ marginBottom: '1rem', cursor: 'pointer' }}
     >
       {children}

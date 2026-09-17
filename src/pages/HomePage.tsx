@@ -9,12 +9,9 @@ import { DirectLoginModal } from '@/components/modals/DirectLoginModal';
 import { GameDetailModal } from '@/components/modals/GameDetailModal';
 import { useShowcaseStore } from '@/store/useShowcaseStore';
 import { useAuthStore } from '@/store/useAuthStore';
-import { useThemeStore } from '@/store/useThemeStore';
 
 export const HomePage: React.FC = () => {
   const { isAuthenticated } = useAuthStore();
-  const { theme } = useThemeStore();
-  const isDark = theme === 'dark';
 
   const {
     isAddGameModalOpen,
@@ -29,9 +26,9 @@ export const HomePage: React.FC = () => {
 
   return (
     <div
-      className={`text-[var(--text-primary)] flex flex-col selection:bg-[#00F0FF]/30 selection:text-white transition-colors duration-200 ${
+      className={`text-[var(--text-primary)] flex flex-col transition-colors duration-300 ${
         !isAuthenticated
-          ? `h-screen overflow-hidden ${isDark ? 'bg-[#07090e]' : 'bg-white'}`
+          ? 'h-screen overflow-hidden bg-[var(--bg-app)]'
           : 'min-h-screen bg-[var(--bg-app)]'
       }`}
     >

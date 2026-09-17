@@ -115,29 +115,29 @@ export const FolderCard: React.FC<FolderCardProps> = ({
       onClick={handleClick}
       onDoubleClick={handleDoubleClick}
       onContextMenu={handleContextMenu}
-      className={`relative flex flex-col items-center gap-2 p-2 rounded-lg cursor-pointer select-none transition-all duration-200 group ${
+      className={`group relative flex w-full max-w-[150px] cursor-pointer select-none flex-col items-start gap-3 p-1 transition-[transform,background-color,outline-color] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
         isSelected
-          ? 'ring-2 ring-[#2a475e] bg-[#1e3a5f]/25 scale-105'
+          ? 'bg-[var(--selection-bg)] outline outline-1 outline-[var(--selection-border)]'
           : isDragOver
-          ? 'ring-2 ring-emerald-400 bg-emerald-500/20 scale-110'
-          : 'hover:scale-105 hover:bg-[#1a5b8c]/5 dark:hover:bg-white/5'
+          ? 'scale-[1.025] bg-emerald-500/10 outline outline-1 outline-emerald-400'
+          : 'hover:scale-[1.025]'
       }`}
     >
       {/* Folder Shape Container */}
-      <div className="relative w-28 h-24 flex items-center justify-center">
+      <div className="relative flex h-24 w-full items-center justify-center">
         {/* Folder Top Tab */}
-        <div className="absolute -top-1 left-2 w-10 h-3 rounded-t-sm bg-[var(--folder-top-bg)] border-t border-l border-r border-[var(--border-card)] transition-colors group-hover:border-[#1a5b8c] dark:group-hover:border-[#66c0f4]" />
+        <div className="absolute -top-1 left-2 h-3 w-11 rounded-t-[2px] border-x border-t border-[var(--border-card)] bg-[var(--folder-top-bg)] transition-colors group-hover:border-[var(--primary-accent)]" />
 
         {/* Folder Body */}
-        <div className="relative w-full h-full bg-[var(--folder-body-bg)] rounded-lg border border-[var(--border-card)] p-2 flex flex-col justify-center shadow-md transition-all duration-200 group-hover:border-[#1a5b8c] dark:group-hover:border-[#66c0f4]">
+        <div className="relative flex h-full w-full flex-col justify-center rounded-[2px] border border-[var(--border-card)] bg-[var(--folder-body-bg)] p-2 transition-colors duration-300 group-hover:border-[var(--primary-accent)]">
           {/* 2x2 Inner Grid Slots for Mini Thumbnails */}
-          <div className="grid grid-cols-2 gap-1 w-full h-full p-1 bg-[var(--folder-inner-bg)] rounded-md overflow-hidden border border-[var(--border-subtle)]">
+          <div className="grid h-full w-full grid-cols-2 gap-1 overflow-hidden border border-[var(--border-subtle)] bg-[var(--folder-inner-bg)] p-1">
             {[0, 1, 2, 3].map((slotIdx) => {
               const game = previewGames[slotIdx];
               return (
                 <div
                   key={slotIdx}
-                  className="w-full h-full bg-[var(--folder-slot-bg)] rounded-[3px] overflow-hidden border border-[var(--border-subtle)] flex items-center justify-center"
+                  className="flex h-full w-full items-center justify-center overflow-hidden border border-[var(--border-subtle)] bg-[var(--folder-slot-bg)]"
                 >
                   {game ? (
                     <img
@@ -156,8 +156,8 @@ export const FolderCard: React.FC<FolderCardProps> = ({
       </div>
 
       {/* Folder Label */}
-      <div className="text-center max-w-[130px]">
-        <span className="text-xs font-bold text-[var(--text-primary)] block truncate transition-colors group-hover:text-[#1a5b8c] dark:group-hover:text-[#66c0f4]">
+      <div className="flex w-full items-center justify-center px-1">
+        <span className="block min-w-0 truncate text-center text-xs font-bold text-[var(--text-primary)] transition-colors group-hover:text-[var(--primary-accent)]">
           {folder.name}
         </span>
       </div>

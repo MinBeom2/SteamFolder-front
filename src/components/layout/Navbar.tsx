@@ -1,15 +1,17 @@
 import React from 'react';
+import { NavLink } from 'react-router-dom';
+import { ArrowUpRight, LogOut, Moon, Settings, Sun } from 'lucide-react';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useShowcaseStore } from '@/store/useShowcaseStore';
 import { useThemeStore } from '@/store/useThemeStore';
 import { ShowcaseSettingsModal } from '@/components/modals/ShowcaseSettingsModal';
-import {
-  Sun,
-  Moon,
-  LogOut,
-  Settings,
-} from 'lucide-react';
-import { Link } from 'react-router-dom';
+
+const navItemClass = ({ isActive }: { isActive: boolean }) =>
+  `group relative flex items-center py-2 text-xs font-semibold transition-colors ${
+    isActive
+      ? 'text-[var(--text-primary)]'
+      : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'
+  }`;
 
 export const Navbar: React.FC = () => {
   const { user, isAuthenticated, logout } = useAuthStore();
@@ -18,113 +20,82 @@ export const Navbar: React.FC = () => {
 
   return (
     <>
-      <header className="sticky top-0 z-40 w-full bg-[var(--bg-header)] backdrop-blur-lg border-b border-[var(--border-subtle)] px-6 py-3 transition-colors">
-      <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
-        {/* Left: Clean Typography Brand Logo & Navigation */}
-        <div className="flex items-center gap-4 sm:gap-6">
-          <Link to="/" className="flex items-center gap-1 cursor-pointer shrink-0">
-            <span className="font-bold text-lg tracking-tight text-[var(--text-primary)] transition-colors">
-              SteamFolder
-            </span>
-          </Link>
+      <header className="sticky top-0 z-40 w-full border-b border-[var(--border-subtle)] bg-[var(--bg-header)] px-4 backdrop-blur-xl sm:px-8">
+        <div className="mx-auto flex h-[68px] w-full max-w-[1440px] items-center justify-between gap-8">
+          <div className="flex min-w-0 items-center gap-8 lg:gap-12">
+            <NavLink to="/" className="group flex shrink-0 items-center" aria-label="SteamFolder 홈">
+              <span className="text-lg font-extrabold leading-none tracking-[-0.04em] text-[var(--text-primary)]">
+                SteamFolder
+              </span>
+            </NavLink>
 
-          <Link
-            to="/rankings"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--nav-btn-bg)] transition-all cursor-pointer"
-          >
-            <span>랭킹</span>
-          </Link>
-        </div>
+            <nav className="flex items-center gap-5 sm:gap-7" aria-label="주요 메뉴">
+              <NavLink to="/rankings" className={navItemClass}>
+                <span>랭킹</span>
+              </NavLink>
+            </nav>
+          </div>
 
-        {/* Right: Actions & Auth State */}
-        <div className="flex items-center gap-2.5">
-          {isAuthenticated && user ? (
-            <>
-              {/* Settings Button */}
-              <button
-                type="button"
-                onClick={() => setSettingsModalOpen(true)}
-                className="h-8 w-8 rounded-md bg-[var(--nav-btn-bg)] border border-[var(--nav-btn-border)] text-[var(--nav-btn-text)] hover:text-[var(--text-primary)] hover:border-[var(--border-card)] active:scale-[0.96] transition-colors cursor-pointer flex items-center justify-center shadow-xs"
-                title="쇼케이스 설정"
-                aria-label="쇼케이스 설정"
-              >
-                <Settings className="w-4 h-4 text-[var(--text-secondary)] hover:rotate-45 transition-transform" />
-              </button>
+          <div className="flex shrink-0 items-center gap-1.5">
+            <button
+              type="button"
+              onClick={toggleTheme}
+              className="flex h-9 w-9 items-center justify-center border border-transparent text-[var(--text-secondary)] transition-colors hover:border-[var(--border-card)] hover:text-[var(--primary-accent)]"
+              title={theme === 'dark' ? '라이트 모드로 전환' : '다크 모드로 전환'}
+              aria-label="화면 모드 전환"
+            >
+              {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+            </button>
 
-              {/* Dark / Light Theme Toggle Button */}
-              <button
-                type="button"
-                onClick={toggleTheme}
-                className="h-8 w-8 rounded-md bg-[var(--nav-btn-bg)] border border-[var(--nav-btn-border)] text-[var(--nav-btn-text)] hover:text-[var(--text-primary)] hover:border-[var(--border-card)] active:scale-[0.96] transition-colors cursor-pointer flex items-center justify-center shadow-xs"
-                title={theme === 'dark' ? '라이트 모드로 전환' : '다크 모드로 전환'}
-                aria-label="화면 모드 전환"
-              >
-                {theme === 'dark' ? (
-                  <Sun className="w-4 h-4 text-amber-400 hover:rotate-45 transition-transform" />
-                ) : (
-                  <Moon className="w-4 h-4 text-indigo-400 hover:-rotate-12 transition-transform" />
-                )}
-              </button>
+            {isAuthenticated && user && (
+              <>
+                <button
+                  type="button"
+                  onClick={() => setSettingsModalOpen(true)}
+                  className="flex h-9 w-9 items-center justify-center border border-transparent text-[var(--text-secondary)] transition-colors hover:border-[var(--border-card)] hover:text-[var(--primary-accent)]"
+                  title="쇼케이스 설정"
+                  aria-label="쇼케이스 설정"
+                >
+                  <Settings className="h-4 w-4" />
+                </button>
 
-              {/* User Profile Avatar & Link to MyPage */}
-              <div className="flex items-center gap-2 pl-2 border-l border-[var(--border-subtle)]">
-                <Link
+                <NavLink
                   to="/mypage"
-                  className="flex items-center gap-2 group cursor-pointer hover:opacity-85 transition-opacity"
+                  className="group ml-2 flex items-center gap-2.5 border-l border-[var(--border-subtle)] pl-4"
                   title="내 페이지로 이동"
                 >
                   <img
-                    src={
-                      user.avatarUrl ||
-                      'https://avatars.steamstatic.com/fef49e7fa7e1997310d705b2a6158ff8dc1cdfeb_full.jpg'
-                    }
+                    src={user.avatarUrl || 'https://avatars.steamstatic.com/fef49e7fa7e1997310d705b2a6158ff8dc1cdfeb_full.jpg'}
                     alt={user.username}
-                    className="w-7 h-7 rounded-full ring-1 ring-[var(--border-card)] group-hover:ring-[#66c0f4] object-cover transition-all"
+                    className="h-8 w-8 rounded-[2px] object-cover grayscale-[25%] transition-all duration-500 group-hover:grayscale-0"
                   />
-                  <span className="text-xs font-medium text-[var(--text-primary)] group-hover:text-[#66c0f4] hidden sm:inline transition-colors">
+                  <span className="hidden max-w-28 truncate text-xs font-semibold text-[var(--text-primary)] sm:inline">
                     {user.username}
                   </span>
-                </Link>
+                  <ArrowUpRight className="hidden h-3.5 w-3.5 text-[var(--text-muted)] transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 lg:block" />
+                </NavLink>
 
                 <button
                   type="button"
                   onClick={logout}
-                  className="p-1.5 rounded-md text-[var(--text-secondary)] hover:text-red-400 hover:bg-red-500/10 active:scale-[0.96] transition-colors cursor-pointer"
+                  className="flex h-9 w-9 items-center justify-center text-[var(--text-muted)] transition-colors hover:text-red-400"
                   title="로그아웃"
+                  aria-label="로그아웃"
                 >
-                  <LogOut className="w-3.5 h-3.5" />
+                  <LogOut className="h-3.5 w-3.5" />
                 </button>
-              </div>
-            </>
-          ) : (
-            /* Unauthenticated Navbar State */
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={toggleTheme}
-                className="h-8 w-8 rounded-md bg-[var(--nav-btn-bg)] border border-[var(--nav-btn-border)] text-[var(--nav-btn-text)] hover:text-[var(--text-primary)] hover:border-[var(--border-card)] active:scale-[0.96] transition-colors cursor-pointer flex items-center justify-center shadow-xs"
-                title={theme === 'dark' ? '라이트 모드로 전환' : '다크 모드로 전환'}
-                aria-label="화면 모드 전환"
-              >
-                {theme === 'dark' ? (
-                  <Sun className="w-4 h-4 text-amber-400 hover:rotate-45 transition-transform" />
-                ) : (
-                  <Moon className="w-4 h-4 text-indigo-400 hover:-rotate-12 transition-transform" />
-                )}
-              </button>
-            </div>
-          )}
+              </>
+            )}
+          </div>
         </div>
-      </div>
-    </header>
+      </header>
 
-    {/* Global Showcase Settings Modal for any page with Navbar */}
-    {isAuthenticated && (
-      <ShowcaseSettingsModal
-        isOpen={isSettingsModalOpen}
-        onClose={() => setSettingsModalOpen(false)}
-      />
-    )}
-  </>
+      {isAuthenticated && (
+        <ShowcaseSettingsModal
+          isOpen={isSettingsModalOpen}
+          onClose={() => setSettingsModalOpen(false)}
+        />
+      )}
+    </>
   );
 };

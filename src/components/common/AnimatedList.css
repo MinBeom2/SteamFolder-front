@@ -38,16 +38,15 @@
 
 .item {
   padding: 16px;
-  background-color: var(--glass-panel-bg, #2F293A);
-  border: 1px solid var(--border-subtle, transparent);
-  border-radius: 12px;
-  margin-bottom: 1rem;
-  transition: background-color 0.2s ease, border-color 0.2s ease;
+  background-color: var(--bg-surface, #171914);
+  border-bottom: 1px solid var(--border-subtle, #30332a);
+  border-radius: 0;
+  transition: background-color 0.25s ease, border-color 0.25s ease;
 }
 
 .item.selected {
-  background-color: var(--nav-btn-bg, #2F293A);
-  border-color: var(--border-card, #66c0f4);
+  background-color: var(--bg-surface-elevated, #1d2019);
+  border-color: var(--primary-accent, #66c0f4);
 }
 
 .item-text {

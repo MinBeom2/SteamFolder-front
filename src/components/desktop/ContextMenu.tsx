@@ -78,7 +78,7 @@ export const ContextMenu: React.FC = () => {
     <div
       ref={menuRef}
       style={{ top: `${safeY}px`, left: `${safeX}px` }}
-      className="fixed z-50 w-52 bg-[var(--context-menu-bg)] backdrop-blur-xl border border-[var(--border-card)] rounded-lg shadow-2xl p-1 text-xs text-[var(--text-primary)] animate-in fade-in zoom-in-95 duration-100 select-none"
+      className="fixed z-50 w-52 bg-[var(--context-menu-bg)] border border-[var(--border-card)] rounded-[3px] shadow-[var(--soft-shadow)] p-1 text-xs text-[var(--text-primary)] animate-in fade-in slide-in-from-top-1 duration-200 select-none"
     >
       {type === 'CANVAS' && (
         <div className="space-y-0.5">
@@ -91,7 +91,7 @@ export const ContextMenu: React.FC = () => {
             className="w-full flex items-center justify-between px-3 py-2 rounded-md hover:bg-black/5 dark:hover:bg-white/5 text-[var(--text-primary)] transition-colors text-left cursor-pointer font-medium"
           >
             <div className="flex items-center gap-2">
-              <FolderPlus className="w-4 h-4 text-sky-500" />
+              <FolderPlus className="w-4 h-4 text-[var(--primary-accent)]" />
               <span>새 폴더 만들기</span>
             </div>
           </button>
@@ -143,7 +143,6 @@ export const ContextMenu: React.FC = () => {
               <RefreshCw className="w-3.5 h-3.5" />
               <span>새로고침</span>
             </div>
-            <span className="text-[10px] text-[var(--text-muted)] font-mono">F5</span>
           </button>
         </div>
       )}
@@ -163,7 +162,7 @@ export const ContextMenu: React.FC = () => {
             className="w-full flex items-center justify-between px-3 py-2 rounded-md hover:bg-black/5 dark:hover:bg-white/5 text-[var(--text-primary)] transition-colors text-left cursor-pointer font-medium"
           >
             <div className="flex items-center gap-2">
-              <FolderOpen className="w-4 h-4 text-sky-500" />
+              <FolderOpen className="w-4 h-4 text-[var(--primary-accent)]" />
               <span>폴더 열기</span>
             </div>
             <span className="text-[10px] text-[var(--text-muted)] font-mono">Enter</span>
@@ -250,7 +249,7 @@ export const ContextMenu: React.FC = () => {
                 className="w-full flex items-center justify-between px-3 py-2 rounded-md hover:bg-black/5 dark:hover:bg-white/5 text-[var(--text-primary)] transition-colors text-left cursor-pointer font-medium"
               >
                 <div className="flex items-center gap-2">
-                  <Info className="w-4 h-4 text-sky-500" />
+                  <Info className="w-4 h-4 text-[var(--primary-accent)]" />
                   <span>상세보기</span>
                 </div>
               </button>

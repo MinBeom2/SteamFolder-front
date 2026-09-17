@@ -83,50 +83,22 @@ interface MarqueeRowProps {
   isDark: boolean;
 }
 
-// 100% Mathematically Seamless Infinite Marquee Row Component
 const MarqueeRow: React.FC<MarqueeRowProps> = ({ games, duration, isDark }) => {
   const cardClassName = isDark
     ? 'w-60 sm:w-72 h-30 sm:h-36 rounded-lg overflow-hidden shadow-lg border border-white/10 shrink-0 bg-[#121620]'
     : 'w-60 sm:w-72 h-30 sm:h-36 rounded-lg overflow-hidden shadow-md border border-slate-200/80 shrink-0 bg-white';
 
   return (
-    <div
-      className="flex w-max shrink-0 will-change-transform"
-      style={{
-        animation: `marqueeSeamless ${duration}s linear infinite`,
-      }}
-    >
-      {/* Primary List A */}
-      <div className="flex gap-4 sm:gap-5 shrink-0 pr-4 sm:pr-5">
-        {games.map((game, idx) => (
-          <div key={`a-${game.appId}-${idx}`} className={cardClassName}>
-            <img
-              src={game.img}
-              alt={game.name}
-              className="w-full h-full object-cover select-none"
-              loading="lazy"
-              decoding="async"
-              draggable={false}
-            />
-          </div>
-        ))}
-      </div>
-
-      {/* Clone List B: Exactly matches List A with padding-right for a zero-stutter seamless loop */}
-      <div className="flex gap-4 sm:gap-5 shrink-0 pr-4 sm:pr-5">
-        {games.map((game, idx) => (
-          <div key={`b-${game.appId}-${idx}`} className={cardClassName}>
-            <img
-              src={game.img}
-              alt={game.name}
-              className="w-full h-full object-cover select-none"
-              loading="lazy"
-              decoding="async"
-              draggable={false}
-            />
-          </div>
-        ))}
-      </div>
+    <div className="flex w-max shrink-0 will-change-transform" style={{ animation: `marqueeSeamless ${duration}s linear infinite` }}>
+      {["a", "b"].map((copy) => (
+        <div key={copy} className="flex gap-4 sm:gap-5 shrink-0 pr-4 sm:pr-5">
+          {games.map((game, idx) => (
+            <div key={`${copy}-${game.appId}-${idx}`} className={cardClassName}>
+              <img src={game.img} alt={game.name} className="w-full h-full object-cover select-none" loading="lazy" decoding="async" draggable={false} />
+            </div>
+          ))}
+        </div>
+      ))}
     </div>
   );
 };
@@ -136,31 +108,15 @@ export const LandingHeroMarquee: React.FC = () => {
   const isDark = theme === 'dark';
 
   return (
-    <div
-      className={`relative flex-1 w-full h-full flex flex-col items-center justify-center overflow-hidden transition-colors duration-200 ${
-        isDark ? 'bg-[#07090e]' : 'bg-white'
-      }`}
-    >
-      {/* Hardware-accelerated GPU translation for 100% seamless zero-jitter infinite scrolling */}
+    <div className={`relative flex-1 w-full h-full flex flex-col items-center justify-center overflow-hidden transition-colors duration-200 ${isDark ? 'bg-[#07090e]' : 'bg-white'}`}>
       <style>{`
         @keyframes marqueeSeamless {
-          0% {
-            transform: translate3d(0, 0, 0);
-          }
-          100% {
-            transform: translate3d(-50%, 0, 0);
-          }
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-50%, 0, 0); }
         }
       `}</style>
 
-      {/* Background Marquee Lanes: Rotated -15deg (Counter-Clockwise) & Scaled to fill all corners without any gaps */}
-      <div
-        className={`absolute -inset-[50vw] flex flex-col justify-center gap-3.5 sm:gap-5 pointer-events-none select-none overflow-hidden -rotate-[15deg] scale-125 origin-center transition-opacity duration-300 ${
-          isDark
-            ? 'opacity-50 blur-[3px]'
-            : 'opacity-35 blur-[2.5px] brightness-105'
-        }`}
-      >
+      <div className={`absolute -inset-[50vw] flex flex-col justify-center gap-3.5 sm:gap-5 pointer-events-none select-none overflow-hidden -rotate-[15deg] scale-125 origin-center transition-opacity duration-300 ${isDark ? 'opacity-50 blur-[3px]' : 'opacity-35 blur-[2.5px] brightness-105'}`}>
         <MarqueeRow games={ROW1_GAMES} duration={52} isDark={isDark} />
         <MarqueeRow games={ROW2_GAMES} duration={66} isDark={isDark} />
         <MarqueeRow games={ROW3_GAMES} duration={46} isDark={isDark} />
@@ -177,7 +133,6 @@ export const LandingHeroMarquee: React.FC = () => {
         <MarqueeRow games={ROW4_GAMES} duration={64} isDark={isDark} />
       </div>
 
-      {/* Full-Screen Radial Gradient Overlay: Seamlessly matches theme */}
       <div
         className="absolute inset-0 pointer-events-none transition-all duration-300"
         style={{
@@ -187,26 +142,14 @@ export const LandingHeroMarquee: React.FC = () => {
         }}
       />
 
-      {/* Center Hero Content (Frameless, Integrated directly into the full-screen radial glow) */}
       <div className="relative z-10 max-w-xl mx-auto px-6 py-12 text-center space-y-6 animate-in fade-in zoom-in-95 duration-300">
-        <h1
-          className={`text-3xl sm:text-5xl font-bold tracking-tight leading-tight transition-colors duration-200 ${
-            isDark
-              ? 'text-white drop-shadow-lg'
-              : 'text-[#171d25] drop-shadow-xs'
-          }`}
-        >
+        <h1 className={`text-3xl sm:text-5xl font-bold tracking-tight leading-tight transition-colors duration-200 ${isDark ? 'text-white drop-shadow-lg' : 'text-[#171d25] drop-shadow-xs'}`}>
           스팀 라이브러리를 <br />
-          <span
-            className={`transition-colors duration-200 ${
-              isDark ? 'text-[#66c0f4]' : 'text-[#1a5b8c]'
-            }`}
-          >
+          <span className={`transition-colors duration-200 ${isDark ? 'text-[#66c0f4]' : 'text-[#1a5b8c]'}`}>
             나만의 쇼케이스
           </span>
           로
         </h1>
-        {/* Action Button */}
         <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
           <SteamLoginButton size="lg" />
         </div>
@@ -214,4 +157,5 @@ export const LandingHeroMarquee: React.FC = () => {
     </div>
   );
 };
+
 export default LandingHeroMarquee;

@@ -179,34 +179,35 @@ export const MyPage: React.FC = () => {
 
   const playtimeHours = Math.round((showcase?.stats.totalPlaytimeForever || 0) / 60);
   const likeCount = showcase?.user.likeCount ?? 0;
-  const cardHoverClass = 'hover:scale-[1.075] hover:z-20 hover:border-[var(--border-card)]';
+  const cardHoverClass = 'hover:translate-x-1 hover:bg-[var(--bg-surface)]';
 
   return (
-    <div className="min-h-screen bg-[var(--bg-app)] text-[var(--text-primary)] flex flex-col justify-between selection:bg-[#66c0f4]/20 transition-colors duration-200">
+    <div className="flex min-h-screen flex-col justify-between bg-[var(--bg-app)] text-[var(--text-primary)] transition-colors duration-300">
       {/* Top Navbar */}
       <Navbar />
 
       {/* Main Content */}
-      <main className="relative z-10 max-w-6xl mx-auto w-full p-4 sm:p-8 flex-1 flex flex-col items-center justify-start select-none pb-28">
+      <main className="relative z-10 mx-auto flex w-full max-w-[1280px] flex-1 select-none flex-col justify-start px-5 pb-28 pt-10 sm:px-10 sm:pt-14">
         {/* Profile Header without enclosing card */}
-        <div className="py-8 sm:py-12 flex flex-col sm:flex-row items-center gap-6 sm:gap-8 mx-auto">
+        <div className="grid w-full gap-7 border-b border-[var(--page-rule)] pb-12 sm:grid-cols-[160px_minmax(0,1fr)] sm:items-end sm:gap-10">
           <img
             src={
               user.avatarUrl ||
               'https://avatars.steamstatic.com/fef49e7fa7e1997310d705b2a6158ff8dc1cdfeb_full.jpg'
             }
             alt={user.username}
-            className="w-20 h-20 sm:w-24 sm:h-24 rounded-full ring-2 ring-[var(--border-card)] object-cover shrink-0 shadow-sm"
+            className="h-28 w-28 shrink-0 object-cover grayscale-[20%] sm:h-36 sm:w-36"
           />
 
-          <div className="flex flex-col gap-3 sm:gap-3.5 items-center sm:items-start text-center sm:text-left">
+          <div className="flex flex-col items-start gap-4 text-left">
             {/* Username (Moved slightly up, no settings button) */}
-            <h1 className="text-xl sm:text-2xl font-black text-[var(--text-primary)] tracking-tight">
+            <p className="editorial-kicker">Personal profile / library owner</p>
+            <h1 className="text-5xl font-black leading-none tracking-[-0.06em] text-[var(--text-primary)] sm:text-7xl">
               {user.username}
             </h1>
 
             {/* 3 Stats: Clean minimal text without emojis and container shells */}
-            <div className="flex flex-wrap items-center justify-center sm:justify-start gap-4 sm:gap-6 pt-1 text-xs sm:text-sm">
+            <div className="flex flex-wrap items-center justify-start gap-4 pt-2 text-xs sm:gap-6 sm:text-sm">
               <div className="flex items-baseline gap-1.5">
                 <span className="text-[var(--text-secondary)]">내 쇼케이스 좋아요</span>
                 <span className="text-base sm:text-lg font-bold text-rose-500">{likeCount}</span>
@@ -219,16 +220,16 @@ export const MyPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setIsGamesModalOpen(true)}
-                className="flex items-center gap-1.5 px-3 py-1 -my-1 rounded-lg bg-[var(--bg-card)] border border-[var(--border-card)] hover:border-[#66c0f4] hover:text-[#66c0f4] text-xs sm:text-sm font-semibold transition-all cursor-pointer shadow-xs active:scale-95 group"
+                className="group -my-1 flex cursor-pointer items-center gap-1.5 border-b border-[var(--border-card)] px-1 py-1 text-xs font-semibold transition-colors hover:border-[var(--primary-accent)] hover:text-[var(--primary-accent)] sm:text-sm"
                 title="보유 게임 전체 목록 열기"
               >
                 <span className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors">
                   보유 게임
                 </span>
-                <strong className="text-[var(--text-primary)] group-hover:text-[#66c0f4] transition-colors">
+                <strong className="text-[var(--text-primary)] transition-colors group-hover:text-[var(--primary-accent)]">
                   {showcase?.stats.totalOwnedGames ?? 0}개
                 </strong>
-                <ChevronRight className="w-3.5 h-3.5 text-[var(--text-muted)] group-hover:text-[#66c0f4] group-hover:translate-x-0.5 transition-transform shrink-0" />
+                <ChevronRight className="h-3.5 w-3.5 shrink-0 text-[var(--text-muted)] transition-transform group-hover:translate-x-0.5 group-hover:text-[var(--primary-accent)]" />
               </button>
 
               <span className="text-[var(--border-subtle)] hidden sm:inline">|</span>
@@ -245,13 +246,13 @@ export const MyPage: React.FC = () => {
         </div>
 
         {/* Liked Showcases Section */}
-        <div className="w-full mt-4 flex flex-col gap-5">
-          <div className="flex items-center justify-between pb-3 border-b border-[var(--border-subtle)]">
+        <div className="mt-14 flex w-full flex-col gap-5">
+          <div className="flex items-end justify-between border-b border-[var(--border-subtle)] pb-5">
             <div className="flex items-center gap-2.5">
-              <h2 className="text-lg sm:text-xl font-bold text-[var(--text-primary)] tracking-tight flex items-center gap-2">
+              <h2 className="flex items-end gap-3 text-3xl font-black tracking-[-0.045em] text-[var(--text-primary)] sm:text-5xl">
                 <span>내가 좋아요 누른 쇼케이스</span>
                 {totalLikedCount > 0 && (
-                  <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-rose-500/15 text-rose-400 border border-rose-500/20">
+                  <span className="mb-1 border border-rose-500/20 px-2 py-0.5 text-xs font-semibold text-rose-400">
                     {totalLikedCount}
                   </span>
                 )}
@@ -282,16 +283,16 @@ export const MyPage: React.FC = () => {
               enableArrowNavigation={false}
               displayScrollbar={true}
               className="w-full"
-              listClassName="max-h-[60vh] overflow-y-auto !px-6 sm:!px-12 md:!px-16 !py-6"
+              listClassName="max-h-[60vh] overflow-y-auto !px-0 !py-0"
               renderItem={(item) => (
                 <Link
                   key={item.userId}
                   to={`/showcase/${encodeURIComponent(item.username)}`}
-                  className={`group relative flex items-center justify-between gap-4 py-4 sm:py-5 px-5 sm:px-7 rounded-2xl transition-all duration-200 backdrop-blur-sm border cursor-pointer bg-[var(--glass-panel-bg)] border-[var(--border-subtle)] ${cardHoverClass}`}
+                  className={`group relative flex cursor-pointer items-center justify-between gap-4 border-b border-[var(--border-subtle)] px-3 py-5 transition-[transform,background-color] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] sm:px-5 ${cardHoverClass}`}
                 >
                   {/* Left: Avatar + Username (No liked date) */}
                   <div className="flex items-center gap-4 sm:gap-5 min-w-0 sm:min-w-[280px]">
-                    <div className="w-12 h-12 rounded-full ring-2 ring-[var(--border-card)] overflow-hidden shadow-sm shrink-0">
+                    <div className="h-12 w-12 shrink-0 overflow-hidden border border-[var(--border-card)]">
                       <img
                         src={
                           item.avatarUrl ||
@@ -303,7 +304,7 @@ export const MyPage: React.FC = () => {
                     </div>
 
                     <div className="flex items-center gap-2 min-w-0">
-                      <span className="text-base sm:text-lg font-bold text-[var(--text-primary)] transition-colors truncate group-hover:text-[#66c0f4]">
+                      <span className="truncate text-base font-bold text-[var(--text-primary)] transition-colors group-hover:text-[var(--primary-accent)] sm:text-lg">
                         {item.username}
                       </span>
                     </div>
@@ -324,7 +325,7 @@ export const MyPage: React.FC = () => {
                       type="button"
                       onClick={(e) => handleLikeToggle(e, item.userId)}
                       disabled={likeLoadingUserIds.has(item.userId)}
-                      className={`flex items-center gap-2 px-3.5 sm:px-4 py-2 rounded-xl border text-sm sm:text-base font-bold transition-all shadow-xs cursor-pointer active:scale-95 disabled:opacity-60 ${
+                      className={`flex cursor-pointer items-center gap-2 rounded-[2px] border px-3.5 py-2 text-sm font-bold transition-colors disabled:opacity-60 sm:px-4 sm:text-base ${
                         item.isLiked
                           ? 'bg-rose-500/15 border-rose-500/30 text-rose-400 hover:bg-rose-500/25'
                           : 'bg-[var(--nav-btn-bg)] border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-rose-400 hover:border-rose-500/30 hover:bg-rose-500/10'

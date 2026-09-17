@@ -256,7 +256,7 @@ export const AddGameModal: React.FC<AddGameModalProps> = ({
             leftIcon={
               <RefreshCw
                 className={`w-3.5 h-3.5 ${
-                  isCooldownActive ? 'text-amber-400' : 'text-[#66c0f4]'
+                  isCooldownActive ? 'text-amber-400' : 'text-[var(--primary-accent)]'
                 }`}
               />
             }
@@ -297,7 +297,7 @@ export const AddGameModal: React.FC<AddGameModalProps> = ({
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="보유 게임 검색..."
-            className="w-full pl-10 pr-4 py-2 bg-[var(--bg-surface-elevated)] border border-[var(--border-card)] rounded-lg text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[#2a475e] focus:ring-1 focus:ring-[#2a475e] transition-all"
+            className="w-full pl-10 pr-4 py-2 bg-[var(--bg-surface-elevated)] border border-[var(--border-card)] rounded-[3px] text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--primary-accent)] transition-all"
           />
         </div>
 
@@ -319,9 +319,9 @@ export const AddGameModal: React.FC<AddGameModalProps> = ({
                 key={genre}
                 type="button"
                 onClick={() => handleTagClick(genre)}
-                className={`px-2.5 py-1 rounded-md text-xs tracking-tight transition-all shrink-0 cursor-pointer active:scale-[0.98] ${
+                className={`px-2.5 py-1 rounded-[3px] text-xs tracking-tight transition-all shrink-0 cursor-pointer ${
                   isActive
-                    ? 'bg-[#1a5b8c] text-white border border-[#1a5b8c] dark:bg-[#66c0f4] dark:text-[#111827] dark:border-[#66c0f4] font-bold shadow-xs dark:shadow-[0_0_10px_rgba(102,192,244,0.3)]'
+                    ? 'bg-[var(--primary-accent)] text-[var(--bg-app)] border border-[var(--primary-accent)] font-bold'
                     : 'bg-[var(--bg-surface-elevated)] text-[var(--text-secondary)] border border-[var(--border-card)] hover:text-[var(--text-primary)] hover:border-[var(--border-subtle)] font-medium'
                 }`}
               >
@@ -337,7 +337,7 @@ export const AddGameModal: React.FC<AddGameModalProps> = ({
           <div className="flex items-center gap-1.5 text-xs text-[var(--text-secondary)] font-medium">
             <Layers className="w-3.5 h-3.5 text-[var(--text-muted)]" />
             <span>
-              총 <strong className="text-[var(--text-primary)]">{totalGamesCount || sortedGames.length}</strong>개 중 <strong className="text-[#66c0f4]">{sortedGames.length}</strong>개 표시
+              총 <strong className="text-[var(--text-primary)]">{totalGamesCount || sortedGames.length}</strong>개 중 <strong className="text-[var(--primary-accent)]">{sortedGames.length}</strong>개 표시
             </span>
           </div>
 
@@ -348,12 +348,12 @@ export const AddGameModal: React.FC<AddGameModalProps> = ({
               onClick={() => setSortBy('playtime')}
               className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors flex items-center gap-1.5 cursor-pointer active:scale-[0.98] ${
                 sortBy === 'playtime'
-                  ? 'bg-white text-[#1a5b8c] border border-blue-200 dark:bg-[#1b2838] dark:text-[#66c0f4] dark:border-[#66c0f4]/40 font-semibold shadow-xs'
+                  ? 'bg-[var(--primary-accent)] text-[var(--bg-app)] border border-[var(--primary-accent)] font-semibold'
                   : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
               }`}
               title="플레이타임이 많은 순으로 정렬"
             >
-              <Clock className={`w-3 h-3 ${sortBy === 'playtime' ? 'text-[#1a5b8c] dark:text-[#66c0f4]' : ''}`} />
+              <Clock className={`w-3 h-3 ${sortBy === 'playtime' ? 'text-[var(--bg-app)]' : ''}`} />
               <span>플레이타임순</span>
             </button>
 
@@ -362,12 +362,12 @@ export const AddGameModal: React.FC<AddGameModalProps> = ({
               onClick={() => setSortBy('recent')}
               className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors flex items-center gap-1.5 cursor-pointer active:scale-[0.98] ${
                 sortBy === 'recent'
-                  ? 'bg-white text-[#1a5b8c] border border-blue-200 dark:bg-[#1b2838] dark:text-[#66c0f4] dark:border-[#66c0f4]/40 font-semibold shadow-xs'
+                  ? 'bg-[var(--primary-accent)] text-[var(--bg-app)] border border-[var(--primary-accent)] font-semibold'
                   : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
               }`}
               title="최근에 플레이한 순으로 정렬"
             >
-              <Calendar className={`w-3 h-3 ${sortBy === 'recent' ? 'text-[#1a5b8c] dark:text-[#66c0f4]' : ''}`} />
+              <Calendar className={`w-3 h-3 ${sortBy === 'recent' ? 'text-[var(--bg-app)]' : ''}`} />
               <span>최근 플레이순</span>
             </button>
 
@@ -377,15 +377,15 @@ export const AddGameModal: React.FC<AddGameModalProps> = ({
               onClick={handleNameSortClick}
               className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors flex items-center gap-1.5 cursor-pointer active:scale-[0.98] ${
                 sortBy === 'name-asc' || sortBy === 'name-desc'
-                  ? 'bg-white text-[#1a5b8c] border border-blue-200 dark:bg-[#1b2838] dark:text-[#66c0f4] dark:border-[#66c0f4]/40 font-semibold shadow-xs'
+                  ? 'bg-[var(--primary-accent)] text-[var(--bg-app)] border border-[var(--primary-accent)] font-semibold'
                   : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
               }`}
               title="클릭 시 이름 가나다순 오름차순/내림차순 토글"
             >
               {sortBy === 'name-asc' ? (
-                <ArrowUpAZ className={`w-3 h-3 ${sortBy === 'name-asc' ? 'text-[#1a5b8c] dark:text-[#66c0f4]' : 'text-[#66c0f4]'}`} />
+                <ArrowUpAZ className="w-3 h-3" />
               ) : sortBy === 'name-desc' ? (
-                <ArrowDownAZ className={`w-3 h-3 ${sortBy === 'name-desc' ? 'text-[#1a5b8c] dark:text-[#66c0f4]' : 'text-[#66c0f4]'}`} />
+                <ArrowDownAZ className="w-3 h-3" />
               ) : (
                 <ArrowUpAZ className="w-3 h-3 opacity-60" />
               )}
@@ -412,10 +412,10 @@ export const AddGameModal: React.FC<AddGameModalProps> = ({
                 <div
                   key={game.appId}
                   onClick={() => toggleGameSelection(game.appId)}
-                  className={`relative rounded-lg bg-[var(--bg-card)] border transition-all duration-200 cursor-pointer overflow-hidden group select-none shadow-xs ${
+                  className={`relative rounded-[3px] bg-[var(--bg-card)] border transition-all duration-300 cursor-pointer overflow-hidden group select-none ${
                     isSelected
-                      ? 'border-[#3d678d] ring-1 ring-[#3d678d]'
-                      : 'border-[var(--border-card)] hover:border-[#2a475e]'
+                      ? 'border-[var(--primary-accent)] ring-1 ring-[var(--primary-accent)]'
+                      : 'border-[var(--border-card)] hover:border-[var(--primary-accent)]'
                   }`}
                 >
                   {/* Official Steam Header Image (460x215) Container */}
@@ -423,14 +423,14 @@ export const AddGameModal: React.FC<AddGameModalProps> = ({
                     <img
                       src={game.headerImage}
                       alt={game.name}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      className="w-full h-full object-cover transition-[filter] duration-500 group-hover:saturate-125"
                       loading="lazy"
                     />
                     {/* Top right checkbox */}
                     <div
                       className={`absolute top-2 right-2 w-5 h-5 rounded flex items-center justify-center transition-all ${
                         isSelected
-                          ? 'bg-[#2a475e] text-white border border-[#3d678d]'
+                          ? 'bg-[var(--primary-accent)] text-[var(--bg-app)] border border-[var(--primary-accent)]'
                           : 'bg-black/60 border border-slate-500/60'
                       }`}
                     >
@@ -440,13 +440,13 @@ export const AddGameModal: React.FC<AddGameModalProps> = ({
 
                   {/* Card Info */}
                   <div className="p-3">
-                    <h4 className="font-bold text-xs text-[var(--text-primary)] truncate mb-1.5 group-hover:text-[#66c0f4] transition-colors">
+                    <h4 className="font-bold text-xs text-[var(--text-primary)] truncate mb-1.5 group-hover:text-[var(--primary-accent)] transition-colors">
                       {game.name}
                     </h4>
 
                     <div className="flex flex-wrap items-center justify-between text-[11px] text-[var(--text-secondary)] gap-1">
                       <div className="flex items-center gap-1">
-                        <Clock className="w-3 h-3 text-[#66c0f4]" />
+                        <Clock className="w-3 h-3 text-[var(--primary-accent)]" />
                         <span className="font-medium text-[var(--text-primary)]">
                           {playtimeHours}시간
                         </span>
@@ -489,7 +489,7 @@ export const AddGameModal: React.FC<AddGameModalProps> = ({
                   size="sm"
                   onClick={handleSync}
                   disabled={isCooldownActive}
-                  leftIcon={<RefreshCw className="w-3.5 h-3.5 text-[#66c0f4]" />}
+                  leftIcon={<RefreshCw className="w-3.5 h-3.5 text-[var(--primary-accent)]" />}
                 >
                   {isCooldownActive
                     ? `쿨다운 중 (${formattedCooldown})`
@@ -503,7 +503,7 @@ export const AddGameModal: React.FC<AddGameModalProps> = ({
         {/* Modal Footer */}
         <div className="flex items-center justify-between pt-3 border-t border-[var(--border-subtle)]">
           <span className="text-xs text-[var(--text-secondary)] font-medium">
-            선택된 게임: <strong className="text-[#66c0f4]">{selectedCount}</strong>개
+            선택된 게임: <strong className="text-[var(--primary-accent)]">{selectedCount}</strong>개
           </span>
           <div className="flex items-center gap-2.5">
             <Button
@@ -522,7 +522,7 @@ export const AddGameModal: React.FC<AddGameModalProps> = ({
               onClick={handleAdd}
               className="px-5 text-xs font-semibold"
             >
-              선택한 게임 추가
+              게임 추가
             </Button>
           </div>
         </div>

@@ -345,9 +345,9 @@ export const GuestUserGamesModal: React.FC<GuestUserGamesModalProps> = ({
                 key={genre}
                 type="button"
                 onClick={() => handleTagClick(genre)}
-                className={`px-2.5 py-1 rounded-md text-xs tracking-tight transition-all shrink-0 cursor-pointer active:scale-[0.98] ${
+                className={`px-2.5 py-1 rounded-[3px] text-xs tracking-tight transition-all shrink-0 cursor-pointer ${
                   isActive
-                    ? 'bg-[#1a5b8c] text-white border border-[#1a5b8c] dark:bg-[#66c0f4] dark:text-[#111827] dark:border-[#66c0f4] font-bold shadow-xs dark:shadow-[0_0_10px_rgba(102,192,244,0.3)]'
+                    ? 'bg-[var(--primary-accent)] text-[var(--bg-app)] border border-[var(--primary-accent)] font-bold'
                     : 'bg-[var(--bg-surface-elevated)] text-[var(--text-secondary)] border border-[var(--border-card)] hover:text-[var(--text-primary)] hover:border-[var(--border-subtle)] font-medium'
                 }`}
               >
@@ -364,12 +364,12 @@ export const GuestUserGamesModal: React.FC<GuestUserGamesModalProps> = ({
             onClick={() => handleSortChange('playtime')}
             className={`w-full py-2 rounded-md text-xs sm:text-sm font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer active:scale-[0.98] ${
               sortBy === 'playtime'
-                ? 'bg-white text-[#1a5b8c] border border-blue-200 dark:bg-[#1b2838] dark:text-[#66c0f4] dark:border-[#66c0f4]/40 font-bold shadow-xs'
+                ? 'bg-[var(--primary-accent)] text-[var(--bg-app)] border border-[var(--primary-accent)] font-bold'
                 : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
             }`}
             title="플레이타임이 많은 순으로 정렬"
           >
-            <Clock className={`w-3.5 h-3.5 ${sortBy === 'playtime' ? 'text-[#1a5b8c] dark:text-[#66c0f4]' : ''}`} />
+            <Clock className="w-3.5 h-3.5" />
             <span>플레이타임순</span>
           </button>
 
@@ -378,12 +378,12 @@ export const GuestUserGamesModal: React.FC<GuestUserGamesModalProps> = ({
             onClick={() => handleSortChange('recent')}
             className={`w-full py-2 rounded-md text-xs sm:text-sm font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer active:scale-[0.98] ${
               sortBy === 'recent'
-                ? 'bg-white text-[#1a5b8c] border border-blue-200 dark:bg-[#1b2838] dark:text-[#66c0f4] dark:border-[#66c0f4]/40 font-bold shadow-xs'
+                ? 'bg-[var(--primary-accent)] text-[var(--bg-app)] border border-[var(--primary-accent)] font-bold'
                 : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
             }`}
             title="최근에 플레이한 순으로 정렬"
           >
-            <Calendar className={`w-3.5 h-3.5 ${sortBy === 'recent' ? 'text-[#1a5b8c] dark:text-[#66c0f4]' : ''}`} />
+            <Calendar className="w-3.5 h-3.5" />
             <span>최근 플레이순</span>
           </button>
 
@@ -392,15 +392,15 @@ export const GuestUserGamesModal: React.FC<GuestUserGamesModalProps> = ({
             onClick={handleNameSortClick}
             className={`w-full py-2 rounded-md text-xs sm:text-sm font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer active:scale-[0.98] ${
               sortBy === 'name-asc' || sortBy === 'name-desc'
-                ? 'bg-white text-[#1a5b8c] border border-blue-200 dark:bg-[#1b2838] dark:text-[#66c0f4] dark:border-[#66c0f4]/40 font-bold shadow-xs'
+                ? 'bg-[var(--primary-accent)] text-[var(--bg-app)] border border-[var(--primary-accent)] font-bold'
                 : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
             }`}
             title="클릭 시 이름 가나다순 오름차순/내림차순 토글"
           >
             {sortBy === 'name-asc' ? (
-              <ArrowUpAZ className={`w-3.5 h-3.5 ${sortBy === 'name-asc' ? 'text-[#1a5b8c] dark:text-[#66c0f4]' : ''}`} />
+              <ArrowUpAZ className="w-3.5 h-3.5" />
             ) : sortBy === 'name-desc' ? (
-              <ArrowDownAZ className={`w-3.5 h-3.5 ${sortBy === 'name-desc' ? 'text-[#1a5b8c] dark:text-[#66c0f4]' : ''}`} />
+              <ArrowDownAZ className="w-3.5 h-3.5" />
             ) : (
               <ArrowUpAZ className="w-3.5 h-3.5 opacity-60" />
             )}
@@ -435,7 +435,7 @@ export const GuestUserGamesModal: React.FC<GuestUserGamesModalProps> = ({
                 <div
                   key={game.appId}
                   onClick={() => handleCardClick(game)}
-                  className={`group relative flex flex-col gap-3 p-3.5 sm:p-4 rounded-xl transition-all bg-[var(--bg-card)] border border-[var(--border-card)] hover:border-[#66c0f4] hover:bg-[var(--bg-surface-elevated)] shadow-xs ${
+                  className={`group relative flex flex-col gap-3 p-3.5 sm:p-4 rounded-[3px] transition-all duration-300 bg-[var(--bg-card)] border border-[var(--border-card)] hover:border-[var(--primary-accent)] hover:bg-[var(--bg-surface-elevated)] ${
                     !isReadOnly ? 'cursor-pointer' : 'cursor-default'
                   }`}
                   title={!isReadOnly ? '클릭 시 스팀 도전과제 정보 동기화' : undefined}
@@ -444,18 +444,18 @@ export const GuestUserGamesModal: React.FC<GuestUserGamesModalProps> = ({
                   <div className="flex items-start justify-between gap-3 sm:gap-4 min-w-0">
                     {/* Left: Capsule Image + Info Block */}
                     <div className="flex items-start gap-3.5 sm:gap-4 min-w-0 flex-1">
-                      <div className="w-36 sm:w-52 md:w-60 aspect-[460/215] rounded-lg overflow-hidden shrink-0 bg-[#07090e] border border-[var(--border-subtle)] shadow-xs">
+                      <div className="w-36 sm:w-52 md:w-60 aspect-[460/215] rounded-[2px] overflow-hidden shrink-0 bg-[var(--bg-app)] border border-[var(--border-subtle)]">
                         <img
                           src={game.headerImage}
                           alt={game.name}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+                          className="w-full h-full object-cover transition-[filter] duration-500 group-hover:saturate-125"
                           loading="lazy"
                         />
                       </div>
 
                       {/* Title at top, Playtime Stats below in place of tags */}
                       <div className="flex flex-col justify-between self-stretch min-w-0 flex-1 py-0.5">
-                        <span className="font-bold text-base sm:text-lg md:text-xl text-[var(--text-primary)] group-hover:text-[#66c0f4] transition-colors truncate">
+                        <span className="font-bold text-base sm:text-lg md:text-xl text-[var(--text-primary)] group-hover:text-[var(--primary-accent)] transition-colors truncate">
                           {game.name}
                         </span>
 
@@ -491,10 +491,10 @@ export const GuestUserGamesModal: React.FC<GuestUserGamesModalProps> = ({
                         target="_blank"
                         rel="noopener noreferrer"
                         onClick={(e) => e.stopPropagation()}
-                        className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium bg-[var(--bg-surface-elevated)] border border-[var(--border-card)] text-[var(--text-secondary)] hover:text-[#66c0f4] hover:border-[#66c0f4]/50 active:scale-95 transition-all shadow-xs shrink-0 cursor-pointer group/store"
+                        className="flex items-center gap-1.5 px-2.5 py-1 rounded-[3px] text-xs font-medium bg-transparent border border-[var(--border-card)] text-[var(--text-secondary)] hover:text-[var(--primary-accent)] hover:border-[var(--primary-accent)] transition-all shrink-0 cursor-pointer group/store"
                         title="스팀 공식 상점 페이지 열기 (새 창)"
                       >
-                        <ExternalLink className="w-3.5 h-3.5 text-[var(--text-muted)] group-hover/store:text-[#66c0f4] transition-colors" />
+                        <ExternalLink className="w-3.5 h-3.5 text-[var(--text-muted)] group-hover/store:text-[var(--primary-accent)] transition-colors" />
                         <span>스팀 상점</span>
                       </a>
                     </div>
@@ -524,7 +524,7 @@ export const GuestUserGamesModal: React.FC<GuestUserGamesModalProps> = ({
                               className={
                                 isPerfect
                                   ? 'text-emerald-500 dark:text-emerald-400'
-                                  : 'text-[#66c0f4]'
+                                  : 'text-[var(--primary-accent)]'
                               }
                             >
                               {achieved}
@@ -535,7 +535,7 @@ export const GuestUserGamesModal: React.FC<GuestUserGamesModalProps> = ({
                             className={`text-xs font-bold px-1.5 py-0.5 rounded ${
                               isPerfect
                                 ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20'
-                                : 'bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/20'
+                                : 'bg-[var(--primary-accent)]/10 text-[var(--primary-accent)] border border-[var(--primary-accent)]/20'
                             }`}
                           >
                             {rate.toFixed(1)}%
@@ -548,19 +548,19 @@ export const GuestUserGamesModal: React.FC<GuestUserGamesModalProps> = ({
                           className={`h-full rounded-full transition-all duration-500 ${
                             isPerfect
                               ? 'bg-emerald-500 dark:bg-emerald-400'
-                              : 'bg-[#66c0f4]'
+                              : 'bg-[var(--primary-accent)]'
                           }`}
                           style={{ width: `${Math.min(100, Math.max(0, rate))}%` }}
                         />
                       </div>
                     </div>
                   ) : (
-                    <div className="rounded-lg bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] py-2.5 px-3 flex items-center justify-between text-xs text-[var(--text-muted)] group-hover:border-[#66c0f4]/40 transition-colors">
+                    <div className="rounded-[3px] bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] py-2.5 px-3 flex items-center justify-between text-xs text-[var(--text-muted)] group-hover:border-[var(--primary-accent)] transition-colors">
                       <div className="flex items-center gap-2">
                         <span>도전과제 미동기화</span>
                       </div>
                       {!isReadOnly && (
-                        <span className="text-[11px] text-[#66c0f4] font-medium flex items-center gap-1">
+                        <span className="text-[11px] text-[var(--primary-accent)] font-medium flex items-center gap-1">
                           클릭하여 업적 불러오기
                         </span>
                       )}

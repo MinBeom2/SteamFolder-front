@@ -140,7 +140,7 @@ export const ShowcaseSettingsForm: React.FC<ShowcaseSettingsFormProps> = ({
           className={`rounded-lg p-4 text-sm ${
             isCooldownActive
               ? 'bg-amber-50 dark:bg-amber-950/50 border border-amber-300 dark:border-amber-800/60 text-amber-800 dark:text-amber-200'
-              : 'bg-sky-50 dark:bg-[#121b28] border border-sky-200 dark:border-[#2a475e] text-sky-900 dark:text-slate-200 shadow-sm'
+              : 'bg-[var(--bg-surface-elevated)] border border-[var(--border-card)] text-[var(--text-primary)]'
           }`}
         >
           {syncStatus}
@@ -203,7 +203,7 @@ export const ShowcaseSettingsForm: React.FC<ShowcaseSettingsFormProps> = ({
         </div>
         <p className="text-xs leading-relaxed text-[var(--text-secondary)]">
           {isPublic
-            ? '누구나 쇼케이스 공유 링크를 통해 열람할 수 있습니다.'
+            ? '누구나 ㅎ쇼케이스 공유 링크를 통해 열람할 수 있습니다.'
             : '나만이 내 쇼케이스에 접근할 수 있습니다.'}
         </p>
       </div>
@@ -233,7 +233,7 @@ export const ShowcaseSettingsForm: React.FC<ShowcaseSettingsFormProps> = ({
           leftIcon={
             <RefreshCw
               className={`h-4 w-4 ${
-                isCooldownActive ? 'text-amber-500' : 'text-[#66c0f4] dark:text-[#66c0f4] light:text-blue-600'
+                isCooldownActive ? 'text-amber-500' : 'text-[var(--primary-accent)]'
               }`}
             />
           }

@@ -72,34 +72,29 @@ export const GameCard: React.FC<GameCardProps> = ({
       onClick={handleClick}
       onDoubleClick={handleDoubleClick}
       onContextMenu={handleContextMenu}
-      className={`relative flex flex-col items-center gap-1.5 p-2 rounded-lg cursor-pointer select-none transition-all duration-200 group ${
+      className={`group relative flex w-full cursor-pointer select-none flex-col items-start gap-3 p-1 transition-[transform,background-color,outline-color] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
         isSelected
-          ? 'ring-2 ring-[#2a475e] bg-[#1e3a5f]/25 scale-105'
-          : 'hover:scale-105 hover:bg-black/5 dark:hover:bg-white/5'
+          ? 'bg-[var(--selection-bg)] outline outline-1 outline-[var(--selection-border)]'
+          : 'hover:scale-[1.025]'
       }`}
     >
       {/* Game Card Container - Official Steam Header Aspect Ratio (460:215) */}
-      <div className="relative w-36 sm:w-44 aspect-[460/215] rounded-lg bg-[var(--bg-card)] border border-[var(--border-card)] p-1 shadow-sm group-hover:border-[#2a475e] transition-all overflow-hidden">
-        <div className="w-full h-full rounded-md overflow-hidden bg-[#07090e]">
+      <div className="relative aspect-[460/215] w-full overflow-hidden border border-[var(--border-card)] bg-[var(--bg-card)] shadow-[0_12px_30px_rgba(0,0,0,0.12)] transition-colors duration-300 group-hover:border-[var(--primary-accent)]">
+        <div className="h-full w-full overflow-hidden bg-[#0e0f0c]">
           <img
             src={game.headerImage}
             alt={game.name}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            className="h-full w-full object-cover grayscale-[10%] transition-[filter] duration-500 group-hover:grayscale-0"
             loading="lazy"
           />
         </div>
       </div>
 
       {/* Card Info */}
-      <div className="text-center max-w-[160px] w-full px-1">
-        <h4 className="text-xs font-bold text-[var(--text-primary)] truncate group-hover:text-[#66c0f4] transition-colors">
+      <div className="w-full border-t border-[var(--border-subtle)] px-1 pt-2 text-center">
+        <h4 className="truncate text-center text-xs font-bold text-[var(--text-primary)] transition-colors group-hover:text-[var(--primary-accent)]">
           {game.name}
         </h4>
-        {game.genres && game.genres.length > 0 && (
-          <p className="text-[10px] text-[var(--text-secondary)] font-medium truncate">
-            {game.genres.slice(0, 2).join(' • ')}
-          </p>
-        )}
       </div>
     </div>
   );

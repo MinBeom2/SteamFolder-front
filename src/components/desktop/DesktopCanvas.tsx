@@ -14,7 +14,6 @@ import {
   Info,
   Share2,
   Check,
-  Lock,
 } from 'lucide-react';
 
 interface DesktopCanvasProps {
@@ -311,20 +310,20 @@ export const DesktopCanvas: React.FC<DesktopCanvasProps> = ({ isReadOnly = false
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
       onContextMenu={handleCanvasContextMenu}
-      className="relative min-h-[calc(100vh-61px)] w-full p-4 sm:p-8 flex flex-col justify-between select-none"
+      className="relative flex min-h-[calc(100vh-68px)] w-full select-none flex-col justify-between px-4 py-7 sm:px-8 sm:py-10"
     >
       {/* Windows Marquee Drag Selection Rectangle */}
       {selectionBox && selectionStyle && (
         <div
           style={selectionStyle}
-          className="absolute z-30 border border-[#2a475e] bg-[#1e3a5f]/25 pointer-events-none rounded-[2px] shadow-sm transition-none"
+          className="pointer-events-none absolute z-30 rounded-[1px] border border-[var(--selection-border)] bg-[var(--selection-bg)] transition-none"
         />
       )}
 
       {/* Background Dot Matrix Pattern */}
       <div className="absolute inset-0 desktop-dot-bg opacity-40 pointer-events-none" />
 
-      <div className="relative z-10 max-w-7xl mx-auto w-full">
+      <div className="relative z-10 mx-auto w-full max-w-[1440px]">
         {/* Breadcrumb Navigation */}
         <div data-interactive="true">
           <Breadcrumb isReadOnly={isReadOnly} />
@@ -333,50 +332,40 @@ export const DesktopCanvas: React.FC<DesktopCanvasProps> = ({ isReadOnly = false
         {/* Controls & Actions Bar */}
         <div
           data-interactive="true"
-          className="flex flex-wrap items-center justify-between gap-4 -mt-2 mb-6"
+          className="mb-6 flex flex-wrap items-center justify-between gap-4"
         >
-          {/* Left: Folder Title (if inside folder) + Share Button + Private Lock */}
-          <div className="flex items-center gap-3">
-            {currentFolder && (
-              <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-[var(--text-primary)] flex items-center gap-2 sm:gap-2.5">
-                <span>{currentFolder.name}</span>
-              </h1>
-            )}
+          <div className="flex flex-wrap items-center gap-4">
+            <h1 className="text-4xl font-black leading-none tracking-[-0.055em] text-[var(--text-primary)] sm:text-5xl">
+              {currentFolder?.name || '나의 컬렉션'}
+            </h1>
 
             {isAuthenticated && user && !isReadOnly && (
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="steam"
-                  size="sm"
-                  onClick={handleShareClick}
-                  className="h-8 text-xs sm:text-[13px] font-medium px-3 shadow-xs cursor-pointer gap-1.5"
-                  leftIcon={
-                    isCopied ? (
-                      <Check className="w-4 h-4 text-emerald-400" />
-                    ) : (
-                      <Share2 className="w-4 h-4" />
-                    )
-                  }
-                >
-                  {isCopied ? '링크 복사됨!' : '공유'}
-                </Button>
-                {!currentFolder && (user?.isPublic === false || showcase?.user?.isPublic === false) && (
-                  <span title="비공개 쇼케이스" className="flex items-center text-[var(--text-secondary)] shrink-0">
-                    <Lock className="w-4 h-4 text-slate-400" aria-hidden="true" />
-                  </span>
-                )}
-              </div>
+              <Button
+                variant="steam"
+                size="sm"
+                onClick={handleShareClick}
+                className="h-9 px-3 text-xs font-medium"
+                leftIcon={
+                  isCopied ? (
+                    <Check className="h-4 w-4 text-emerald-400" />
+                  ) : (
+                    <Share2 className="h-4 w-4" />
+                  )
+                }
+              >
+                {isCopied ? '링크 복사됨!' : '공유'}
+              </Button>
             )}
           </div>
 
           {/* Right: Action Buttons ([폴더 추가], [게임 추가]) */}
           {!isReadOnly && (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 sm:pb-1">
               <Button
                 variant="secondary"
                 size="sm"
                 onClick={() => setCreateFolderModalOpen(true)}
-                className="h-8 text-xs sm:text-[13px] font-medium px-3.5 shadow-xs cursor-pointer gap-1.5"
+                className="h-9 px-4 text-xs font-medium hover:translate-y-0"
                 leftIcon={<FolderPlus className="w-4 h-4" />}
               >
                 폴더 추가
@@ -387,7 +376,7 @@ export const DesktopCanvas: React.FC<DesktopCanvasProps> = ({ isReadOnly = false
                   variant="secondary"
                   size="sm"
                   onClick={() => setAddGameModalOpen(true)}
-                  className="h-8 text-xs sm:text-[13px] font-medium px-3.5 shadow-xs cursor-pointer gap-1.5"
+                  className="h-9 px-4 text-xs font-medium hover:translate-y-0"
                   leftIcon={<Plus className="w-4 h-4" />}
                 >
                   게임 추가
@@ -403,7 +392,7 @@ export const DesktopCanvas: React.FC<DesktopCanvasProps> = ({ isReadOnly = false
             <LoadingSpinner size="lg" label="쇼케이스 캔버스 로딩 중..." />
           </div>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4 min-h-[420px] p-4 rounded-xl bg-[var(--glass-panel-bg)] border border-[var(--border-subtle)] backdrop-blur-sm">
+          <div className="editorial-rule grid min-h-[420px] grid-cols-2 gap-x-3 gap-y-7 border-y py-7 sm:grid-cols-3 md:grid-cols-6">
             {/* Render 2D Grid Cells */}
             {Array.from({ length: totalRows }).map((_, rowIndex) =>
               Array.from({ length: 6 }).map((_, colIndex) => {
@@ -424,12 +413,12 @@ export const DesktopCanvas: React.FC<DesktopCanvasProps> = ({ isReadOnly = false
                     onDragOver={(e) => handleCellDragOver(e, colIndex, rowIndex)}
                     onDragLeave={handleCellDragLeave}
                     onDrop={(e) => handleCellDrop(e, colIndex, rowIndex)}
-                    className={`relative min-h-[130px] rounded-lg flex items-center justify-center transition-all ${
+                    className={`relative flex min-h-[142px] items-center justify-center border border-transparent transition-colors duration-300 ${
                       isCellDragOver
                         ? 'border-2 border-dashed border-emerald-400 bg-emerald-500/10'
                         : cellItem
                         ? ''
-                        : 'border border-dashed border-transparent hover:border-slate-800/80 hover:bg-white/[0.02]'
+                        : 'hover:border-[var(--border-subtle)] hover:bg-[var(--bg-surface)]/35'
                     }`}
                   >
                     {cellItem && cellItem.type === 'FOLDER' && cellItem.folderData && (
@@ -481,7 +470,7 @@ export const DesktopCanvas: React.FC<DesktopCanvasProps> = ({ isReadOnly = false
       {!isReadOnly && (
         <div
           data-interactive="true"
-          className="relative z-10 max-w-7xl mx-auto w-full pt-8 flex items-center justify-between text-xs text-[var(--text-muted)] border-t border-[var(--border-subtle)]"
+          className="relative z-10 mx-auto flex w-full max-w-[1440px] items-center justify-between border-t border-[var(--border-subtle)] pt-6 text-[10px] uppercase tracking-[0.08em] text-[var(--text-muted)]"
         >
           <span>마우스 드래그: 다중 선택 • 아이콘 드래그: 이동 • Ctrl+C/V: 복사/붙여넣기 • Delete: 삭제</span>
         </div>

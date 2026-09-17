@@ -6,20 +6,19 @@ import type { ShowcaseResponse, FolderResponse, CanvasItem } from '@/types/showc
 import { FolderCard } from '@/components/desktop/FolderCard';
 import { GameCard } from '@/components/desktop/GameCard';
 import { GuestBanner } from '@/components/layout/GuestBanner';
+import { Navbar } from '@/components/layout/Navbar';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { Button } from '@/components/common/Button';
 import { Breadcrumb } from '@/components/desktop/Breadcrumb';
 import { GameDetailModal } from '@/components/modals/GameDetailModal';
 import { DirectLoginModal } from '@/components/modals/DirectLoginModal';
 import { GuestUserGamesModal } from '@/components/modals/GuestUserGamesModal';
-import { useThemeStore } from '@/store/useThemeStore';
 import { useAuthStore } from '@/store/useAuthStore';
-import { Lock, Sun, Moon, Heart, Info, Share2, Check, Gamepad2, ChevronRight } from 'lucide-react';
+import { Lock, Heart, Info, Share2, Check, ChevronRight } from 'lucide-react';
 
 export const GuestShowcasePage: React.FC = () => {
   const { identifier, folderId } = useParams<{ identifier?: string; folderId?: string }>();
   const navigate = useNavigate();
-  const { theme, toggleTheme } = useThemeStore();
   const { user: currentUser, isAuthenticated } = useAuthStore();
   const targetId = identifier || 'guest';
 
@@ -207,19 +206,11 @@ export const GuestShowcasePage: React.FC = () => {
 
   if (isPrivate) {
     return (
-      <div className="min-h-screen bg-[var(--bg-app)] text-[var(--text-primary)] flex flex-col justify-between selection:bg-[#66c0f4]/20">
-        <header className="sticky top-0 z-40 w-full bg-[var(--bg-header)] backdrop-blur-md border-b border-[var(--border-subtle)] px-6 py-3">
-          <div className="max-w-7xl mx-auto flex items-center justify-between">
-            <Link to="/" className="flex items-center gap-1 group cursor-pointer shrink-0">
-              <span className="font-bold text-lg tracking-tight text-[var(--text-primary)] group-hover:text-[#66c0f4] transition-colors">
-                SteamFolder
-              </span>
-            </Link>
-          </div>
-        </header>
+      <div className="min-h-screen bg-[var(--bg-app)] text-[var(--text-primary)] flex flex-col justify-between">
+        <Navbar />
 
         <main className="flex-1 flex flex-col items-center justify-center p-6 text-center">
-          <div className="max-w-md w-full glass-modal p-8 rounded-xl border border-amber-500/40 space-y-4 animate-in fade-in zoom-in-95">
+          <div className="max-w-md w-full bg-[var(--bg-surface)] p-8 rounded-[3px] border border-amber-500/40 space-y-4 animate-in fade-in slide-in-from-bottom-2">
             <div className="w-12 h-12 rounded-full bg-amber-500/10 border border-amber-500/20 flex items-center justify-center mx-auto text-amber-500">
               <Lock className="w-6 h-6" />
             </div>
@@ -242,19 +233,11 @@ export const GuestShowcasePage: React.FC = () => {
 
   if (error || !showcase) {
     return (
-      <div className="min-h-screen bg-[var(--bg-app)] text-[var(--text-primary)] flex flex-col justify-between selection:bg-[#66c0f4]/20">
-        <header className="sticky top-0 z-40 w-full bg-[var(--bg-header)] backdrop-blur-md border-b border-[var(--border-subtle)] px-6 py-3">
-          <div className="max-w-7xl mx-auto flex items-center justify-between">
-            <Link to="/" className="flex items-center gap-1 cursor-pointer shrink-0">
-              <span className="font-bold text-lg tracking-tight text-[var(--text-primary)] transition-colors">
-                SteamFolder
-              </span>
-            </Link>
-          </div>
-        </header>
+      <div className="min-h-screen bg-[var(--bg-app)] text-[var(--text-primary)] flex flex-col justify-between">
+        <Navbar />
 
         <main className="flex-1 flex flex-col items-center justify-center p-6 text-center">
-          <div className="max-w-md w-full glass-modal p-8 rounded-xl border border-[var(--border-card)] space-y-4 animate-in fade-in zoom-in-95">
+          <div className="max-w-md w-full bg-[var(--bg-surface)] p-8 rounded-[3px] border border-[var(--border-card)] space-y-4 animate-in fade-in slide-in-from-bottom-2">
             <h2 className="text-xl font-bold text-[var(--text-primary)]">쇼케이스를 찾을 수 없습니다</h2>
             <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
               {error || '존재하지 않는 유저이거나 등록된 쇼케이스가 없습니다.'}
@@ -275,73 +258,46 @@ export const GuestShowcasePage: React.FC = () => {
   const playtimeHours = Math.round((showcase.stats.totalPlaytimeForever || 0) / 60);
 
   return (
-    <div className="min-h-screen bg-[var(--bg-app)] text-[var(--text-primary)] flex flex-col justify-between pb-20 selection:bg-[#66c0f4]/20 transition-colors duration-200">
+    <div className="flex min-h-screen flex-col justify-between bg-[var(--bg-app)] pb-20 text-[var(--text-primary)] transition-colors duration-300">
       {/* Background Dot Matrix Pattern */}
       <div className="absolute inset-0 desktop-dot-bg opacity-40 pointer-events-none" />
 
       {/* Floating Feedback Toast */}
       {toastMessage && (
         <div className="fixed top-16 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 px-4 py-2.5 rounded-lg bg-[var(--bg-surface)] text-[var(--text-primary)] border border-[var(--border-subtle)] shadow-xl animate-in fade-in slide-in-from-top-2 text-xs font-semibold">
-          <Info className="w-4 h-4 text-[#66c0f4]" />
+          <Info className="w-4 h-4 text-[var(--primary-accent)]" />
           <span>{toastMessage}</span>
         </div>
       )}
 
-      {/* Top Guest Navbar */}
-      <header className="sticky top-0 z-40 w-full bg-[var(--bg-header)] backdrop-blur-md border-b border-[var(--border-subtle)] px-6 py-3 transition-colors">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-1 cursor-pointer shrink-0">
-            <span className="font-bold text-lg tracking-tight text-[var(--text-primary)] transition-colors">
-              SteamFolder
-            </span>
-          </Link>
-
-          <div className="flex items-center gap-2.5">
-
-            {/* Dark / Light Mode Toggle Button */}
-            <button
-              type="button"
-              onClick={toggleTheme}
-              className="p-2 rounded-md bg-[var(--nav-btn-bg)] border border-[var(--nav-btn-border)] text-[var(--nav-btn-text)] hover:text-[var(--text-primary)] hover:border-[var(--border-card)] active:scale-[0.96] transition-colors cursor-pointer flex items-center justify-center shadow-xs"
-              title={theme === 'dark' ? '라이트 모드로 전환' : '다크 모드로 전환'}
-              aria-label="테마 모드 전환"
-            >
-              {theme === 'dark' ? (
-                <Sun className="w-4 h-4 text-amber-400 hover:rotate-45 transition-transform" />
-              ) : (
-                <Moon className="w-4 h-4 text-indigo-500 hover:-rotate-12 transition-transform" />
-              )}
-            </button>
-          </div>
-        </div>
-      </header>
+      <Navbar />
 
       {/* Main Showcase Container */}
-      <main className="relative z-10 max-w-7xl mx-auto w-full p-4 sm:p-8 flex-1 flex flex-col justify-start select-none">
+      <main className="relative z-10 mx-auto flex w-full max-w-[1440px] flex-1 select-none flex-col justify-start px-5 py-9 sm:px-10 sm:py-12">
         {/* User Profile & Showcase Stats Banner */}
-        <div className="flex flex-wrap items-center justify-between gap-6 p-5 sm:p-6 rounded-xl bg-[var(--glass-panel-bg)] border border-[var(--border-subtle)] backdrop-blur-md mb-6 shadow-sm">
-          <div className="flex items-center gap-4">
+        <div className="mb-6 grid gap-8 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end">
+          <div className="flex items-end gap-5 sm:gap-7">
             <img
               src={
                 showcase.user.avatarUrl ||
                 'https://avatars.steamstatic.com/fef49e7fa7e1997310d705b2a6158ff8dc1cdfeb_full.jpg'
               }
               alt={showcase.user.username}
-              className="w-14 h-14 rounded-full ring-2 ring-[var(--border-card)] object-cover shadow-sm"
+              className="h-20 w-20 object-cover grayscale-[15%] sm:h-28 sm:w-28"
             />
             <div>
-              <h1 className="text-xl sm:text-2xl font-bold text-[var(--text-primary)] tracking-tight flex items-center gap-2">
+              <h1 className="flex items-center gap-3 text-3xl font-black tracking-[-0.055em] text-[var(--text-primary)] sm:text-6xl">
                 {!showcase.user.isPublic && (
                   <span title="비공개 쇼케이스 (링크 공유됨)" className="flex items-center text-[var(--text-secondary)] shrink-0">
                     <Lock className="w-5 h-5 text-slate-400" aria-hidden="true" />
                   </span>
                 )}
-                <span>{showcase.user.username}님의 쇼케이스</span>
+                <span>{showcase.user.username}</span>
                 <Button
                   variant="steam"
                   size="sm"
                   onClick={handleShareClick}
-                  className="h-7 text-xs font-medium px-2.5 ml-1 shadow-xs cursor-pointer"
+                  className="ml-1 h-8 px-3 text-xs font-medium"
                   leftIcon={
                     isCopied ? (
                       <Check className="w-3.5 h-3.5 text-emerald-400" />
@@ -357,20 +313,19 @@ export const GuestShowcasePage: React.FC = () => {
           </div>
 
           {/* Profile Stats & Actions */}
-          <div className="flex items-center gap-3 sm:gap-4 flex-wrap">
+          <div className="flex flex-wrap items-center gap-3 sm:justify-end sm:gap-4">
             {/* Owned Games Button (방안 1: 칩/뱃지형) */}
             <button
               type="button"
               onClick={() => setIsGamesModalOpen(true)}
-              className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[var(--bg-card)] border border-[var(--border-card)] hover:border-[#66c0f4] hover:text-[#66c0f4] text-xs sm:text-sm font-semibold transition-all cursor-pointer shadow-xs active:scale-95 group"
+              className="group flex cursor-pointer items-center gap-2 py-1.5 text-xs font-semibold transition-colors hover:text-[var(--primary-accent)] sm:text-sm"
               title="보유 게임 전체 목록 열기"
             >
-              <Gamepad2 className="w-4 h-4 text-[#66c0f4] shrink-0" />
               <span className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors">보유 게임</span>
-              <strong className="text-[var(--text-primary)] group-hover:text-[#66c0f4] transition-colors">
+              <strong className="text-[var(--text-primary)] transition-colors group-hover:text-[var(--primary-accent)]">
                 {showcase.stats.totalOwnedGames}개
               </strong>
-              <ChevronRight className="w-3.5 h-3.5 text-[var(--text-muted)] group-hover:text-[#66c0f4] group-hover:translate-x-0.5 transition-transform shrink-0" />
+              <ChevronRight className="h-3.5 w-3.5 shrink-0 text-[var(--text-muted)] transition-transform group-hover:translate-x-0.5 group-hover:text-[var(--primary-accent)]" />
             </button>
 
             <span className="text-[var(--text-muted)] hidden sm:inline">•</span>
@@ -384,7 +339,7 @@ export const GuestShowcasePage: React.FC = () => {
               type="button"
               onClick={handleToggleLike}
               disabled={isLikeLoading}
-              className={`h-9 px-3.5 rounded-lg border text-xs sm:text-sm font-semibold transition-all cursor-pointer shadow-xs active:scale-95 flex items-center gap-1.5 ${
+              className={`flex h-9 cursor-pointer items-center gap-1.5 rounded-[2px] border px-3.5 text-xs font-semibold transition-colors sm:text-sm ${
                 isLiked
                   ? 'bg-rose-500/15 border-rose-500/40 text-rose-400 hover:bg-rose-500/25'
                   : 'bg-[var(--nav-btn-bg)] border-[var(--nav-btn-border)] text-[var(--text-secondary)] hover:text-rose-400 hover:border-rose-400/40'
@@ -402,9 +357,10 @@ export const GuestShowcasePage: React.FC = () => {
         </div>
 
         {/* Hierarchical Breadcrumb Navigation Path */}
-        <div className="mb-4">
+        <div className="mb-5">
           <Breadcrumb
             isReadOnly={true}
+            className="mb-0"
             basePath={`/showcase/${encodeURIComponent(targetId)}`}
             trail={
               currentFolder
@@ -422,7 +378,7 @@ export const GuestShowcasePage: React.FC = () => {
         </div>
 
         {/* 2D 6-Column Desktop Grid Canvas */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4 min-h-[420px] p-4 rounded-xl bg-[var(--glass-panel-bg)] border border-[var(--border-subtle)] backdrop-blur-sm shadow-sm">
+        <div className="editorial-rule grid min-h-[420px] grid-cols-2 gap-x-3 gap-y-7 border-y py-7 sm:grid-cols-3 md:grid-cols-6">
           {items.length === 0 ? (
             <div className="col-span-full py-20 text-center text-xs text-[var(--text-muted)]">
               폴더가 비어있습니다.
@@ -437,7 +393,7 @@ export const GuestShowcasePage: React.FC = () => {
                 return (
                   <div
                     key={`${colIndex}-${rowIndex}`}
-                    className="relative min-h-[130px] rounded-lg flex items-center justify-center"
+                    className="relative flex min-h-[142px] items-center justify-center"
                   >
                     {cellItem && cellItem.type === 'FOLDER' && cellItem.folderData && (
                       <div className="w-full flex items-center justify-center">

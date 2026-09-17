@@ -48,13 +48,13 @@ export const Modal: React.FC<ModalProps> = ({
     >
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-black/80 backdrop-blur-md transition-opacity duration-200"
+        className="fixed inset-0 bg-black/75 backdrop-blur-[2px] transition-opacity duration-300"
         onClick={onClose}
       />
 
       {/* Modal Container */}
       <div
-        className={`relative w-full ${maxWidthStyles[maxWidth]} glass-modal rounded-xl shadow-2xl border border-[var(--border-modal)] overflow-hidden z-10 animate-in fade-in zoom-in-95 duration-200 text-[var(--text-primary)]`}
+        className={`relative w-full ${maxWidthStyles[maxWidth]} glass-modal rounded-[4px] border border-[var(--border-modal)] overflow-hidden z-10 animate-in fade-in slide-in-from-bottom-2 duration-300 text-[var(--text-primary)] shadow-[var(--soft-shadow)]`}
       >
         {/* Header */}
         {(title || showCloseButton) && (
@@ -71,7 +71,7 @@ export const Modal: React.FC<ModalProps> = ({
             {showCloseButton && (
               <button
                 onClick={onClose}
-                className="p-1.5 rounded-md text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/10 active:scale-[0.96] transition-colors cursor-pointer"
+                className="p-1.5 rounded-[2px] text-[var(--text-secondary)] hover:text-[var(--primary-accent)] hover:bg-black/5 dark:hover:bg-white/5 transition-colors cursor-pointer"
                 aria-label="창 닫기"
               >
                 <X className="w-5 h-5" />
