@@ -392,7 +392,7 @@ export const DesktopCanvas: React.FC<DesktopCanvasProps> = ({ isReadOnly = false
             <LoadingSpinner size="lg" label="쇼케이스 캔버스 로딩 중..." />
           </div>
         ) : (
-          <div className="editorial-rule grid min-h-[420px] grid-cols-2 gap-x-3 gap-y-7 border-y py-7 sm:grid-cols-3 md:grid-cols-6">
+          <div className="editorial-rule grid min-h-[420px] grid-cols-2 gap-x-3 gap-y-7 border-t py-7 sm:grid-cols-3 md:grid-cols-6">
             {/* Render 2D Grid Cells */}
             {Array.from({ length: totalRows }).map((_, rowIndex) =>
               Array.from({ length: 6 }).map((_, colIndex) => {
@@ -470,7 +470,7 @@ export const DesktopCanvas: React.FC<DesktopCanvasProps> = ({ isReadOnly = false
       {!isReadOnly && (
         <div
           data-interactive="true"
-          className="relative z-10 mx-auto flex w-full max-w-[1440px] items-center justify-between border-t border-[var(--border-subtle)] pt-6 text-[10px] uppercase tracking-[0.08em] text-[var(--text-muted)]"
+          className="relative z-10 mx-auto flex w-full max-w-[1440px] items-center justify-between border-t border-[var(--border-subtle)] pt-6 text-[11px] uppercase tracking-[0.08em] text-[var(--text-muted)]"
         >
           <span>마우스 드래그: 다중 선택 • 아이콘 드래그: 이동 • Ctrl+C/V: 복사/붙여넣기 • Delete: 삭제</span>
         </div>

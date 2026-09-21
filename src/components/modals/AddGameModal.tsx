@@ -153,7 +153,7 @@ export const AddGameModal: React.FC<AddGameModalProps> = ({
       console.error('Failed to sync games:', err);
       const resData = (err as { response?: { data?: { code?: string; message?: string } } })?.response?.data;
       if (resData?.code !== 'G005' && !resData?.message?.includes('쿨다운')) {
-        setErrorMessage(resData?.message || '스팀 동기화 요청 중 오류가 발생했습니다.');
+        setErrorMessage(getErrorMessage(err, '스팀 동기화 요청 중 오류가 발생했습니다.'));
       }
     }
   };
@@ -397,12 +397,15 @@ export const AddGameModal: React.FC<AddGameModalProps> = ({
         </div>
 
         {/* 4. Game Card Grid (3 Columns) - Steam Official Header Aspect Ratio (460:215) */}
-        {isLoadingGames ? (
-          <div className="py-16 flex items-center justify-center">
-            <LoadingSpinner size="md" label="스팀 게임 목록 불러오는 중..." />
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3.5 max-h-[380px] overflow-y-auto pr-1">
+        <div className="relative min-h-32">
+          {isLoadingGames && (
+            <div className="absolute inset-0 z-20 flex items-center justify-center bg-[var(--glass-modal-bg)]/75 backdrop-blur-[1px]">
+              <LoadingSpinner size="md" label="스팀 게임 목록 불러오는 중..." />
+            </div>
+          )}
+          <div className={`grid max-h-[380px] grid-cols-1 gap-3.5 overflow-y-auto pr-1 transition-opacity sm:grid-cols-2 md:grid-cols-3 ${
+            isLoadingGames ? 'pointer-events-none opacity-40' : ''
+          }`}>
             {sortedGames.map((game) => {
               const isSelected = !!game.selected;
               const playtimeHours = Math.round((game.playtimeForever || 0) / 60);
@@ -498,7 +501,7 @@ export const AddGameModal: React.FC<AddGameModalProps> = ({
               </div>
             )}
           </div>
-        )}
+        </div>
 
         {/* Modal Footer */}
         <div className="flex items-center justify-between pt-3 border-t border-[var(--border-subtle)]">

@@ -9,6 +9,7 @@ interface ModalProps {
   maxWidth?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl';
   showCloseButton?: boolean;
   zIndex?: number;
+  className?: string;
 }
 
 export const Modal: React.FC<ModalProps> = ({
@@ -19,6 +20,7 @@ export const Modal: React.FC<ModalProps> = ({
   maxWidth = 'md',
   showCloseButton = true,
   zIndex = 50,
+  className = '',
 }) => {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -54,7 +56,7 @@ export const Modal: React.FC<ModalProps> = ({
 
       {/* Modal Container */}
       <div
-        className={`relative w-full ${maxWidthStyles[maxWidth]} glass-modal rounded-[4px] border border-[var(--border-modal)] overflow-hidden z-10 animate-in fade-in slide-in-from-bottom-2 duration-300 text-[var(--text-primary)] shadow-[var(--soft-shadow)]`}
+        className={`relative w-full ${maxWidthStyles[maxWidth]} glass-modal rounded-[4px] border border-[var(--border-modal)] overflow-hidden z-10 animate-in fade-in slide-in-from-bottom-2 duration-300 text-[var(--text-primary)] shadow-[var(--soft-shadow)] ${className}`}
       >
         {/* Header */}
         {(title || showCloseButton) && (

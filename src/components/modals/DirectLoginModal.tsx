@@ -4,6 +4,7 @@ import { Button } from '@/components/common/Button';
 import { useAuthStore } from '@/store/useAuthStore';
 import { loginWithSteamApi } from '@/api/auth';
 import { Sparkles, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { getErrorMessage } from '@/utils/error';
 
 interface DirectLoginModalProps {
   isOpen: boolean;
@@ -48,6 +49,11 @@ export const DirectLoginModal: React.FC<DirectLoginModalProps> = ({
         onClose();
       }, 800);
     } catch (err: unknown) {
+      const errorCode = (err as { response?: { data?: { code?: string } } })?.response?.data?.code;
+      if (errorCode === 'G004') {
+        setErrorMessage(getErrorMessage(err, '스팀 계정 공개 설정을 확인해 주세요.'));
+        return;
+      }
       console.warn('Backend login request fallback to local auth:', err);
       // Local fallback for offline/preview
       setAuth({

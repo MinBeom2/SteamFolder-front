@@ -411,15 +411,18 @@ export const GuestUserGamesModal: React.FC<GuestUserGamesModalProps> = ({
         </div>
 
         {/* 4. Long Horizontal Row List (Ranking-style, No Animation) */}
-        {isLoading ? (
-          <div className="py-16 flex items-center justify-center">
-            <LoadingSpinner size="md" label="게임 목록 불러오는 중..." />
-          </div>
-        ) : (
+        <div className="relative min-h-32">
+          {isLoading && (
+            <div className="absolute inset-0 z-20 flex items-center justify-center bg-[var(--glass-modal-bg)]/75 backdrop-blur-[1px]">
+              <LoadingSpinner size="md" label="게임 목록 불러오는 중..." />
+            </div>
+          )}
           <div
             ref={scrollContainerRef}
             onScroll={handleScroll}
-            className="flex flex-col gap-3 max-h-[500px] overflow-y-auto pr-3.5 sm:pr-4 select-none"
+            className={`flex max-h-[500px] flex-col gap-3 overflow-y-auto pr-3.5 transition-opacity sm:pr-4 select-none ${
+              isLoading ? 'pointer-events-none opacity-40' : ''
+            }`}
           >
             {visibleGames.map((game) => {
               const playtimeHours = (Math.round(((game.playtimeForever || 0) / 60) * 10) / 10).toFixed(1);
@@ -587,7 +590,7 @@ export const GuestUserGamesModal: React.FC<GuestUserGamesModalProps> = ({
               </div>
             )}
           </div>
-        )}
+        </div>
       </div>
     </Modal>
   );

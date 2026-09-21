@@ -216,6 +216,20 @@ html.light, html[data-theme="light"] {
   border: 1px solid var(--border-modal);
 }
 
+.settings-modal-flat {
+  background: var(--bg-surface);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.settings-modal-flat > div:first-child {
+  background: var(--bg-surface);
+}
+
+.settings-modal-flat button {
+  border-radius: 0 !important;
+}
+
 /* Desktop Canvas Dot Grid Background */
 .desktop-dot-bg {
   background-image: linear-gradient(to bottom, transparent 39px, var(--desktop-dot) 40px);

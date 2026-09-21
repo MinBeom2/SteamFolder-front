@@ -35,6 +35,7 @@ import {
   syncGameAchievementsApi,
 } from '@/api/game';
 import { useAuthStore } from '@/store/useAuthStore';
+import { getErrorMessage } from '@/utils/error';
 
 interface ContextMenuState {
   isOpen: boolean;
@@ -1172,9 +1173,7 @@ export const useShowcaseStore = create<ShowcaseState>((set, get) => ({
       }));
     } catch (err: unknown) {
       console.error('Failed to fetch game achievements detail:', err);
-      const msg =
-        (err as { response?: { data?: { message?: string } } })?.response?.data?.message ||
-        '도전과제 정보를 불러오지 못했습니다.';
+      const msg = getErrorMessage(err, '도전과제 정보를 불러오지 못했습니다.');
       set({
         gameDetailError: msg,
         isLoadingGameDetail: false,
@@ -1217,9 +1216,7 @@ export const useShowcaseStore = create<ShowcaseState>((set, get) => ({
       }));
     } catch (err: unknown) {
       console.error('Failed to sync game achievements:', err);
-      const msg =
-        (err as { response?: { data?: { message?: string } } })?.response?.data?.message ||
-        '도전과제 동기화에 실패했습니다.';
+      const msg = getErrorMessage(err, '도전과제 동기화에 실패했습니다.');
       set({
         gameDetailError: msg,
         isSyncingAchievements: false,

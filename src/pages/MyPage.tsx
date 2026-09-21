@@ -201,7 +201,6 @@ export const MyPage: React.FC = () => {
 
           <div className="flex flex-col items-start gap-4 text-left">
             {/* Username (Moved slightly up, no settings button) */}
-            <p className="editorial-kicker">Personal profile / library owner</p>
             <h1 className="text-5xl font-black leading-none tracking-[-0.06em] text-[var(--text-primary)] sm:text-7xl">
               {user.username}
             </h1>

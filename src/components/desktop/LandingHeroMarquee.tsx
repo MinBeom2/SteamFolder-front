@@ -134,11 +134,11 @@ export const LandingHeroMarquee: React.FC = () => {
       </div>
 
       <div
-        className="absolute inset-0 pointer-events-none transition-all duration-300"
+        className="absolute inset-0 pointer-events-none transition-colors duration-300"
         style={{
-          background: isDark
-            ? 'radial-gradient(ellipse 75% 70% at 50% 50%, rgba(7, 9, 14, 0.94) 0%, rgba(7, 9, 14, 0.82) 35%, rgba(7, 9, 14, 0.55) 65%, rgba(7, 9, 14, 0.25) 100%)'
-            : 'radial-gradient(ellipse 75% 70% at 50% 50%, rgba(255, 255, 255, 0.96) 0%, rgba(255, 255, 255, 0.88) 35%, rgba(255, 255, 255, 0.65) 65%, rgba(255, 255, 255, 0.35) 100%)',
+          backgroundColor: isDark
+            ? 'rgba(7, 9, 14, 0.78)'
+            : 'rgba(255, 255, 255, 0.78)',
         }}
       />
 

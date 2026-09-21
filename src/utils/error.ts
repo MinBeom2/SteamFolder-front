@@ -12,7 +12,7 @@ const ERROR_CODE_MESSAGES: Record<string, string> = {
   G001: '존재하지 않는 게임입니다.',
   G002: '보유하지 않은 게임입니다.',
   G003: '스팀 외부 API 호출 중 오류가 발생했습니다.',
-  G004: '스팀 프로필 또는 게임 목록이 비공개 상태입니다.',
+  G004: "Steam 프로필 편집의 공개 설정에서 '내 프로필'과 '게임 세부 정보'를 모두 공개로 변경한 후 다시 시도해 주세요.",
   G005: '동기화 쿨다운(5분) 제한 중입니다.',
 };
 
@@ -37,6 +37,10 @@ export const getErrorMessage = (
 
   if (responseData) {
     if (typeof responseData === 'object') {
+      // Steam 비공개 오류는 화면마다 동일한 해결 방법을 안내합니다.
+      if (responseData.code === 'G004') {
+        return ERROR_CODE_MESSAGES.G004;
+      }
       // 1-1. 백엔드에서 명시적으로 내려준 message
       if (typeof responseData.message === 'string' && responseData.message.trim()) {
         return responseData.message;

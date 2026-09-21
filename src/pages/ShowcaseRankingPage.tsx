@@ -176,7 +176,7 @@ export const ShowcaseRankingPage: React.FC = () => {
                 <span>쇼케이스 랭킹</span>
               </h1>
               <p className="text-xs sm:text-sm text-[var(--text-secondary)] mt-1">
-                유저들의 좋아요 을 가장 많이 받은 쇼케이스 순위
+                유저들의 좋아요를 가장 많이 받은 쇼케이스
               </p>
             </div>
           </div>

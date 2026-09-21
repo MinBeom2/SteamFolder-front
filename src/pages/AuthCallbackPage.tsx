@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuthStore } from '@/store/useAuthStore';
 import { loginWithSteamApi } from '@/api/auth';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
+import { getErrorMessage } from '@/utils/error';
 import { X } from 'lucide-react';
 
 export const AuthCallbackPage: React.FC = () => {
@@ -37,10 +38,7 @@ export const AuthCallbackPage: React.FC = () => {
         navigate('/', { replace: true });
       } catch (err: unknown) {
         console.error('Steam OpenID login failed:', err);
-        const serverMsg =
-          (err as { response?: { data?: { message?: string } } })?.response?.data
-            ?.message || '스팀 로그인 검증에 실패했습니다.';
-        setError(serverMsg);
+        setError(getErrorMessage(err, '스팀 로그인 검증에 실패했습니다.'));
       }
     };
 

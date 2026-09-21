@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
-import { ArrowUpRight, LogOut, Moon, Settings, Sun } from 'lucide-react';
+import { LogOut, Moon, Settings, Sun } from 'lucide-react';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useShowcaseStore } from '@/store/useShowcaseStore';
 import { useThemeStore } from '@/store/useThemeStore';
 import { ShowcaseSettingsModal } from '@/components/modals/ShowcaseSettingsModal';
+import { FeedbackModal } from '@/components/modals/FeedbackModal';
 
 const navItemClass = ({ isActive }: { isActive: boolean }) =>
   `group relative flex items-center py-2 text-xs font-semibold transition-colors ${
@@ -17,6 +18,7 @@ export const Navbar: React.FC = () => {
   const { user, isAuthenticated, logout } = useAuthStore();
   const { isSettingsModalOpen, setSettingsModalOpen } = useShowcaseStore();
   const { theme, toggleTheme } = useThemeStore();
+  const [isFeedbackModalOpen, setFeedbackModalOpen] = useState(false);
 
   return (
     <>
@@ -33,6 +35,15 @@ export const Navbar: React.FC = () => {
               <NavLink to="/rankings" className={navItemClass}>
                 <span>랭킹</span>
               </NavLink>
+              {isAuthenticated && (
+                <button
+                  type="button"
+                  onClick={() => setFeedbackModalOpen(true)}
+                  className="py-2 text-xs font-semibold text-[var(--text-muted)] transition-colors hover:text-[var(--text-primary)]"
+                >
+                  피드백
+                </button>
+              )}
             </nav>
           </div>
 
@@ -40,11 +51,15 @@ export const Navbar: React.FC = () => {
             <button
               type="button"
               onClick={toggleTheme}
-              className="flex h-9 w-9 items-center justify-center border border-transparent text-[var(--text-secondary)] transition-colors hover:border-[var(--border-card)] hover:text-[var(--primary-accent)]"
+              className="group flex h-9 w-9 items-center justify-center text-[var(--text-muted)]"
               title={theme === 'dark' ? '라이트 모드로 전환' : '다크 모드로 전환'}
               aria-label="화면 모드 전환"
             >
-              {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+              {theme === 'dark' ? (
+                <Sun className="h-4 w-4 transition-colors group-hover:text-[var(--text-primary)]" />
+              ) : (
+                <Moon className="h-4 w-4 transition-colors group-hover:text-[var(--text-primary)]" />
+              )}
             </button>
 
             {isAuthenticated && user && (
@@ -52,11 +67,11 @@ export const Navbar: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setSettingsModalOpen(true)}
-                  className="flex h-9 w-9 items-center justify-center border border-transparent text-[var(--text-secondary)] transition-colors hover:border-[var(--border-card)] hover:text-[var(--primary-accent)]"
+                  className="group flex h-9 w-9 items-center justify-center text-[var(--text-muted)]"
                   title="쇼케이스 설정"
                   aria-label="쇼케이스 설정"
                 >
-                  <Settings className="h-4 w-4" />
+                  <Settings className="h-4 w-4 transition-colors group-hover:text-[var(--text-primary)]" />
                 </button>
 
                 <NavLink
@@ -69,20 +84,19 @@ export const Navbar: React.FC = () => {
                     alt={user.username}
                     className="h-8 w-8 rounded-[2px] object-cover grayscale-[25%] transition-all duration-500 group-hover:grayscale-0"
                   />
-                  <span className="hidden max-w-28 truncate text-xs font-semibold text-[var(--text-primary)] sm:inline">
+                  <span className="hidden max-w-28 truncate text-xs font-semibold text-[var(--text-primary)] transition-colors group-hover:text-[var(--primary-accent)] sm:inline">
                     {user.username}
                   </span>
-                  <ArrowUpRight className="hidden h-3.5 w-3.5 text-[var(--text-muted)] transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 lg:block" />
                 </NavLink>
 
                 <button
                   type="button"
                   onClick={logout}
-                  className="flex h-9 w-9 items-center justify-center text-[var(--text-muted)] transition-colors hover:text-red-400"
+                  className="group flex h-9 w-9 items-center justify-center text-[var(--text-muted)]"
                   title="로그아웃"
                   aria-label="로그아웃"
                 >
-                  <LogOut className="h-3.5 w-3.5" />
+                  <LogOut className="h-3.5 w-3.5 transition-colors group-hover:text-[var(--text-primary)]" />
                 </button>
               </>
             )}
@@ -91,10 +105,16 @@ export const Navbar: React.FC = () => {
       </header>
 
       {isAuthenticated && (
-        <ShowcaseSettingsModal
-          isOpen={isSettingsModalOpen}
-          onClose={() => setSettingsModalOpen(false)}
-        />
+        <>
+          <ShowcaseSettingsModal
+            isOpen={isSettingsModalOpen}
+            onClose={() => setSettingsModalOpen(false)}
+          />
+          <FeedbackModal
+            isOpen={isFeedbackModalOpen}
+            onClose={() => setFeedbackModalOpen(false)}
+          />
+        </>
       )}
     </>
   );

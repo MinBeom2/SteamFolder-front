@@ -12,8 +12,6 @@ import {
   Globe,
   Lock,
   RefreshCw,
-  RotateCcw,
-  Trash2,
 } from 'lucide-react';
 
 interface ShowcaseSettingsModalProps {
@@ -44,7 +42,6 @@ export const ShowcaseSettingsForm: React.FC<ShowcaseSettingsFormProps> = ({
   const [isPublic, setIsPublic] = useState(user.isPublic ?? true);
   const [syncStatus, setSyncStatus] = useState<string | null>(null);
   const [isUpdatingVisibility, setIsUpdatingVisibility] = useState(false);
-  const [saveSuccess, setSaveSuccess] = useState(false);
   const [dangerAction, setDangerAction] = useState<'workspace' | 'account' | null>(null);
   const [isProcessingDangerAction, setIsProcessingDangerAction] = useState(false);
   const [dangerError, setDangerError] = useState<string | null>(null);
@@ -62,8 +59,6 @@ export const ShowcaseSettingsForm: React.FC<ShowcaseSettingsFormProps> = ({
     setIsUpdatingVisibility(true);
     try {
       await updateVisibility(nextPublic);
-      setSaveSuccess(true);
-      setTimeout(() => setSaveSuccess(false), 2000);
     } catch (err) {
       console.error('Failed to update visibility:', err);
       setIsPublic(!nextPublic);
@@ -88,7 +83,7 @@ export const ShowcaseSettingsForm: React.FC<ShowcaseSettingsFormProps> = ({
       if (resData?.code === 'G005' || resData?.message?.includes('쿨다운')) {
         setSyncStatus(`동기화 쿨다운(5분) 제한 중입니다. (${formattedCooldown} 후 가능)`);
       } else {
-        setSyncStatus('스팀 동기화에 실패했습니다. 잠시 후 다시 시도해주세요.');
+        setSyncStatus(getErrorMessage(err, '스팀 동기화에 실패했습니다. 잠시 후 다시 시도해 주세요.'));
       }
     }
   };
@@ -150,24 +145,14 @@ export const ShowcaseSettingsForm: React.FC<ShowcaseSettingsFormProps> = ({
       {/* 1. 공개 설정 */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <label className="block text-sm font-bold text-[var(--text-primary)]">
+          <label className="block pl-2 text-sm font-bold text-[var(--text-primary)]">
             쇼케이스 공개 범위
           </label>
-          {isUpdatingVisibility && (
-            <span className="animate-pulse text-xs text-[var(--text-secondary)]">
-              저장 중...
-            </span>
-          )}
-          {saveSuccess && !isUpdatingVisibility && (
-            <span className="animate-in fade-in text-xs font-medium text-emerald-500">
-              ✓ 자동 저장됨
-            </span>
-          )}
         </div>
-        <div className="relative flex items-center p-1 bg-[var(--bg-surface-elevated)] rounded-lg border border-[var(--border-card)] select-none">
+        <div className="relative flex items-center border border-[var(--border-card)] bg-[var(--bg-surface-elevated)] p-1 select-none">
           {/* Sliding Pill Indicator */}
           <div
-            className="absolute top-1 bottom-1 w-[calc(50%-4px)] rounded-md toggle-pill-indicator transition-transform duration-300 ease-in-out pointer-events-none"
+            className="toggle-pill-indicator pointer-events-none absolute top-1 bottom-1 w-[calc(50%-4px)] transition-transform duration-300 ease-in-out"
             style={{
               left: '4px',
               transform: isPublic ? 'translateX(0%)' : 'translateX(100%)',
@@ -178,7 +163,7 @@ export const ShowcaseSettingsForm: React.FC<ShowcaseSettingsFormProps> = ({
             type="button"
             disabled={isUpdatingVisibility}
             onClick={() => handleToggleVisibility(true)}
-            className={`relative z-10 flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-md py-3 text-sm transition-colors duration-200 ${
+            className={`relative z-10 flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-none py-3 text-sm transition-colors duration-200 ${
               isPublic
                 ? 'toggle-item-active'
                 : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] font-medium'
@@ -191,7 +176,7 @@ export const ShowcaseSettingsForm: React.FC<ShowcaseSettingsFormProps> = ({
             type="button"
             disabled={isUpdatingVisibility}
             onClick={() => handleToggleVisibility(false)}
-            className={`relative z-10 flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-md py-3 text-sm transition-colors duration-200 ${
+            className={`relative z-10 flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-none py-3 text-sm transition-colors duration-200 ${
               !isPublic
                 ? 'toggle-item-active'
                 : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] font-medium'
@@ -201,11 +186,6 @@ export const ShowcaseSettingsForm: React.FC<ShowcaseSettingsFormProps> = ({
             <span>비공개</span>
           </button>
         </div>
-        <p className="text-xs leading-relaxed text-[var(--text-secondary)]">
-          {isPublic
-            ? '누구나 ㅎ쇼케이스 공유 링크를 통해 열람할 수 있습니다.'
-            : '나만이 내 쇼케이스에 접근할 수 있습니다.'}
-        </p>
       </div>
 
       {/* 2. 스팀 계정 연동 & 라이브러리 동기화 */}
@@ -222,7 +202,7 @@ export const ShowcaseSettingsForm: React.FC<ShowcaseSettingsFormProps> = ({
           type="button"
           variant="secondary"
           size="sm"
-          className={`shrink-0 border px-4 py-2 text-sm font-medium transition-all ${
+          className={`shrink-0 rounded-none border px-4 py-2 text-sm font-medium transition-all hover:translate-y-0 ${
             isCooldownActive
               ? 'bg-amber-50 dark:bg-amber-950/30 border-amber-300 dark:border-amber-800/60 text-amber-700 dark:text-amber-300 cursor-not-allowed'
               : ''
@@ -245,49 +225,28 @@ export const ShowcaseSettingsForm: React.FC<ShowcaseSettingsFormProps> = ({
       </div>
 
       {/* 3. 데이터 관리 */}
-      <div className="space-y-4 border-t border-[var(--border-subtle)] pt-5">
-        <div>
-          <h4 className="text-sm font-bold text-[var(--text-primary)]">데이터 관리</h4>
-          <p className="mt-1.5 text-xs leading-relaxed text-[var(--text-secondary)]">
-            작업 공간 초기화와 회원 탈퇴는 삭제 범위가 다릅니다. 내용을 확인한 뒤 진행해 주세요.
-          </p>
-        </div>
+      <div className="mx-auto grid w-full max-w-sm gap-2 border-t border-[var(--border-subtle)] pt-5">
+        <button
+          type="button"
+          onClick={() => {
+            setDangerError(null);
+            setDangerAction('workspace');
+          }}
+          className="flex h-12 cursor-pointer items-center justify-center rounded-none border border-[var(--border-card)] bg-[var(--bg-surface-elevated)] px-4 text-center text-sm font-semibold text-[var(--text-primary)] transition-colors hover:bg-[var(--bg-surface)]"
+        >
+          초기화
+        </button>
 
-        <div className="grid gap-3 sm:grid-cols-2">
-          <button
-            type="button"
-            onClick={() => {
-              setDangerError(null);
-              setDangerAction('workspace');
-            }}
-            className="group flex min-h-28 cursor-pointer flex-col items-start justify-between rounded-xl border border-amber-500/25 bg-amber-500/5 p-4 text-left transition-colors hover:border-amber-500/45 hover:bg-amber-500/10 active:scale-[0.99]"
-          >
-            <span className="flex w-full items-center justify-between gap-3">
-              <span className="text-sm font-bold text-amber-700 dark:text-amber-300">작업 공간 초기화</span>
-              <RotateCcw className="h-5 w-5 text-amber-600 dark:text-amber-400" />
-            </span>
-            <span className="text-xs leading-relaxed text-[var(--text-secondary)]">
-              폴더와 배치한 게임만 비웁니다. Steam 보유 게임은 유지됩니다.
-            </span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => {
-              setDangerError(null);
-              setDangerAction('account');
-            }}
-            className="group flex min-h-28 cursor-pointer flex-col items-start justify-between rounded-xl border border-red-500/25 bg-red-500/5 p-4 text-left transition-colors hover:border-red-500/45 hover:bg-red-500/10 active:scale-[0.99]"
-          >
-            <span className="flex w-full items-center justify-between gap-3">
-              <span className="text-sm font-bold text-red-600 dark:text-red-300">회원 탈퇴</span>
-              <Trash2 className="h-5 w-5 text-red-500" />
-            </span>
-            <span className="text-xs leading-relaxed text-[var(--text-secondary)]">
-              계정 연동과 모든 사용자 데이터를 삭제합니다. 되돌릴 수 없습니다.
-            </span>
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={() => {
+            setDangerError(null);
+            setDangerAction('account');
+          }}
+          className="flex h-12 cursor-pointer items-center justify-center rounded-none border border-[var(--border-card)] bg-[var(--bg-surface-elevated)] px-4 text-center text-sm font-semibold text-[var(--text-primary)] transition-colors hover:bg-[var(--bg-surface)]"
+        >
+          회원 탈퇴
+        </button>
       </div>
 
       <Modal
@@ -341,6 +300,7 @@ export const ShowcaseSettingsForm: React.FC<ShowcaseSettingsFormProps> = ({
               type="button"
               variant="ghost"
               size="sm"
+              className="rounded-none hover:translate-y-0"
               onClick={closeDangerModal}
               disabled={isProcessingDangerAction}
             >
@@ -350,6 +310,7 @@ export const ShowcaseSettingsForm: React.FC<ShowcaseSettingsFormProps> = ({
               type="button"
               variant="danger"
               size="sm"
+              className="rounded-none hover:translate-y-0"
               onClick={dangerAction === 'workspace' ? handleResetWorkspace : handleDeleteAccount}
               isLoading={isProcessingDangerAction}
             >
@@ -375,7 +336,8 @@ export const ShowcaseSettingsModal: React.FC<ShowcaseSettingsModalProps> = ({
       isOpen={isOpen}
       onClose={onClose}
       title={<h3 className="text-xl font-bold tracking-tight text-[var(--text-primary)]">설정</h3>}
-      maxWidth="xl"
+      maxWidth="lg"
+      className="settings-modal-flat"
     >
       <ShowcaseSettingsForm
         key={`${user.id}-${user.isPublic}`}
