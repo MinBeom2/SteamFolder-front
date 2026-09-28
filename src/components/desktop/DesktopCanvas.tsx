@@ -69,7 +69,6 @@ export const DesktopCanvas: React.FC<DesktopCanvasProps> = ({ isReadOnly = false
     try {
       await navigator.clipboard.writeText(shareUrl);
       setIsCopied(true);
-      setToastMessage('쇼케이스 링크가 클립보드에 복사되었습니다.');
       setTimeout(() => setIsCopied(false), 2500);
     } catch {
       navigate(`/showcase/${encodeURIComponent(identifier)}`);
@@ -111,6 +110,7 @@ export const DesktopCanvas: React.FC<DesktopCanvasProps> = ({ isReadOnly = false
     if (isReadOnly) return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
+      if (document.querySelector('[data-app-modal]')) return;
       // Ignore typing in input/textarea
       if (
         ['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement).tagName) ||
@@ -170,6 +170,11 @@ export const DesktopCanvas: React.FC<DesktopCanvasProps> = ({ isReadOnly = false
       it.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
   }, [items, searchQuery]);
+
+  const mobileItems = useMemo(
+    () => [...filteredItems].sort((a, b) => a.positionY - b.positionY || a.positionX - b.positionX),
+    [filteredItems]
+  );
 
   // Determine grid dimensions (fixed 6 columns, dynamic rows)
   const totalRows = useMemo(() => {
@@ -335,7 +340,7 @@ export const DesktopCanvas: React.FC<DesktopCanvasProps> = ({ isReadOnly = false
           className="mb-6 flex flex-wrap items-center justify-between gap-4"
         >
           <div className="flex flex-wrap items-center gap-4">
-            <h1 className="text-4xl font-black leading-none tracking-[-0.055em] text-[var(--text-primary)] sm:text-5xl">
+            <h1 className="min-w-0 break-words text-3xl font-black leading-tight tracking-[-0.055em] text-[var(--text-primary)] sm:text-5xl">
               {currentFolder?.name || '나의 컬렉션'}
             </h1>
 
@@ -392,7 +397,33 @@ export const DesktopCanvas: React.FC<DesktopCanvasProps> = ({ isReadOnly = false
             <LoadingSpinner size="lg" label="쇼케이스 캔버스 로딩 중..." />
           </div>
         ) : (
-          <div className="editorial-rule grid min-h-[420px] grid-cols-2 gap-x-3 gap-y-7 border-t py-7 sm:grid-cols-3 md:grid-cols-6">
+          <>
+          <div className="editorial-rule grid grid-cols-2 gap-3 border-t py-6 sm:grid-cols-3 md:hidden">
+            {mobileItems.length === 0 ? (
+              <p className="col-span-full py-16 text-center text-sm text-[var(--text-secondary)]">
+                {searchQuery.trim() ? '검색 결과가 없습니다.' : '아직 배치한 폴더나 게임이 없습니다.'}
+              </p>
+            ) : mobileItems.map((cellItem) => (
+              <div key={`${cellItem.type}_${cellItem.id}`} className="flex min-w-0 items-start justify-center">
+                {cellItem.type === 'FOLDER' && cellItem.folderData ? (
+                  <FolderCard
+                    item={cellItem}
+                    folder={cellItem.folderData}
+                    isSelected={selectedItemKeys.includes(`FOLDER_${cellItem.id}`)}
+                    isReadOnly={isReadOnly}
+                  />
+                ) : cellItem.type === 'GAME' && cellItem.gameData ? (
+                  <GameCard
+                    item={cellItem}
+                    game={cellItem.gameData}
+                    isSelected={selectedItemKeys.includes(`GAME_${cellItem.id}`)}
+                    isReadOnly={isReadOnly}
+                  />
+                ) : null}
+              </div>
+            ))}
+          </div>
+          <div className="editorial-rule hidden min-h-[420px] grid-cols-6 gap-x-3 gap-y-7 border-t py-7 md:grid">
             {/* Render 2D Grid Cells */}
             {Array.from({ length: totalRows }).map((_, rowIndex) =>
               Array.from({ length: 6 }).map((_, colIndex) => {
@@ -455,6 +486,7 @@ export const DesktopCanvas: React.FC<DesktopCanvasProps> = ({ isReadOnly = false
               })
             )}
           </div>
+          </>
         )}
       </div>
 

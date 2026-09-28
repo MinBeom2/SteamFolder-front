@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useShowcaseStore } from '@/store/useShowcaseStore';
-import { ChevronRight, Home, Folder } from 'lucide-react';
+import { ChevronRight, Home } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 interface BreadcrumbProps {
@@ -84,7 +84,7 @@ export const Breadcrumb: React.FC<BreadcrumbProps> = ({
   };
 
   return (
-    <nav className={`${className} flex select-none flex-wrap items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.08em] text-[var(--text-secondary)]`}>
+    <nav aria-label="현재 위치" className={`${className} flex select-none flex-wrap items-center gap-1.5 text-xs font-semibold text-[var(--text-secondary)]`}>
       {activeTrail.map((crumb, idx) => {
         const isLast = idx === activeTrail.length - 1;
         const isDragOver = dragOverIdx === idx;
@@ -97,21 +97,18 @@ export const Breadcrumb: React.FC<BreadcrumbProps> = ({
 
             <button
               type="button"
+              aria-current={isLast ? 'page' : undefined}
               onClick={() => handleClickCrumb(crumb.id)}
               onDragOver={(e) => handleDragOver(e, idx)}
               onDragLeave={handleDragLeave}
               onDrop={(e) => handleDrop(e, idx)}
-              className={`flex cursor-pointer items-center gap-1.5 border-b px-1 py-1.5 transition-colors ${
+              className={`flex min-h-11 cursor-pointer items-center gap-1.5 border-b px-2 py-1.5 transition-colors ${
                 isLast
                   ? 'border-[var(--primary-accent)] text-[var(--primary-accent)]'
                   : 'border-transparent hover:border-[var(--border-card)] hover:text-[var(--text-primary)]'
               } ${isDragOver ? 'ring-2 ring-emerald-400 bg-emerald-500/20' : ''}`}
             >
-              {idx === 0 ? (
-                <Home className="w-3.5 h-3.5" />
-              ) : (
-                <Folder className={`w-3.5 h-3.5 ${isLast ? 'text-current' : 'text-slate-400'}`} />
-              )}
+              {idx === 0 && <Home aria-hidden="true" className="w-3.5 h-3.5" />}
               <span>{crumb.name}</span>
             </button>
           </React.Fragment>

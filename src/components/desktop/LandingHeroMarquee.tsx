@@ -89,12 +89,12 @@ const MarqueeRow: React.FC<MarqueeRowProps> = ({ games, duration, isDark }) => {
     : 'w-60 sm:w-72 h-30 sm:h-36 rounded-lg overflow-hidden shadow-md border border-slate-200/80 shrink-0 bg-white';
 
   return (
-    <div className="flex w-max shrink-0 will-change-transform" style={{ animation: `marqueeSeamless ${duration}s linear infinite` }}>
+    <div className="marquee-row flex w-max shrink-0 will-change-transform" style={{ animation: `marqueeSeamless ${duration}s linear infinite` }}>
       {["a", "b"].map((copy) => (
         <div key={copy} className="flex gap-4 sm:gap-5 shrink-0 pr-4 sm:pr-5">
           {games.map((game, idx) => (
             <div key={`${copy}-${game.appId}-${idx}`} className={cardClassName}>
-              <img src={game.img} alt={game.name} className="w-full h-full object-cover select-none" loading="lazy" decoding="async" draggable={false} />
+              <img src={game.img} alt="" className="w-full h-full object-cover select-none" loading="lazy" decoding="async" draggable={false} />
             </div>
           ))}
         </div>
@@ -116,7 +116,7 @@ export const LandingHeroMarquee: React.FC = () => {
         }
       `}</style>
 
-      <div className={`absolute -inset-[50vw] flex flex-col justify-center gap-3.5 sm:gap-5 pointer-events-none select-none overflow-hidden -rotate-[15deg] scale-125 origin-center transition-opacity duration-300 ${isDark ? 'opacity-50 blur-[3px]' : 'opacity-35 blur-[2.5px] brightness-105'}`}>
+      <div aria-hidden="true" className={`absolute -inset-[50vw] flex flex-col justify-center gap-3.5 sm:gap-5 pointer-events-none select-none overflow-hidden -rotate-[15deg] scale-125 origin-center transition-opacity duration-300 ${isDark ? 'opacity-75 blur-[1.5px]' : 'opacity-65 blur-[1.5px]'}`}>
         <MarqueeRow games={ROW1_GAMES} duration={52} isDark={isDark} />
         <MarqueeRow games={ROW2_GAMES} duration={66} isDark={isDark} />
         <MarqueeRow games={ROW3_GAMES} duration={46} isDark={isDark} />
@@ -136,20 +136,20 @@ export const LandingHeroMarquee: React.FC = () => {
       <div
         className="absolute inset-0 pointer-events-none transition-colors duration-300"
         style={{
-          backgroundColor: isDark
-            ? 'rgba(7, 9, 14, 0.78)'
-            : 'rgba(255, 255, 255, 0.78)',
+          background: isDark
+            ? 'radial-gradient(ellipse 65% 55% at center, rgba(7, 9, 14, 0.88) 0%, rgba(7, 9, 14, 0.72) 65%, rgba(7, 9, 14, 0.48) 100%)'
+            : 'radial-gradient(ellipse 65% 55% at center, rgba(255, 255, 255, 0.93) 0%, rgba(255, 255, 255, 0.77) 65%, rgba(255, 255, 255, 0.52) 100%)',
         }}
       />
 
-      <div className="relative z-10 max-w-xl mx-auto px-6 py-12 text-center space-y-6 animate-in fade-in zoom-in-95 duration-300">
-        <h1 className={`text-3xl sm:text-5xl font-bold tracking-tight leading-tight transition-colors duration-200 ${isDark ? 'text-white drop-shadow-lg' : 'text-[#171d25] drop-shadow-xs'}`}>
-          스팀 라이브러리를 <br />
-          <span className={`transition-colors duration-200 ${isDark ? 'text-[#66c0f4]' : 'text-[#1a5b8c]'}`}>
-            나만의 쇼케이스
-          </span>
-          로
+      <div className="relative z-10 mx-auto max-w-xl space-y-6 px-6 py-12 text-center animate-in fade-in duration-300">
+        <h1 className={`text-3xl font-extrabold leading-tight tracking-[-0.045em] transition-colors duration-200 sm:text-5xl ${isDark ? 'text-white' : 'text-[#171d25]'}`}>
+          스팀 라이브러리를<br />
+          나만의 쇼케이스로
         </h1>
+        <p className={`mx-auto max-w-sm text-sm leading-6 sm:text-base ${isDark ? 'text-[#d7e6f0]' : 'text-[#354e60]'}`}>
+          게임을 자유롭게 배치하고, 공유하세요
+        </p>
         <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
           <SteamLoginButton size="lg" />
         </div>

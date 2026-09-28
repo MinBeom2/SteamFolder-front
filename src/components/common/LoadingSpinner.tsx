@@ -22,8 +22,8 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
   };
 
   return (
-    <div className={`flex flex-col items-center justify-center gap-3 ${className}`}>
-      <div className="relative flex items-center justify-center">
+    <div role="status" aria-label={label || '불러오는 중'} className={`flex flex-col items-center justify-center gap-3 ${className}`}>
+      <div aria-hidden="true" className="relative flex items-center justify-center">
         <Loader2 className={`${sizeMap[size]} animate-spin text-[var(--primary-accent)]`} />
         {glow && (
           <div className="absolute inset-0 blur-md opacity-20 bg-[var(--primary-accent)] rounded-full animate-pulse pointer-events-none" />

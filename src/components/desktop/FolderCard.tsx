@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import type { CanvasItem, FolderResponse } from '@/types/showcase';
 import { useShowcaseStore } from '@/store/useShowcaseStore';
 import { useNavigate } from 'react-router-dom';
+import { MoreHorizontal } from 'lucide-react';
 
 interface FolderCardProps {
   item: CanvasItem;
@@ -30,21 +31,22 @@ export const FolderCard: React.FC<FolderCardProps> = ({
 
   // Get up to 4 preview thumbnails from games inside folder
   const previewGames = (folder.games || []).slice(0, 4);
+  const previewCount = previewGames.length;
+
+  const openFolder = () => {
+    if (onOpen) onOpen();
+    else navigate(`/folders/${folder.id}`);
+  };
 
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (!isReadOnly) {
-      selectItem(`FOLDER_${folder.id}`, e.ctrlKey || e.metaKey || e.shiftKey);
-    }
+    if (isReadOnly || window.matchMedia('(pointer: coarse)').matches) openFolder();
+    else selectItem(`FOLDER_${folder.id}`, e.ctrlKey || e.metaKey || e.shiftKey);
   };
 
   const handleDoubleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (onOpen) {
-      onOpen();
-    } else {
-      navigate(`/folders/${folder.id}`);
-    }
+    openFolder();
   };
 
   const handleContextMenu = (e: React.MouseEvent) => {
@@ -53,6 +55,25 @@ export const FolderCard: React.FC<FolderCardProps> = ({
     e.stopPropagation();
     selectItem(`FOLDER_${folder.id}`, false);
     openContextMenu(e.clientX, e.clientY, 'FOLDER', item);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLButtonElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      openFolder();
+    } else if (!isReadOnly && (e.key === 'ContextMenu' || (e.shiftKey && e.key === 'F10'))) {
+      e.preventDefault();
+      const rect = e.currentTarget.getBoundingClientRect();
+      selectItem(`FOLDER_${folder.id}`, false);
+      openContextMenu(rect.left + rect.width / 2, rect.bottom, 'FOLDER', item);
+    }
+  };
+
+  const handleMoreClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation();
+    const rect = e.currentTarget.getBoundingClientRect();
+    selectItem(`FOLDER_${folder.id}`, false);
+    openContextMenu(rect.right, rect.bottom, 'FOLDER', item);
   };
 
   // Drag Source
@@ -112,10 +133,8 @@ export const FolderCard: React.FC<FolderCardProps> = ({
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
-      onClick={handleClick}
-      onDoubleClick={handleDoubleClick}
       onContextMenu={handleContextMenu}
-      className={`group relative flex w-full max-w-[150px] cursor-pointer select-none flex-col items-start gap-3 p-1 transition-[transform,background-color,outline-color] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+      className={`group relative flex w-full select-none flex-col items-start p-1 transition-[transform,background-color,outline-color] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
         isSelected
           ? 'bg-[var(--selection-bg)] outline outline-1 outline-[var(--selection-border)]'
           : isDragOver
@@ -123,44 +142,66 @@ export const FolderCard: React.FC<FolderCardProps> = ({
           : 'hover:scale-[1.025]'
       }`}
     >
+      <button
+        type="button"
+        onClick={handleClick}
+        onDoubleClick={handleDoubleClick}
+        onKeyDown={handleKeyDown}
+        aria-label={`${folder.name} 폴더 열기`}
+        aria-pressed={isReadOnly ? undefined : isSelected}
+        className="flex w-full cursor-pointer flex-col items-center gap-3 text-left"
+      >
       {/* Folder Shape Container */}
-      <div className="relative flex h-24 w-full items-center justify-center">
+      <div className="relative flex aspect-[460/215] w-full items-center justify-center">
         {/* Folder Top Tab */}
-        <div className="absolute -top-1 left-2 h-3 w-11 rounded-t-[2px] border-x border-t border-[var(--border-card)] bg-[var(--folder-top-bg)] transition-colors group-hover:border-[var(--primary-accent)]" />
+        <div className="absolute -top-1 left-2 h-3 w-[30%] rounded-t-[2px] border-x border-t border-[var(--border-card)] bg-[var(--folder-top-bg)] transition-colors group-hover:border-[var(--primary-accent)]" />
 
         {/* Folder Body */}
         <div className="relative flex h-full w-full flex-col justify-center rounded-[2px] border border-[var(--border-card)] bg-[var(--folder-body-bg)] p-2 transition-colors duration-300 group-hover:border-[var(--primary-accent)]">
-          {/* 2x2 Inner Grid Slots for Mini Thumbnails */}
-          <div className="grid h-full w-full grid-cols-2 gap-1 overflow-hidden border border-[var(--border-subtle)] bg-[var(--folder-inner-bg)] p-1">
-            {[0, 1, 2, 3].map((slotIdx) => {
-              const game = previewGames[slotIdx];
-              return (
+          {/* Show only occupied previews; one or two covers keep their wide Steam ratio. */}
+          <div
+            className={`grid h-full w-full gap-1 overflow-hidden border border-[var(--border-subtle)] bg-[var(--folder-inner-bg)] p-1 ${
+              previewCount <= 1
+                ? 'grid-cols-1 place-items-center'
+                : previewCount === 2
+                  ? 'grid-cols-2 place-items-center'
+                  : 'grid-cols-2 grid-rows-2'
+            }`}
+          >
+            {previewCount === 0 ? (
+              <span aria-hidden="true" className="h-2 w-2 rounded-full bg-slate-400/50 dark:bg-slate-500/50" />
+            ) : (
+              previewGames.map((game, index) => (
                 <div
-                  key={slotIdx}
-                  className="flex h-full w-full items-center justify-center overflow-hidden border border-[var(--border-subtle)] bg-[var(--folder-slot-bg)]"
+                  key={game.id}
+                  className={`overflow-hidden border border-[var(--border-subtle)] bg-[var(--folder-slot-bg)] ${
+                    previewCount <= 2 ? 'aspect-[460/215] w-full' : 'h-full w-full'
+                  } ${previewCount === 3 && index === 0 ? 'col-span-2' : ''}`}
                 >
-                  {game ? (
-                    <img
-                      src={game.headerImage}
-                      alt={game.name}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-1.5 h-1.5 rounded-full bg-slate-400 dark:bg-slate-600 opacity-50" />
-                  )}
+                  <img src={game.headerImage} alt="" className="h-full w-full object-cover" />
                 </div>
-              );
-            })}
+              ))
+            )}
           </div>
         </div>
       </div>
-
       {/* Folder Label */}
-      <div className="flex w-full items-center justify-center px-1">
+      <div className="w-full border-t border-[var(--border-subtle)] px-1 pt-2 text-center">
         <span className="block min-w-0 truncate text-center text-xs font-bold text-[var(--text-primary)] transition-colors group-hover:text-[var(--primary-accent)]">
           {folder.name}
         </span>
       </div>
+      </button>
+      {!isReadOnly && (
+        <button
+          type="button"
+          onClick={handleMoreClick}
+          className="absolute right-0 top-0 z-10 flex h-11 w-11 items-center justify-center rounded-[3px] border border-[var(--border-card)] bg-[var(--bg-surface)] text-[var(--text-primary)] md:hidden"
+          aria-label={`${folder.name} 폴더 메뉴`}
+        >
+          <MoreHorizontal className="h-5 w-5" aria-hidden="true" />
+        </button>
+      )}
     </div>
   );
 };

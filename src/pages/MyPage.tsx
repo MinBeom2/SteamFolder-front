@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { Navbar } from '@/components/layout/Navbar';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { SteamLoginButton } from '@/components/auth/SteamLoginButton';
@@ -16,7 +16,6 @@ import { GuestUserGamesModal } from '@/components/modals/GuestUserGamesModal';
 import { GameDetailModal } from '@/components/modals/GameDetailModal';
 
 export const MyPage: React.FC = () => {
-  const navigate = useNavigate();
   const { user, isAuthenticated, isInitialized } = useAuthStore();
 
   // Profile data
@@ -163,9 +162,9 @@ export const MyPage: React.FC = () => {
       <div className="min-h-screen bg-[var(--bg-app)] text-[var(--text-primary)] flex flex-col justify-between">
         <Navbar />
         <main className="flex-1 flex flex-col items-center justify-center p-6 text-center">
-          <div className="max-w-md w-full p-8 rounded-2xl bg-[var(--glass-panel-bg)] border border-[var(--border-subtle)] backdrop-blur-md shadow-lg space-y-5">
+          <div className="w-full max-w-md space-y-5 border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-8">
             <h2 className="text-xl font-bold text-[var(--text-primary)]">로그인이 필요합니다</h2>
-            <p className="text-xs text-[var(--text-secondary)]">
+            <p className="text-sm text-[var(--text-secondary)]">
               마이페이지를 확인하려면 스팀 계정으로 로그인해 주세요.
             </p>
             <div className="flex justify-center pt-2">
@@ -179,7 +178,7 @@ export const MyPage: React.FC = () => {
 
   const playtimeHours = Math.round((showcase?.stats.totalPlaytimeForever || 0) / 60);
   const likeCount = showcase?.user.likeCount ?? 0;
-  const cardHoverClass = 'hover:translate-x-1 hover:bg-[var(--bg-surface)]';
+  const cardHoverClass = 'hover:bg-[var(--bg-surface-elevated)]';
 
   return (
     <div className="flex min-h-screen flex-col justify-between bg-[var(--bg-app)] text-[var(--text-primary)] transition-colors duration-300">
@@ -201,7 +200,7 @@ export const MyPage: React.FC = () => {
 
           <div className="flex flex-col items-start gap-4 text-left">
             {/* Username (Moved slightly up, no settings button) */}
-            <h1 className="text-5xl font-black leading-none tracking-[-0.06em] text-[var(--text-primary)] sm:text-7xl">
+            <h1 className="max-w-full break-all text-4xl font-black leading-tight tracking-[-0.04em] text-[var(--text-primary)] sm:text-6xl">
               {user.username}
             </h1>
 
@@ -209,7 +208,7 @@ export const MyPage: React.FC = () => {
             <div className="flex flex-wrap items-center justify-start gap-4 pt-2 text-xs sm:gap-6 sm:text-sm">
               <div className="flex items-baseline gap-1.5">
                 <span className="text-[var(--text-secondary)]">내 쇼케이스 좋아요</span>
-                <span className="text-base sm:text-lg font-bold text-rose-500">{likeCount}</span>
+                <span className="text-base sm:text-lg font-bold text-[var(--text-like)]">{likeCount}</span>
                 <span className="text-xs text-[var(--text-secondary)]">개</span>
               </div>
 
@@ -219,7 +218,7 @@ export const MyPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setIsGamesModalOpen(true)}
-                className="group -my-1 flex cursor-pointer items-center gap-1.5 border-b border-[var(--border-card)] px-1 py-1 text-xs font-semibold transition-colors hover:border-[var(--primary-accent)] hover:text-[var(--primary-accent)] sm:text-sm"
+                className="group flex min-h-11 cursor-pointer items-center gap-1.5 border-b border-[var(--border-card)] px-1 text-xs font-semibold transition-colors hover:border-[var(--primary-accent)] hover:text-[var(--primary-accent)] sm:text-sm"
                 title="보유 게임 전체 목록 열기"
               >
                 <span className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors">
@@ -248,10 +247,10 @@ export const MyPage: React.FC = () => {
         <div className="mt-14 flex w-full flex-col gap-5">
           <div className="flex items-end justify-between border-b border-[var(--border-subtle)] pb-5">
             <div className="flex items-center gap-2.5">
-              <h2 className="flex items-end gap-3 text-3xl font-black tracking-[-0.045em] text-[var(--text-primary)] sm:text-5xl">
+              <h2 className="flex flex-wrap items-end gap-3 text-2xl font-black tracking-[-0.04em] text-[var(--text-primary)] sm:text-5xl">
                 <span>내가 좋아요 누른 쇼케이스</span>
                 {totalLikedCount > 0 && (
-                  <span className="mb-1 border border-rose-500/20 px-2 py-0.5 text-xs font-semibold text-rose-400">
+                  <span className="mb-1 border border-rose-500/20 px-2 py-0.5 text-xs font-semibold text-[var(--text-like)]">
                     {totalLikedCount}
                   </span>
                 )}
@@ -266,70 +265,80 @@ export const MyPage: React.FC = () => {
               <LoadingSpinner size="md" label="좋아요 누른 쇼케이스 불러오는 중..." />
             </div>
           ) : likedShowcases.length === 0 ? (
-            <div className="py-16 text-center text-sm text-[var(--text-secondary)] bg-[var(--glass-panel-bg)] rounded-2xl border border-[var(--border-subtle)] p-8 space-y-3">
-              <p className="font-medium text-[var(--text-primary)]">
+            <div className="space-y-3 border-y border-[var(--border-subtle)] px-4 py-14 text-center text-sm text-[var(--text-secondary)] sm:py-16">
+              <p className="text-base font-semibold text-[var(--text-primary)]">
                 아직 좋아요를 누른 쇼케이스가 없습니다.
               </p>
-              <p className="text-xs text-[var(--text-secondary)]">
-                다른 유저들의 멋진 쇼케이스를 둘러보고 마음에 드는 쇼케이스에 좋아요를 눌러보세요!
+              <p className="text-sm text-[var(--text-secondary)]">
+                랭킹에서 다른 유저의 게임 컬렉션을 둘러보세요.
               </p>
+              <Link to="/rankings" className="inline-flex min-h-11 items-center justify-center border border-[var(--primary-accent)] px-4 text-sm font-semibold text-[var(--primary-accent)] transition-colors hover:bg-[var(--selection-bg)]">
+                쇼케이스 랭킹 보기
+              </Link>
             </div>
           ) : (
             <AnimatedList<LikedShowcaseItemDto>
               items={likedShowcases}
-              onItemSelect={(item) => navigate(`/showcase/${encodeURIComponent(item.username)}`)}
               showGradients={true}
               enableArrowNavigation={false}
               displayScrollbar={true}
               className="w-full"
-              listClassName="max-h-[60vh] overflow-y-auto !px-0 !py-0"
+              listClassName="max-h-[60vh] overflow-y-auto border-t border-[var(--border-subtle)] !px-0 !py-0"
               renderItem={(item) => (
-                <Link
+                <div
                   key={item.userId}
-                  to={`/showcase/${encodeURIComponent(item.username)}`}
-                  className={`group relative flex cursor-pointer items-center justify-between gap-4 border-b border-[var(--border-subtle)] px-3 py-5 transition-[transform,background-color] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] sm:px-5 ${cardHoverClass}`}
+                  className={`group relative flex items-center justify-between gap-3 border-b border-[var(--border-subtle)] px-3 py-4 transition-colors duration-200 sm:gap-4 sm:px-5 ${cardHoverClass}`}
                 >
+                  <Link
+                    to={`/showcase/${encodeURIComponent(item.username)}`}
+                    className="flex min-h-12 min-w-0 flex-1 items-center gap-4 sm:gap-5"
+                    aria-label={`${item.username}님의 쇼케이스 열기`}
+                  >
                   {/* Left: Avatar + Username (No liked date) */}
-                  <div className="flex items-center gap-4 sm:gap-5 min-w-0 sm:min-w-[280px]">
+                  <div className="flex min-w-0 items-center gap-4 sm:min-w-[280px] sm:gap-5">
                     <div className="h-12 w-12 shrink-0 overflow-hidden border border-[var(--border-card)]">
                       <img
                         src={
                           item.avatarUrl ||
                           'https://avatars.steamstatic.com/fef49e7fa7e1997310d705b2a6158ff8dc1cdfeb_full.jpg'
                         }
-                        alt={item.username}
+                        alt=""
                         className="w-full h-full object-cover"
                       />
                     </div>
 
-                    <div className="flex items-center gap-2 min-w-0">
+                    <div className="flex min-w-0 flex-col gap-1">
                       <span className="truncate text-base font-bold text-[var(--text-primary)] transition-colors group-hover:text-[var(--primary-accent)] sm:text-lg">
                         {item.username}
                       </span>
+                      <span className="text-xs text-[var(--text-secondary)] sm:hidden">보유 게임 {item.totalGamesCount}개</span>
                     </div>
                   </div>
 
                   {/* Center: Total Games */}
-                  <div className="flex flex-1 items-center justify-center px-4 hidden sm:flex">
+                  <div className="hidden flex-1 items-center justify-center px-4 sm:flex">
                     <div className="flex items-center gap-2 text-sm sm:text-base text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors">
                       <span>
                         보유 게임: <strong className="font-bold text-[var(--text-primary)] text-base sm:text-lg">{item.totalGamesCount}</strong>개
                       </span>
                     </div>
                   </div>
+                  </Link>
 
                   {/* Right: Like Button */}
-                  <div className="flex items-center gap-3 shrink-0">
+                  <div className="flex shrink-0 items-center gap-3">
                     <button
                       type="button"
                       onClick={(e) => handleLikeToggle(e, item.userId)}
                       disabled={likeLoadingUserIds.has(item.userId)}
                       className={`flex cursor-pointer items-center gap-2 rounded-[2px] border px-3.5 py-2 text-sm font-bold transition-colors disabled:opacity-60 sm:px-4 sm:text-base ${
                         item.isLiked
-                          ? 'bg-rose-500/15 border-rose-500/30 text-rose-400 hover:bg-rose-500/25'
-                          : 'bg-[var(--nav-btn-bg)] border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-rose-400 hover:border-rose-500/30 hover:bg-rose-500/10'
+                          ? 'bg-rose-500/15 border-rose-500/30 text-[var(--text-like)] hover:bg-rose-500/25'
+                          : 'bg-[var(--nav-btn-bg)] border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-like)] hover:border-rose-500/30 hover:bg-rose-500/10'
                       }`}
                       title={item.isLiked ? '좋아요 취소' : '좋아요'}
+                      aria-label={`${item.username}님 쇼케이스 ${item.isLiked ? '좋아요 취소' : '좋아요'}, 현재 ${item.likeCount}개`}
+                      aria-pressed={item.isLiked}
                     >
                       <Heart
                         className={`w-5 h-5 transition-all ${
@@ -341,7 +350,7 @@ export const MyPage: React.FC = () => {
                       <span>{item.likeCount}</span>
                     </button>
                   </div>
-                </Link>
+                </div>
               )}
               footer={
                 hasNext ? (

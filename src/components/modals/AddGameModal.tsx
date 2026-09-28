@@ -12,7 +12,6 @@ import {
   ArrowUpAZ,
   ArrowDownAZ,
   Calendar,
-  Layers,
 } from 'lucide-react';
 
 interface AddGameModalProps {
@@ -49,7 +48,6 @@ export const AddGameModal: React.FC<AddGameModalProps> = ({
     isLoadingGames,
     isLoadingMoreGames,
     hasMoreGames,
-    totalGamesCount,
     isSyncingGames,
     cooldownSeconds,
     syncGames,
@@ -240,7 +238,7 @@ export const AddGameModal: React.FC<AddGameModalProps> = ({
       isOpen={isOpen}
       onClose={onClose}
       title={
-        <div className="flex items-center justify-between w-full pr-4">
+        <div className="flex w-full flex-wrap items-center justify-between gap-2 pr-2">
           <span className="text-lg font-bold text-[var(--text-primary)] tracking-tight">게임 추가하기</span>
           <Button
             variant="secondary"
@@ -248,9 +246,9 @@ export const AddGameModal: React.FC<AddGameModalProps> = ({
             onClick={handleSync}
             disabled={isCooldownActive}
             isLoading={isSyncingGames}
-            className={`text-xs py-1.5 px-3 border transition-all ${
+            className={`min-h-11 border px-3 text-xs transition-all ${
               isCooldownActive
-                ? 'bg-amber-950/30 border-amber-800/60 text-amber-300 cursor-not-allowed'
+                ? 'bg-amber-50 border-amber-300 text-amber-700 dark:bg-amber-950/30 dark:border-amber-800/60 dark:text-amber-300 cursor-not-allowed'
                 : ''
             }`}
             leftIcon={
@@ -294,10 +292,11 @@ export const AddGameModal: React.FC<AddGameModalProps> = ({
           <Search className="w-4 h-4 text-[var(--text-muted)] absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
             type="text"
+            aria-label="보유 게임 검색"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="보유 게임 검색..."
-            className="w-full pl-10 pr-4 py-2 bg-[var(--bg-surface-elevated)] border border-[var(--border-card)] rounded-[3px] text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--primary-accent)] transition-all"
+            className="min-h-11 w-full rounded-[3px] border border-[var(--border-card)] bg-[var(--bg-surface-elevated)] py-2 pl-10 pr-4 text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] transition-all focus:border-[var(--primary-accent)] focus:outline-none"
           />
         </div>
 
@@ -332,17 +331,9 @@ export const AddGameModal: React.FC<AddGameModalProps> = ({
         </div>
 
         {/* 3. Sort Row (Positioned underneath genre tags) */}
-        <div className="flex items-center justify-between gap-3 pt-1 border-t border-[var(--border-subtle)] pb-1">
-          {/* Left: Filtered games count / Total count */}
-          <div className="flex items-center gap-1.5 text-xs text-[var(--text-secondary)] font-medium">
-            <Layers className="w-3.5 h-3.5 text-[var(--text-muted)]" />
-            <span>
-              총 <strong className="text-[var(--text-primary)]">{totalGamesCount || sortedGames.length}</strong>개 중 <strong className="text-[var(--primary-accent)]">{sortedGames.length}</strong>개 표시
-            </span>
-          </div>
-
+        <div className="flex flex-wrap items-center justify-end gap-3 border-t border-[var(--border-subtle)] pb-1 pt-2">
           {/* Right: Clean Sort Buttons (Playtime, Recent, Toggleable Name) */}
-          <div className="flex items-center gap-1 bg-[var(--bg-surface-elevated)] p-1 rounded-lg border border-[var(--border-card)] shrink-0">
+          <div className="flex max-w-full items-center gap-1 overflow-x-auto rounded-lg border border-[var(--border-card)] bg-[var(--bg-surface-elevated)] p-1">
             <button
               type="button"
               onClick={() => setSortBy('playtime')}
@@ -412,10 +403,13 @@ export const AddGameModal: React.FC<AddGameModalProps> = ({
               const lastPlayedFormatted = formatLastPlayed(game.lastPlayedAt);
 
               return (
-                <div
+                <button
+                  type="button"
                   key={game.appId}
                   onClick={() => toggleGameSelection(game.appId)}
-                  className={`relative rounded-[3px] bg-[var(--bg-card)] border transition-all duration-300 cursor-pointer overflow-hidden group select-none ${
+                  aria-pressed={isSelected}
+                  aria-label={`${game.name} ${isSelected ? '선택 해제' : '선택'}`}
+                  className={`relative overflow-hidden rounded-[3px] border bg-[var(--bg-card)] text-left transition-colors duration-300 cursor-pointer group select-none ${
                     isSelected
                       ? 'border-[var(--primary-accent)] ring-1 ring-[var(--primary-accent)]'
                       : 'border-[var(--border-card)] hover:border-[var(--primary-accent)]'
@@ -425,7 +419,7 @@ export const AddGameModal: React.FC<AddGameModalProps> = ({
                   <div className="relative w-full aspect-[460/215] overflow-hidden bg-[#07090e]">
                     <img
                       src={game.headerImage}
-                      alt={game.name}
+                      alt=""
                       className="w-full h-full object-cover transition-[filter] duration-500 group-hover:saturate-125"
                       loading="lazy"
                     />
@@ -443,11 +437,11 @@ export const AddGameModal: React.FC<AddGameModalProps> = ({
 
                   {/* Card Info */}
                   <div className="p-3">
-                    <h4 className="font-bold text-xs text-[var(--text-primary)] truncate mb-1.5 group-hover:text-[var(--primary-accent)] transition-colors">
+                    <h4 className="mb-1.5 truncate text-sm font-bold text-[var(--text-primary)] transition-colors group-hover:text-[var(--primary-accent)]">
                       {game.name}
                     </h4>
 
-                    <div className="flex flex-wrap items-center justify-between text-[11px] text-[var(--text-secondary)] gap-1">
+                    <div className="flex flex-wrap items-center justify-between gap-1 text-xs text-[var(--text-secondary)]">
                       <div className="flex items-center gap-1">
                         <Clock className="w-3 h-3 text-[var(--primary-accent)]" />
                         <span className="font-medium text-[var(--text-primary)]">
@@ -456,14 +450,14 @@ export const AddGameModal: React.FC<AddGameModalProps> = ({
                       </div>
 
                       {lastPlayedFormatted && (
-                        <div className="flex items-center gap-1 text-[10px] text-[var(--text-muted)]">
+                        <div className="flex items-center gap-1 text-xs text-[var(--text-muted)]">
                           <Calendar className="w-2.5 h-2.5" />
                           <span>{lastPlayedFormatted}</span>
                         </div>
                       )}
                     </div>
                   </div>
-                </div>
+                </button>
               );
             })}
 
@@ -479,13 +473,13 @@ export const AddGameModal: React.FC<AddGameModalProps> = ({
 
             {/* End of list message */}
             {!hasMoreGames && sortedGames.length > 0 && (
-              <div className="col-span-full py-2 text-center text-[11px] text-slate-500">
+              <div className="col-span-full py-2 text-center text-xs text-[var(--text-muted)]">
                 모든 게임을 불러왔습니다
               </div>
             )}
 
             {sortedGames.length === 0 && (
-              <div className="col-span-full py-12 text-center text-xs text-slate-500 space-y-3">
+              <div className="col-span-full space-y-3 py-12 text-center text-sm text-[var(--text-secondary)]">
                 <p>조건과 일치하는 게임이 없습니다.</p>
                 <Button
                   variant="secondary"

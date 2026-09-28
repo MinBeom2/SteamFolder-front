@@ -218,10 +218,8 @@ export const GuestShowcasePage: React.FC = () => {
             <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
               사용자가 쇼케이스를 <strong>Private(비공개)</strong>로 설정하여 열람할 수 없습니다.
             </p>
-            <Link to="/">
-              <Button variant="cyan" size="sm" className="w-full mt-4">
-                홈으로 돌아가기
-              </Button>
+            <Link to="/" className="btn-variant-cyan mt-4 inline-flex min-h-11 w-full items-center justify-center rounded-[3px] px-4 text-sm font-semibold">
+              홈으로 돌아가기
             </Link>
           </div>
         </main>
@@ -242,10 +240,8 @@ export const GuestShowcasePage: React.FC = () => {
             <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
               {error || '존재하지 않는 유저이거나 등록된 쇼케이스가 없습니다.'}
             </p>
-            <Link to="/">
-              <Button variant="cyan" size="sm" className="w-full mt-4">
-                홈으로 돌아가기
-              </Button>
+            <Link to="/" className="btn-variant-cyan mt-4 inline-flex min-h-11 w-full items-center justify-center rounded-[3px] px-4 text-sm font-semibold">
+              홈으로 돌아가기
             </Link>
           </div>
         </main>
@@ -275,29 +271,30 @@ export const GuestShowcasePage: React.FC = () => {
       {/* Main Showcase Container */}
       <main className="relative z-10 mx-auto flex w-full max-w-[1440px] flex-1 select-none flex-col justify-start px-5 py-9 sm:px-10 sm:py-12">
         {/* User Profile & Showcase Stats Banner */}
-        <div className="mb-6 grid gap-8 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end">
-          <div className="flex items-end gap-5 sm:gap-7">
+        <div className="mb-6 grid gap-5 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
+          <div className="flex min-w-0 items-end gap-4 sm:gap-7">
             <img
               src={
                 showcase.user.avatarUrl ||
                 'https://avatars.steamstatic.com/fef49e7fa7e1997310d705b2a6158ff8dc1cdfeb_full.jpg'
               }
               alt={showcase.user.username}
-              className="h-20 w-20 object-cover grayscale-[15%] sm:h-28 sm:w-28"
+              className="h-16 w-16 shrink-0 object-cover grayscale-[15%] sm:h-28 sm:w-28"
             />
-            <div>
-              <h1 className="flex items-center gap-3 text-3xl font-black tracking-[-0.055em] text-[var(--text-primary)] sm:text-6xl">
+            <div className="min-w-0">
+              <h1 className="flex min-w-0 flex-wrap items-center gap-3 break-words text-3xl font-black tracking-[-0.04em] text-[var(--text-primary)] sm:text-6xl">
                 {!showcase.user.isPublic && (
                   <span title="비공개 쇼케이스 (링크 공유됨)" className="flex items-center text-[var(--text-secondary)] shrink-0">
                     <Lock className="w-5 h-5 text-slate-400" aria-hidden="true" />
                   </span>
                 )}
-                <span>{showcase.user.username}</span>
-                <Button
+                <span className="min-w-0 break-all">{showcase.user.username}</span>
+              </h1>
+              <Button
                   variant="steam"
                   size="sm"
                   onClick={handleShareClick}
-                  className="ml-1 h-8 px-3 text-xs font-medium"
+                  className="mt-3 min-h-11 px-3 text-xs font-medium"
                   leftIcon={
                     isCopied ? (
                       <Check className="w-3.5 h-3.5 text-emerald-400" />
@@ -307,18 +304,17 @@ export const GuestShowcasePage: React.FC = () => {
                   }
                 >
                   {isCopied ? '링크 복사됨!' : '공유'}
-                </Button>
-              </h1>
+              </Button>
             </div>
           </div>
 
           {/* Profile Stats & Actions */}
-          <div className="flex flex-wrap items-center gap-3 sm:justify-end sm:gap-4">
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2 lg:justify-end">
             {/* Owned Games Button (방안 1: 칩/뱃지형) */}
             <button
               type="button"
               onClick={() => setIsGamesModalOpen(true)}
-              className="group flex cursor-pointer items-center gap-2 py-1.5 text-xs font-semibold transition-colors hover:text-[var(--primary-accent)] sm:text-sm"
+              className="group flex min-h-11 cursor-pointer items-center gap-2 py-1.5 text-xs font-semibold transition-colors hover:text-[var(--primary-accent)] sm:text-sm"
               title="보유 게임 전체 목록 열기"
             >
               <span className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors">보유 게임</span>
@@ -339,12 +335,14 @@ export const GuestShowcasePage: React.FC = () => {
               type="button"
               onClick={handleToggleLike}
               disabled={isLikeLoading}
-              className={`flex h-9 cursor-pointer items-center gap-1.5 rounded-[2px] border px-3.5 text-xs font-semibold transition-colors sm:text-sm ${
+              className={`flex min-h-11 cursor-pointer items-center gap-1.5 rounded-[2px] border px-3.5 text-xs font-semibold transition-colors sm:text-sm ${
                 isLiked
-                  ? 'bg-rose-500/15 border-rose-500/40 text-rose-400 hover:bg-rose-500/25'
-                  : 'bg-[var(--nav-btn-bg)] border-[var(--nav-btn-border)] text-[var(--text-secondary)] hover:text-rose-400 hover:border-rose-400/40'
+                  ? 'bg-rose-500/15 border-rose-500/40 text-[var(--text-like)] hover:bg-rose-500/25'
+                  : 'bg-[var(--nav-btn-bg)] border-[var(--nav-btn-border)] text-[var(--text-secondary)] hover:text-[var(--text-like)] hover:border-rose-400/40'
               }`}
               title={isLiked ? '좋아요 취소' : '쇼케이스 좋아요'}
+              aria-label={`쇼케이스 ${isLiked ? '좋아요 취소' : '좋아요'}, 현재 ${likeCount}개`}
+              aria-pressed={isLiked}
             >
               <Heart
                 className={`w-4 h-4 transition-transform duration-200 ${
@@ -378,7 +376,20 @@ export const GuestShowcasePage: React.FC = () => {
         </div>
 
         {/* 2D 6-Column Desktop Grid Canvas */}
-        <div className="editorial-rule grid min-h-[420px] grid-cols-2 gap-x-3 gap-y-7 border-y py-7 sm:grid-cols-3 md:grid-cols-6">
+        <div className="editorial-rule grid grid-cols-2 gap-3 border-y py-6 sm:grid-cols-3 md:hidden">
+          {items.length === 0 ? (
+            <p className="col-span-full py-16 text-center text-sm text-[var(--text-secondary)]">폴더가 비어있습니다.</p>
+          ) : [...items].sort((a, b) => a.positionY - b.positionY || a.positionX - b.positionX).map((cellItem) => (
+            <div key={`${cellItem.type}_${cellItem.id}`} className="flex min-w-0 items-start justify-center">
+              {cellItem.type === 'FOLDER' && cellItem.folderData ? (
+                <FolderCard item={cellItem} folder={cellItem.folderData} onOpen={() => handleOpenFolder(cellItem.folderData!)} isReadOnly />
+              ) : cellItem.type === 'GAME' && cellItem.gameData ? (
+                <GameCard item={cellItem} game={cellItem.gameData} isReadOnly />
+              ) : null}
+            </div>
+          ))}
+        </div>
+        <div className="editorial-rule hidden min-h-[420px] grid-cols-6 gap-x-3 gap-y-7 border-y py-7 md:grid">
           {items.length === 0 ? (
             <div className="col-span-full py-20 text-center text-xs text-[var(--text-muted)]">
               폴더가 비어있습니다.

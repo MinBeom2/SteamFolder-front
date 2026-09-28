@@ -37,10 +37,10 @@ export const SteamLoginButton: React.FC<SteamLoginButtonProps> = ({
   return (
     <div className={`flex flex-wrap items-center gap-2.5 ${className}`}>
       <Button
-        variant="steam"
+        variant="cyan"
         size={size}
         onClick={handleSteamRedirect}
-        className="font-medium cursor-pointer"
+        className="font-medium cursor-pointer hover:translate-y-0"
       >
         <span>스팀 계정으로 로그인</span>
       </Button>

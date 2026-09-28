@@ -94,24 +94,25 @@ export const DirectLoginModal: React.FC<DirectLoginModalProps> = ({
         </p>
 
         {errorMessage && (
-          <div className="p-3 bg-red-50 dark:bg-red-950/50 border border-red-200 dark:border-red-800/60 rounded-lg flex items-start gap-2.5 text-xs text-red-700 dark:text-red-200">
+          <div role="alert" className="p-3 bg-red-50 dark:bg-red-950/50 border border-red-200 dark:border-red-800/60 rounded-lg flex items-start gap-2.5 text-xs text-red-700 dark:text-red-200">
             <AlertCircle className="w-4 h-4 text-red-500 dark:text-red-400 shrink-0 mt-0.5" />
             <span>{errorMessage}</span>
           </div>
         )}
 
         {successMessage && (
-          <div className="p-3 bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800/60 rounded-lg flex items-start gap-2.5 text-xs text-emerald-700 dark:text-emerald-200">
+          <div role="status" className="p-3 bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800/60 rounded-lg flex items-start gap-2.5 text-xs text-emerald-700 dark:text-emerald-200">
             <CheckCircle2 className="w-4 h-4 text-emerald-500 dark:text-emerald-400 shrink-0 mt-0.5" />
             <span>{successMessage}</span>
           </div>
         )}
 
         <div className="space-y-1.5">
-          <label className="block text-xs font-semibold text-[var(--text-secondary)]">
+          <label htmlFor="direct-login-steam-id" className="block text-sm font-semibold text-[var(--text-secondary)]">
             Steam ID (64-bit) <span className="text-red-400">*</span>
           </label>
           <input
+            id="direct-login-steam-id"
             type="text"
             value={steamId}
             onChange={(e) => setSteamId(e.target.value)}
@@ -122,10 +123,11 @@ export const DirectLoginModal: React.FC<DirectLoginModalProps> = ({
         </div>
 
         <div className="space-y-1.5">
-          <label className="block text-xs font-semibold text-[var(--text-secondary)]">
+          <label htmlFor="direct-login-username" className="block text-sm font-semibold text-[var(--text-secondary)]">
             유저 닉네임 (선택)
           </label>
           <input
+            id="direct-login-username"
             type="text"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
@@ -135,10 +137,11 @@ export const DirectLoginModal: React.FC<DirectLoginModalProps> = ({
         </div>
 
         <div className="space-y-1.5">
-          <label className="block text-xs font-semibold text-[var(--text-secondary)]">
+          <label htmlFor="direct-login-avatar-url" className="block text-sm font-semibold text-[var(--text-secondary)]">
             프로필 아바타 이미지 URL (선택)
           </label>
           <input
+            id="direct-login-avatar-url"
             type="text"
             value={avatarUrl}
             onChange={(e) => setAvatarUrl(e.target.value)}

@@ -76,7 +76,7 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
         <div className="flex flex-col items-center py-7 text-center">
           <CheckCircle2 className="h-9 w-9 text-emerald-500" />
           <h4 className="mt-4 text-base font-bold text-[var(--text-primary)]">피드백이 접수되었습니다.</h4>
-          <p className="mt-2 text-xs leading-relaxed text-[var(--text-secondary)]">
+          <p className="mt-2 text-sm leading-relaxed text-[var(--text-secondary)]">
             보내주신 내용은 서비스 개선에 참고하겠습니다.
           </p>
           <Button type="button" variant="secondary" size="sm" className="mt-6 hover:translate-y-0" onClick={handleClose}>
@@ -85,13 +85,14 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
         </div>
       ) : (
         <form onSubmit={handleSubmit} className="space-y-5">
-          <div className="grid grid-cols-3 gap-2">
+          <div role="group" aria-label="피드백 종류" className="grid grid-cols-1 gap-2 sm:grid-cols-3">
             {CATEGORIES.map((item) => (
               <button
                 key={item.value}
                 type="button"
                 onClick={() => setCategory(item.value)}
-                className={`h-10 rounded-[3px] border px-2 text-xs font-semibold transition-colors ${
+                aria-pressed={category === item.value}
+                className={`min-h-11 rounded-[3px] border px-2 text-sm font-semibold transition-colors ${
                   category === item.value
                     ? 'border-[var(--primary-accent)] bg-[var(--selection-bg)] text-[var(--primary-accent)]'
                     : 'border-[var(--border-card)] text-[var(--text-secondary)] hover:border-[var(--primary-accent)] hover:text-[var(--text-primary)]'
@@ -103,7 +104,11 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
           </div>
 
           <div>
+            <label htmlFor="feedback-content" className="mb-2 block text-sm font-semibold text-[var(--text-primary)]">
+              피드백 내용
+            </label>
             <textarea
+              id="feedback-content"
               value={content}
               onChange={(event) => {
                 setContent(event.target.value);
@@ -111,11 +116,13 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
               }}
               rows={7}
               maxLength={3000}
+              aria-invalid={Boolean(error)}
+              aria-describedby="feedback-content-help"
               placeholder="불편했던 점이나 필요한 기능을 자세히 알려주세요."
               className="w-full resize-none rounded-[3px] border border-[var(--border-card)] bg-[var(--bg-surface-elevated)] px-3.5 py-3 text-sm leading-6 text-[var(--text-primary)] outline-none placeholder:text-[var(--text-muted)] focus:border-[var(--primary-accent)]"
             />
-            <div className="mt-1.5 flex items-center justify-between text-[10px]">
-              <span className={error ? 'text-red-500' : 'text-[var(--text-muted)]'}>
+            <div id="feedback-content-help" className="mt-1.5 flex items-center justify-between gap-2 text-xs">
+              <span role={error ? 'alert' : undefined} className={error ? 'text-red-700 dark:text-red-300' : 'text-[var(--text-muted)]'}>
                 {error || '10자 이상 입력해 주세요.'}
               </span>
               <span className="tabular-nums text-[var(--text-muted)]">{content.length} / 3,000</span>

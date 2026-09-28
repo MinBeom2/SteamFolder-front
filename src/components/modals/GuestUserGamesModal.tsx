@@ -12,7 +12,6 @@ import {
   ArrowDownAZ,
   Calendar,
   Trophy,
-  ExternalLink,
 } from 'lucide-react';
 
 interface GuestUserGamesModalProps {
@@ -314,11 +313,12 @@ export const GuestUserGamesModal: React.FC<GuestUserGamesModalProps> = ({
       title={`${username}님이 보유한 게임`}
       maxWidth="3xl"
     >
-      <div className="space-y-4">
+      <div className="space-y-3">
         {/* 1. Search Bar */}
         <div className="relative">
           <Search className="w-4 h-4 text-[var(--text-muted)] absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
+            aria-label="보유 게임 검색"
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -334,7 +334,7 @@ export const GuestUserGamesModal: React.FC<GuestUserGamesModalProps> = ({
           onMouseMove={handleMouseMove}
           onMouseUp={handleMouseUpOrLeave}
           onMouseLeave={handleMouseUpOrLeave}
-          className={`flex items-center gap-1.5 overflow-x-auto pb-1 pt-0.5 select-none no-scrollbar ${
+          className={`flex items-center gap-1.5 overflow-x-auto select-none no-scrollbar ${
             isGrabbed ? 'cursor-grabbing' : 'cursor-grab'
           }`}
         >
@@ -345,7 +345,8 @@ export const GuestUserGamesModal: React.FC<GuestUserGamesModalProps> = ({
                 key={genre}
                 type="button"
                 onClick={() => handleTagClick(genre)}
-                className={`px-2.5 py-1 rounded-[3px] text-xs tracking-tight transition-all shrink-0 cursor-pointer ${
+                aria-pressed={isActive}
+                className={`min-h-11 px-2.5 py-1 rounded-[3px] text-xs tracking-tight transition-all shrink-0 cursor-pointer ${
                   isActive
                     ? 'bg-[var(--primary-accent)] text-[var(--bg-app)] border border-[var(--primary-accent)] font-bold'
                     : 'bg-[var(--bg-surface-elevated)] text-[var(--text-secondary)] border border-[var(--border-card)] hover:text-[var(--text-primary)] hover:border-[var(--border-subtle)] font-medium'
@@ -362,7 +363,8 @@ export const GuestUserGamesModal: React.FC<GuestUserGamesModalProps> = ({
           <button
             type="button"
             onClick={() => handleSortChange('playtime')}
-            className={`w-full py-2 rounded-md text-xs sm:text-sm font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer active:scale-[0.98] ${
+            aria-pressed={sortBy === 'playtime'}
+            className={`min-h-11 w-full py-2 rounded-md text-xs sm:text-sm font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer active:scale-[0.98] ${
               sortBy === 'playtime'
                 ? 'bg-[var(--primary-accent)] text-[var(--bg-app)] border border-[var(--primary-accent)] font-bold'
                 : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
@@ -376,7 +378,8 @@ export const GuestUserGamesModal: React.FC<GuestUserGamesModalProps> = ({
           <button
             type="button"
             onClick={() => handleSortChange('recent')}
-            className={`w-full py-2 rounded-md text-xs sm:text-sm font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer active:scale-[0.98] ${
+            aria-pressed={sortBy === 'recent'}
+            className={`min-h-11 w-full py-2 rounded-md text-xs sm:text-sm font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer active:scale-[0.98] ${
               sortBy === 'recent'
                 ? 'bg-[var(--primary-accent)] text-[var(--bg-app)] border border-[var(--primary-accent)] font-bold'
                 : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
@@ -390,7 +393,8 @@ export const GuestUserGamesModal: React.FC<GuestUserGamesModalProps> = ({
           <button
             type="button"
             onClick={handleNameSortClick}
-            className={`w-full py-2 rounded-md text-xs sm:text-sm font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer active:scale-[0.98] ${
+            aria-pressed={sortBy === 'name-asc' || sortBy === 'name-desc'}
+            className={`min-h-11 w-full py-2 rounded-md text-xs sm:text-sm font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer active:scale-[0.98] ${
               sortBy === 'name-asc' || sortBy === 'name-desc'
                 ? 'bg-[var(--primary-accent)] text-[var(--bg-app)] border border-[var(--primary-accent)] font-bold'
                 : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
@@ -437,20 +441,16 @@ export const GuestUserGamesModal: React.FC<GuestUserGamesModalProps> = ({
               return (
                 <div
                   key={game.appId}
-                  onClick={() => handleCardClick(game)}
-                  className={`group relative flex flex-col gap-3 p-3.5 sm:p-4 rounded-[3px] transition-all duration-300 bg-[var(--bg-card)] border border-[var(--border-card)] hover:border-[var(--primary-accent)] hover:bg-[var(--bg-surface-elevated)] ${
-                    !isReadOnly ? 'cursor-pointer' : 'cursor-default'
-                  }`}
-                  title={!isReadOnly ? '클릭 시 스팀 도전과제 정보 동기화' : undefined}
+                  className="group relative flex flex-col gap-3 rounded-[3px] border border-[var(--border-card)] bg-[var(--bg-card)] p-3.5 transition-all duration-300 hover:border-[var(--primary-accent)] hover:bg-[var(--bg-surface-elevated)] sm:p-4"
                 >
                   {/* Upper Row: Capsule Image + Title & Playtime Stats + Store Link */}
-                  <div className="flex items-start justify-between gap-3 sm:gap-4 min-w-0">
+                  <div className="flex flex-wrap items-start justify-between gap-3 sm:gap-4 min-w-0">
                     {/* Left: Capsule Image + Info Block */}
                     <div className="flex items-start gap-3.5 sm:gap-4 min-w-0 flex-1">
-                      <div className="w-36 sm:w-52 md:w-60 aspect-[460/215] rounded-[2px] overflow-hidden shrink-0 bg-[var(--bg-app)] border border-[var(--border-subtle)]">
+                      <div className="w-28 sm:w-52 md:w-60 aspect-[460/215] rounded-[2px] overflow-hidden shrink-0 bg-[var(--bg-app)] border border-[var(--border-subtle)]">
                         <img
                           src={game.headerImage}
-                          alt={game.name}
+                          alt=""
                           className="w-full h-full object-cover transition-[filter] duration-500 group-hover:saturate-125"
                           loading="lazy"
                         />
@@ -465,7 +465,7 @@ export const GuestUserGamesModal: React.FC<GuestUserGamesModalProps> = ({
                         {/* Steam Style: 전체 플레이 시간 & 최근 플레이 in place of genre tags */}
                         <div className="flex items-center gap-5 sm:gap-8 pt-2">
                           <div className="flex flex-col">
-                            <span className="text-[11px] sm:text-xs text-[var(--text-muted)] font-medium">
+                            <span className="text-xs text-[var(--text-muted)] font-medium">
                               전체 플레이 시간
                             </span>
                             <span className="text-xs sm:text-sm font-bold text-[var(--text-primary)]">
@@ -475,7 +475,7 @@ export const GuestUserGamesModal: React.FC<GuestUserGamesModalProps> = ({
 
                           {lastPlayedFormatted && (
                             <div className="flex flex-col min-w-[65px]">
-                              <span className="text-[11px] sm:text-xs text-[var(--text-muted)] font-medium">
+                              <span className="text-xs text-[var(--text-muted)] font-medium">
                                 최근 플레이
                               </span>
                               <span className="text-xs sm:text-sm font-bold text-[var(--text-primary)]">
@@ -497,8 +497,7 @@ export const GuestUserGamesModal: React.FC<GuestUserGamesModalProps> = ({
                         className="flex items-center gap-1.5 px-2.5 py-1 rounded-[3px] text-xs font-medium bg-transparent border border-[var(--border-card)] text-[var(--text-secondary)] hover:text-[var(--primary-accent)] hover:border-[var(--primary-accent)] transition-all shrink-0 cursor-pointer group/store"
                         title="스팀 공식 상점 페이지 열기 (새 창)"
                       >
-                        <ExternalLink className="w-3.5 h-3.5 text-[var(--text-muted)] group-hover/store:text-[var(--primary-accent)] transition-colors" />
-                        <span>스팀 상점</span>
+                        <span>상점 방문</span>
                       </a>
                     </div>
                   </div>
@@ -558,14 +557,18 @@ export const GuestUserGamesModal: React.FC<GuestUserGamesModalProps> = ({
                       </div>
                     </div>
                   ) : (
-                    <div className="rounded-[3px] bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] py-2.5 px-3 flex items-center justify-between text-xs text-[var(--text-muted)] group-hover:border-[var(--primary-accent)] transition-colors">
+                    <div className="rounded-[3px] bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] py-2.5 px-3 flex flex-wrap items-center justify-between gap-2 text-xs text-[var(--text-muted)] group-hover:border-[var(--primary-accent)] transition-colors">
                       <div className="flex items-center gap-2">
                         <span>도전과제 미동기화</span>
                       </div>
                       {!isReadOnly && (
-                        <span className="text-[11px] text-[var(--primary-accent)] font-medium flex items-center gap-1">
-                          클릭하여 업적 불러오기
-                        </span>
+                        <button
+                          type="button"
+                          onClick={() => handleCardClick(game)}
+                          className="min-h-11 rounded px-2 text-sm font-semibold text-[var(--primary-accent)] hover:underline"
+                        >
+                          업적 불러오기
+                        </button>
                       )}
                     </div>
                   )}

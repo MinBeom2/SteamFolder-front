@@ -48,12 +48,12 @@ export const AuthCallbackPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-[var(--bg-app)] text-[var(--text-primary)] flex flex-col items-center justify-center p-6 text-center transition-colors duration-200">
       {error ? (
-        <div className="relative max-w-md w-full bg-[var(--bg-surface)] p-8 sm:p-10 rounded-[3px] border border-[var(--border-modal)] shadow-[var(--soft-shadow)] space-y-3 animate-in fade-in slide-in-from-bottom-2">
+        <div className="relative max-w-md w-full bg-[var(--bg-surface)] p-8 sm:p-10 rounded-[3px] border border-[var(--border-modal)] space-y-3">
           {/* Top-right Close (X) Button */}
           <button
             type="button"
             onClick={() => navigate('/')}
-            className="absolute top-4 right-4 p-1.5 rounded-[3px] text-[var(--text-secondary)] hover:text-[var(--primary-accent)] hover:bg-black/5 dark:hover:bg-white/10 transition-colors cursor-pointer"
+            className="absolute right-2 top-2 flex h-11 w-11 items-center justify-center rounded-[3px] text-[var(--text-secondary)] transition-colors hover:bg-black/5 hover:text-[var(--primary-accent)] dark:hover:bg-white/10 cursor-pointer"
             aria-label="창 닫기"
           >
             <X className="w-5 h-5" />

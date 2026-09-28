@@ -64,18 +64,20 @@ const EditFolderForm: React.FC<EditFolderFormProps> = ({ folder, onClose }) => {
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
       {error && (
-        <div className="p-3 bg-red-50 dark:bg-red-950/50 border border-red-200 dark:border-red-800/60 rounded-lg text-xs text-red-700 dark:text-red-300">
+        <div role="alert" className="p-3 bg-red-50 dark:bg-red-950/50 border border-red-200 dark:border-red-800/60 rounded-lg text-xs text-red-700 dark:text-red-300">
           {error}
         </div>
       )}
 
       {/* 1. 폴더 이름 */}
       <div className="space-y-1.5">
-        <label className="block text-xs font-bold text-[var(--text-primary)]">
+        <label htmlFor="edit-folder-name" className="block text-sm font-bold text-[var(--text-primary)]">
           폴더 이름
         </label>
         <input
+          id="edit-folder-name"
           type="text"
+          aria-invalid={Boolean(error)}
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="폴더 이름 입력"

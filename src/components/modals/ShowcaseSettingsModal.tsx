@@ -225,16 +225,22 @@ export const ShowcaseSettingsForm: React.FC<ShowcaseSettingsFormProps> = ({
       </div>
 
       {/* 3. 데이터 관리 */}
-      <div className="mx-auto grid w-full max-w-sm gap-2 border-t border-[var(--border-subtle)] pt-5">
+      <div className="space-y-3 border-t border-[var(--border-subtle)] pt-5">
+        <div>
+          <h3 className="text-sm font-bold text-[var(--text-primary)]">데이터 관리</h3>
+          <p className="mt-1 text-xs text-[var(--text-secondary)]">아래 작업은 확인 후 실행되며 되돌릴 수 없습니다.</p>
+        </div>
+        <div className="grid w-full gap-2">
         <button
           type="button"
           onClick={() => {
             setDangerError(null);
             setDangerAction('workspace');
           }}
-          className="flex h-12 cursor-pointer items-center justify-center rounded-none border border-[var(--border-card)] bg-[var(--bg-surface-elevated)] px-4 text-center text-sm font-semibold text-[var(--text-primary)] transition-colors hover:bg-[var(--bg-surface)]"
+          className="flex min-h-14 cursor-pointer flex-col items-start justify-center border border-amber-500/45 bg-amber-500/5 px-4 py-2 text-left transition-colors hover:bg-amber-500/10"
         >
-          초기화
+          <span className="text-sm font-semibold text-amber-800 dark:text-amber-200">작업 공간 초기화</span>
+          <span className="text-xs text-[var(--text-secondary)]">폴더와 배치한 게임만 비웁니다.</span>
         </button>
 
         <button
@@ -243,10 +249,12 @@ export const ShowcaseSettingsForm: React.FC<ShowcaseSettingsFormProps> = ({
             setDangerError(null);
             setDangerAction('account');
           }}
-          className="flex h-12 cursor-pointer items-center justify-center rounded-none border border-[var(--border-card)] bg-[var(--bg-surface-elevated)] px-4 text-center text-sm font-semibold text-[var(--text-primary)] transition-colors hover:bg-[var(--bg-surface)]"
+          className="flex min-h-14 cursor-pointer flex-col items-start justify-center border border-red-500/45 bg-red-500/5 px-4 py-2 text-left transition-colors hover:bg-red-500/10"
         >
-          회원 탈퇴
+          <span className="text-sm font-semibold text-red-700 dark:text-red-300">회원 탈퇴</span>
+          <span className="text-xs text-[var(--text-secondary)]">계정과 쇼케이스 데이터를 삭제합니다.</span>
         </button>
+        </div>
       </div>
 
       <Modal

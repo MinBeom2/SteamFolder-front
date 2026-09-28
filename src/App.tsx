@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { HomePage } from '@/pages/HomePage';
 import { GuestShowcasePage } from '@/pages/GuestShowcasePage';
 import { ShowcaseRankingPage } from '@/pages/ShowcaseRankingPage';
@@ -8,6 +8,27 @@ import { AuthCallbackPage } from '@/pages/AuthCallbackPage';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useThemeStore } from '@/store/useThemeStore';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
+
+const PageTitle: React.FC = () => {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    const section = pathname.startsWith('/rankings')
+      ? '쇼케이스 랭킹'
+      : pathname.startsWith('/mypage')
+        ? '마이페이지'
+        : pathname.startsWith('/showcase/') || pathname === '/guest'
+          ? '공유 쇼케이스'
+          : pathname.startsWith('/auth/callback')
+            ? '로그인'
+            : pathname.startsWith('/folders/')
+              ? '내 폴더'
+              : '나만의 게임 쇼케이스';
+    document.title = `${section} | SteamFolder`;
+  }, [pathname]);
+
+  return null;
+};
 
 export const App: React.FC = () => {
   const { initializeAuth, isInitialized } = useAuthStore();
@@ -29,6 +50,7 @@ export const App: React.FC = () => {
 
   return (
     <BrowserRouter>
+      <PageTitle />
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/folders/:folderId" element={<HomePage />} />

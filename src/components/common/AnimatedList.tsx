@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect, useCallback } from 'react';
-import { motion, useInView } from 'motion/react';
+import { motion, useInView, useReducedMotion } from 'motion/react';
 import './AnimatedList.css';
 
 interface AnimatedItemProps {
@@ -21,6 +21,7 @@ const AnimatedItem: React.FC<AnimatedItemProps> = ({
 }) => {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { amount: inViewAmount, once: false });
+  const prefersReducedMotion = useReducedMotion();
 
   return (
     <motion.div
@@ -28,10 +29,10 @@ const AnimatedItem: React.FC<AnimatedItemProps> = ({
       data-index={index}
       onMouseEnter={onMouseEnter}
       onClick={onClick}
-      initial={{ y: 20, opacity: 0 }}
-      animate={inView ? { y: 0, opacity: 1 } : { y: 14, opacity: 0 }}
-      transition={{ type: 'spring', stiffness: 150, damping: 22, mass: 0.8, delay }}
-      style={{ marginBottom: '1rem', cursor: 'pointer' }}
+      initial={prefersReducedMotion ? false : { y: 20, opacity: 0 }}
+      animate={prefersReducedMotion || inView ? { y: 0, opacity: 1 } : { y: 14, opacity: 0 }}
+      transition={prefersReducedMotion ? { duration: 0 } : { type: 'spring', stiffness: 150, damping: 22, mass: 0.8, delay }}
+      style={{ marginBottom: 0, cursor: onClick ? 'pointer' : undefined }}
     >
       {children}
     </motion.div>
@@ -155,7 +156,7 @@ export const AnimatedList = <T,>({
             index={index}
             inViewAmount={inViewAmount}
             onMouseEnter={() => handleItemMouseEnter(index)}
-            onClick={() => handleItemClick(item, index)}
+            onClick={onItemSelect ? () => handleItemClick(item, index) : undefined}
           >
             {renderItem ? (
               renderItem(item, index, selectedIndex === index)
