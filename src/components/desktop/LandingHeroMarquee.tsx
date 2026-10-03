@@ -151,7 +151,7 @@ export const LandingHeroMarquee: React.FC = () => {
           게임을 자유롭게 배치하고, 공유하세요
         </p>
         <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
-          <SteamLoginButton size="lg" />
+          <SteamLoginButton size="lg" showDemoOption />
         </div>
       </div>
     </div>

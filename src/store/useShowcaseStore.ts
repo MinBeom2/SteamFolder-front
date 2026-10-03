@@ -36,6 +36,7 @@ import {
 } from '@/api/game';
 import { useAuthStore } from '@/store/useAuthStore';
 import { getErrorMessage } from '@/utils/error';
+import { getAuthSessionVersion, subscribeAuthSession } from '@/utils/authSession';
 
 interface ContextMenuState {
   isOpen: boolean;
@@ -61,6 +62,8 @@ interface ShowcaseState {
   totalGamesCount: number;
   isLoadingGames: boolean;
   isLoadingMoreGames: boolean;
+  gamesError: string | null;
+  isAddingGames: boolean;
   isSyncingGames: boolean;
   cooldownSeconds: number;
   searchQuery: string;
@@ -172,6 +175,12 @@ interface ShowcaseState {
 
 let countdownTimer: ReturnType<typeof setInterval> | null = null;
 let toastTimeout: ReturnType<typeof setTimeout> | null = null;
+let userGamesRequestId = 0;
+let activeGamesQuery: { genres?: string[]; sort: string } | null = null;
+let gameDetailRequestId = 0;
+let addGamesPromise: Promise<void> | null = null;
+let gamesSyncRequest: { sessionVersion: number; promise: Promise<SyncResult> } | null = null;
+let cooldownRequestId = 0;
 
 const startCooldownCountdown = (
   initialSeconds: number,
@@ -288,6 +297,8 @@ export const useShowcaseStore = create<ShowcaseState>((set, get) => ({
   totalGamesCount: 0,
   isLoadingGames: false,
   isLoadingMoreGames: false,
+  gamesError: null,
+  isAddingGames: false,
   isSyncingGames: false,
   cooldownSeconds: 0,
   searchQuery: '',
@@ -527,29 +538,43 @@ export const useShowcaseStore = create<ShowcaseState>((set, get) => ({
     }
   },
 
-  addSelectedGamesToFolder: async () => {
+  addSelectedGamesToFolder: () => {
+    if (addGamesPromise) return addGamesPromise;
+
     const { currentFolderId, selectedGameAppIds, userGames } = get();
     if (currentFolderId === null) {
       get().setToastMessage('게임을 추가하려면 먼저 폴더 안으로 이동해 주세요!');
-      return;
+      return Promise.resolve();
     }
 
     const appIdsSet = new Set(selectedGameAppIds);
     userGames.filter((g) => g.selected).forEach((g) => appIdsSet.add(g.appId));
 
-    if (appIdsSet.size === 0) return;
+    if (appIdsSet.size === 0) return Promise.resolve();
 
     const appIds = Array.from(appIdsSet);
-    await batchAddFolderGamesApi(currentFolderId, { appIds });
+    set({ isAddingGames: true });
+    addGamesPromise = (async () => {
+      await batchAddFolderGamesApi(currentFolderId, { appIds });
 
-    set((state) => ({
-      selectedGameAppIds: [],
-      userGames: state.userGames.map((g) => ({ ...g, selected: false })),
-      isAddGameModalOpen: false,
-    }));
+      get().setAddGameModalOpen(false);
+      set((state) => ({
+        selectedGameAppIds: [],
+        userGames: state.userGames.map((g) => ({ ...g, selected: false })),
+      }));
+      get().setToastMessage(`${appIds.length}개의 게임이 폴더에 추가되었습니다.`);
 
-    get().setToastMessage(`${appIds.length}개의 게임이 폴더에 추가되었습니다.`);
-    await get().refreshCurrentView();
+      try {
+        await get().refreshCurrentView();
+      } catch (err) {
+        console.error('Failed to refresh folder after adding games:', err);
+        get().setToastMessage('게임은 추가되었지만 폴더를 갱신하지 못했습니다. 페이지를 새로고침해 주세요.');
+      }
+    })().finally(() => {
+      addGamesPromise = null;
+      set({ isAddingGames: false });
+    });
+    return addGamesPromise;
   },
 
   addSingleGameToFolder: async (appId: number, posX?: number, posY?: number) => {
@@ -896,18 +921,18 @@ export const useShowcaseStore = create<ShowcaseState>((set, get) => ({
   setSelectedGenre: (genre: string) => set({ selectedGenre: genre }),
 
   setCooldownSeconds: (seconds: number) => {
+    cooldownRequestId++;
     startCooldownCountdown(seconds, set, get);
   },
 
   checkCooldown: async () => {
+    const sessionVersion = getAuthSessionVersion();
+    const requestId = ++cooldownRequestId;
     try {
       const status = await getSyncCooldownApi();
+      if (sessionVersion !== getAuthSessionVersion() || requestId !== cooldownRequestId) return null;
       const remaining = status?.remainingSeconds ?? 0;
-      if (remaining > 0) {
-        startCooldownCountdown(remaining, set, get);
-      } else {
-        set({ cooldownSeconds: 0 });
-      }
+      startCooldownCountdown(remaining, set, get);
       return status;
     } catch (err) {
       console.warn('Failed to check sync cooldown:', err);
@@ -916,27 +941,23 @@ export const useShowcaseStore = create<ShowcaseState>((set, get) => ({
   },
 
   fetchUserGames: async (reset = true) => {
-    if (reset) {
-      set({
-        isLoadingGames: true,
-        userGames: [],
-        gamesCursor: null,
-        hasMoreGames: true,
-      });
-    } else {
-      set({ isLoadingGames: true });
-    }
+    const requestId = ++userGamesRequestId;
+    activeGamesQuery = null;
+    const selectedSet = new Set(get().selectedGameAppIds);
+    get().userGames.filter((g) => g.selected).forEach((g) => selectedSet.add(g.appId));
+    set({
+      isLoadingGames: true,
+      isLoadingMoreGames: false,
+      gamesError: null,
+      selectedGameAppIds: Array.from(selectedSet),
+      ...(reset ? { userGames: [], gamesCursor: null, hasMoreGames: true } : {}),
+    });
 
     try {
       const pageData = await getUserGamesCursorApi(null, 24);
+      if (requestId !== userGamesRequestId) return;
       if (pageData && pageData.content) {
-        // 기존에 선택되었던 항목 유지
-        const existingSelectedAppIds = new Set(
-          get()
-            .userGames.filter((g) => g.selected)
-            .map((g) => g.appId)
-        );
-
+        const existingSelectedAppIds = new Set(get().selectedGameAppIds);
         const formattedGames: UserGame[] = pageData.content.map((g) => ({
           ...g,
           selected: existingSelectedAppIds.has(g.appId),
@@ -953,59 +974,90 @@ export const useShowcaseStore = create<ShowcaseState>((set, get) => ({
         set({ isLoadingGames: false, hasMoreGames: false });
       }
     } catch (err) {
+      if (requestId !== userGamesRequestId) return;
       console.warn('Backend getUserGamesCursor fallback:', err);
       try {
         const games = await getUserGamesApi();
+        if (requestId !== userGamesRequestId) return;
+        const existingSelectedAppIds = new Set(get().selectedGameAppIds);
         set({
-          userGames: games || [],
+          userGames: (games || []).map((g) => ({
+            ...g,
+            selected: existingSelectedAppIds.has(g.appId),
+          })),
           gamesCursor: null,
           hasMoreGames: false,
           totalGamesCount: games?.length || 0,
           isLoadingGames: false,
         });
       } catch (fallbackErr) {
+        if (requestId !== userGamesRequestId) return;
         console.error('Failed to load user games:', fallbackErr);
-        set({ isLoadingGames: false });
+        set({
+          isLoadingGames: false,
+          hasMoreGames: false,
+          gamesError: getErrorMessage(fallbackErr, '게임 목록을 불러오지 못했습니다.'),
+        });
       }
     }
   },
 
   filterUserGames: async (genres?: string[], sort: string = 'playtime') => {
-    set({ isLoadingGames: true });
-    try {
-      const selectedSet = new Set(get().selectedGameAppIds);
-      get().userGames.filter((g) => g.selected).forEach((g) => selectedSet.add(g.appId));
+    const requestId = ++userGamesRequestId;
+    activeGamesQuery = { genres: genres?.slice(), sort };
+    const selectedSet = new Set(get().selectedGameAppIds);
+    get().userGames.filter((g) => g.selected).forEach((g) => selectedSet.add(g.appId));
+    set({
+      isLoadingGames: true,
+      isLoadingMoreGames: false,
+      gamesCursor: null,
+      hasMoreGames: false,
+      selectedGameAppIds: Array.from(selectedSet),
+    });
 
+    try {
       const data = await filterUserGamesApi(genres, sort);
+      if (requestId !== userGamesRequestId) return;
+      const currentSelectedSet = new Set(get().selectedGameAppIds);
       const formattedGames: UserGame[] = (data.games || []).map((g) => ({
         ...g,
-        selected: selectedSet.has(g.appId),
+        selected: currentSelectedSet.has(g.appId),
       }));
 
       set({
         userGames: formattedGames,
-        selectedGameAppIds: Array.from(selectedSet),
         gamesCursor: null,
         hasMoreGames: false,
         totalGamesCount: data.totalCount,
         isLoadingGames: false,
+        gamesError: null,
       });
     } catch (err) {
+      if (requestId !== userGamesRequestId) return;
       console.error('Failed to filter user games:', err);
-      set({ isLoadingGames: false });
+      set({
+        isLoadingGames: false,
+        gamesError: getErrorMessage(err, '게임 목록을 불러오지 못했습니다.'),
+      });
     }
   },
 
   loadMoreGames: async () => {
-    const { hasMoreGames, isLoadingMoreGames, isLoadingGames, gamesCursor, userGames } = get();
+    const { hasMoreGames, isLoadingMoreGames, isLoadingGames, gamesCursor } = get();
     if (!hasMoreGames || isLoadingMoreGames || isLoadingGames) return;
 
+    const requestId = userGamesRequestId;
     set({ isLoadingMoreGames: true });
     try {
       const pageData = await getUserGamesCursorApi(gamesCursor, 24);
+      if (requestId !== userGamesRequestId) return;
       if (pageData && pageData.content) {
+        const { userGames, selectedGameAppIds } = get();
         const currentAppIds = new Set(userGames.map((g) => g.appId));
-        const newUniqueGames = pageData.content.filter((g) => !currentAppIds.has(g.appId));
+        const selectedSet = new Set(selectedGameAppIds);
+        const newUniqueGames = pageData.content
+          .filter((g) => !currentAppIds.has(g.appId))
+          .map((g) => ({ ...g, selected: selectedSet.has(g.appId) }));
 
         set({
           userGames: [...userGames, ...newUniqueGames],
@@ -1018,27 +1070,51 @@ export const useShowcaseStore = create<ShowcaseState>((set, get) => ({
         set({ hasMoreGames: false, isLoadingMoreGames: false });
       }
     } catch (err) {
+      if (requestId !== userGamesRequestId) return;
       console.error('Failed to load more games:', err);
       set({ isLoadingMoreGames: false });
     }
   },
 
-  syncGames: async () => {
-    set({ isSyncingGames: true });
-    try {
-      const result = await syncSteamGamesApi();
-      startCooldownCountdown(300, set, get);
-      await get().fetchUserGames();
-      set({ isSyncingGames: false });
-      return result;
-    } catch (err: unknown) {
-      set({ isSyncingGames: false });
-      const errResponse = (err as { response?: { data?: { code?: string; message?: string } } })?.response?.data;
-      if (errResponse?.code === 'G005' || errResponse?.message?.includes('쿨다운')) {
-        await get().checkCooldown();
-      }
-      throw err;
+  syncGames: () => {
+    const sessionVersion = getAuthSessionVersion();
+    if (gamesSyncRequest?.sessionVersion === sessionVersion) return gamesSyncRequest.promise;
+    if (get().cooldownSeconds > 0) {
+      return Promise.reject(new Error('동기화 쿨다운(5분) 제한 중입니다.'));
     }
+    set({ isSyncingGames: true });
+    const request = {
+      sessionVersion,
+      promise: Promise.resolve().then(async () => {
+        try {
+          if (sessionVersion !== getAuthSessionVersion()) throw new Error('로그인 상태가 변경되었습니다.');
+          const result = await syncSteamGamesApi();
+          if (sessionVersion !== getAuthSessionVersion()) throw new Error('로그인 상태가 변경되었습니다.');
+          cooldownRequestId++;
+          startCooldownCountdown(300, set, get);
+          const query = activeGamesQuery;
+          if (get().isAddGameModalOpen && query) {
+            await get().filterUserGames(query.genres, query.sort);
+          } else {
+            await get().fetchUserGames(false);
+          }
+          if (sessionVersion !== getAuthSessionVersion()) throw new Error('로그인 상태가 변경되었습니다.');
+          return result;
+        } catch (err: unknown) {
+          const errResponse = (err as { response?: { data?: { code?: string; message?: string } } })?.response?.data;
+          if (sessionVersion === getAuthSessionVersion() &&
+              (errResponse?.code === 'G005' || errResponse?.message?.includes('쿨다운'))) {
+            await get().checkCooldown();
+          }
+          throw err;
+        } finally {
+          if (sessionVersion === getAuthSessionVersion()) set({ isSyncingGames: false });
+          if (gamesSyncRequest === request) gamesSyncRequest = null;
+        }
+      }),
+    };
+    gamesSyncRequest = request;
+    return request.promise;
   },
 
   toggleGameSelection: (appId: number) => {
@@ -1066,14 +1142,17 @@ export const useShowcaseStore = create<ShowcaseState>((set, get) => ({
   },
 
   setAddGameModalOpen: (open: boolean) => {
-    set({ isAddGameModalOpen: open });
-    if (open) {
-      set({ selectedGameAppIds: [] });
-      get().fetchUserGames();
-      get().checkCooldown();
-    } else {
-      set({ selectedGameAppIds: [] });
-    }
+    if (!open) userGamesRequestId++;
+    set((state) => ({
+      isAddGameModalOpen: open,
+      selectedGameAppIds: [],
+      userGames: state.userGames.map((g) => ({ ...g, selected: false })),
+      ...(!open ? {
+        isLoadingGames: false,
+        isLoadingMoreGames: false,
+        gamesError: null,
+      } : {}),
+    }));
   },
 
   setDirectLoginModalOpen: (open: boolean) => set({ isDirectLoginModalOpen: open }),
@@ -1096,6 +1175,7 @@ export const useShowcaseStore = create<ShowcaseState>((set, get) => ({
     achievementRate?: number | null;
     isReadOnly?: boolean;
   }) => {
+    const requestId = ++gameDetailRequestId;
     const isGuestOrReadOnly = Boolean(game.isReadOnly || !useAuthStore.getState().isAuthenticated);
 
     const matchingUserGame = get().userGames.find((g) => g.appId === game.appId);
@@ -1133,6 +1213,7 @@ export const useShowcaseStore = create<ShowcaseState>((set, get) => ({
       },
       achievementDetail: cachedAchievements,
       isLoadingGameDetail: !isGuestOrReadOnly,
+      isSyncingAchievements: false,
       gameDetailError: null,
     });
 
@@ -1143,6 +1224,11 @@ export const useShowcaseStore = create<ShowcaseState>((set, get) => ({
 
     try {
       const data = await getGameAchievementsApi(game.appId);
+      if (
+        requestId !== gameDetailRequestId ||
+        !get().isGameDetailModalOpen ||
+        get().selectedGameDetail?.appId !== game.appId
+      ) return;
       set((state) => ({
         achievementDetail: data,
         isLoadingGameDetail: false,
@@ -1172,6 +1258,7 @@ export const useShowcaseStore = create<ShowcaseState>((set, get) => ({
         ),
       }));
     } catch (err: unknown) {
+      if (requestId !== gameDetailRequestId) return;
       console.error('Failed to fetch game achievements detail:', err);
       const msg = getErrorMessage(err, '도전과제 정보를 불러오지 못했습니다.');
       set({
@@ -1182,27 +1269,41 @@ export const useShowcaseStore = create<ShowcaseState>((set, get) => ({
   },
 
   closeGameDetailModal: () => {
+    gameDetailRequestId++;
     set({
       isGameDetailModalOpen: false,
       selectedGameDetail: null,
       achievementDetail: null,
       gameDetailError: null,
+      isLoadingGameDetail: false,
+      isSyncingAchievements: false,
     });
   },
 
   syncGameAchievements: async (force = true) => {
-    const { selectedGameDetail } = get();
-    if (!selectedGameDetail) return;
+    const { selectedGameDetail, isGameDetailModalOpen, isSyncingAchievements } = get();
+    if (!selectedGameDetail || !isGameDetailModalOpen || selectedGameDetail.isReadOnly || isSyncingAchievements) return;
 
-    set({ isSyncingAchievements: true, gameDetailError: null });
+    const requestId = ++gameDetailRequestId;
+    set({ isSyncingAchievements: true, isLoadingGameDetail: false, gameDetailError: null });
     try {
       const updated = await syncGameAchievementsApi(selectedGameDetail.appId, force);
-      set({
+      if (
+        requestId !== gameDetailRequestId ||
+        !get().isGameDetailModalOpen ||
+        get().selectedGameDetail?.appId !== selectedGameDetail.appId
+      ) return;
+      set((state) => ({
         achievementDetail: updated,
         isSyncingAchievements: false,
-      });
-
-      set((state) => ({
+        selectedGameDetail: state.selectedGameDetail ? {
+          ...state.selectedGameDetail,
+          playtimeForever: updated.playtimeForever ?? state.selectedGameDetail.playtimeForever,
+          lastPlayedAt: (updated.lastPlayedAt ?? state.selectedGameDetail.lastPlayedAt) || undefined,
+          totalAchievements: updated.totalAchievements,
+          achievedAchievements: updated.achievedAchievements,
+          achievementRate: updated.achievementRate,
+        } : null,
         userGames: state.userGames.map((g) =>
           g.appId === selectedGameDetail.appId
             ? {
@@ -1215,6 +1316,7 @@ export const useShowcaseStore = create<ShowcaseState>((set, get) => ({
         ),
       }));
     } catch (err: unknown) {
+      if (requestId !== gameDetailRequestId) return;
       console.error('Failed to sync game achievements:', err);
       const msg = getErrorMessage(err, '도전과제 동기화에 실패했습니다.');
       set({
@@ -1230,3 +1332,15 @@ export const useShowcaseStore = create<ShowcaseState>((set, get) => ({
     }
   },
 }));
+
+subscribeAuthSession(() => {
+  cooldownRequestId++;
+  userGamesRequestId++;
+  gameDetailRequestId++;
+  activeGamesQuery = null;
+  if (countdownTimer) clearInterval(countdownTimer);
+  if (toastTimeout) clearTimeout(toastTimeout);
+  countdownTimer = null;
+  toastTimeout = null;
+  useShowcaseStore.setState(useShowcaseStore.getInitialState());
+});

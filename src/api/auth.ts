@@ -40,7 +40,7 @@ export const refreshTokenApi = async (
  * 내 프로필 정보 조회 API
  */
 export const getMyProfileApi = async (): Promise<User> => {
-  const response = await apiClient.get<ApiResponse<User>>('/api/v1/users/me');
+  const response = await apiClient.get<ApiResponse<User>>('/api/v1/users/me', { timeout: 15000 });
   return response.data.data;
 };
 

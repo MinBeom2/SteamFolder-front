@@ -76,12 +76,14 @@ export const ShowcaseSettingsForm: React.FC<ShowcaseSettingsFormProps> = ({
     setSyncStatus(null);
     try {
       const res = await syncGames();
-      setSyncStatus(`동기화 완료: ${res.syncedGameCount}개의 게임 라이브러리가 갱신되었습니다.`);
+      setSyncStatus(useShowcaseStore.getState().gamesError
+        ? 'Steam 동기화는 완료했지만 게임 목록을 갱신하지 못했습니다. 게임 추가 화면에서 목록을 다시 불러와 주세요.'
+        : `동기화 완료: ${res.syncedGameCount}개의 게임 라이브러리가 갱신되었습니다.`);
     } catch (err: unknown) {
       console.error('Steam sync failed:', err);
       const resData = (err as { response?: { data?: { code?: string; message?: string } } })?.response?.data;
       if (resData?.code === 'G005' || resData?.message?.includes('쿨다운')) {
-        setSyncStatus(`동기화 쿨다운(5분) 제한 중입니다. (${formattedCooldown} 후 가능)`);
+        setSyncStatus('동기화 쿨다운(5분) 제한 중입니다. 버튼에 표시된 남은 시간 후 다시 시도해 주세요.');
       } else {
         setSyncStatus(getErrorMessage(err, '스팀 동기화에 실패했습니다. 잠시 후 다시 시도해 주세요.'));
       }

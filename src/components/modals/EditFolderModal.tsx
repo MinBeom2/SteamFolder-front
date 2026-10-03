@@ -5,6 +5,7 @@ import { useShowcaseStore } from '@/store/useShowcaseStore';
 import type { FolderResponse } from '@/types/showcase';
 import { Trash2 } from 'lucide-react';
 import { getErrorMessage } from '@/utils/error';
+import { confirmFolderDeletion } from '@/utils/folderDeletion';
 
 interface EditFolderModalProps {
   isOpen: boolean;
@@ -47,11 +48,7 @@ const EditFolderForm: React.FC<EditFolderFormProps> = ({ folder, onClose }) => {
   };
 
   const handleDelete = async () => {
-    if (
-      window.confirm(
-        `'${folder.name}' 폴더와 하위 모든 내용을 정말 삭제하시겠습니까?`
-      )
-    ) {
+    if (confirmFolderDeletion([folder.name])) {
       try {
         await deleteFolder(folder.id);
         onClose();

@@ -59,10 +59,12 @@ export const HomePage: React.FC = () => {
         onClose={() => setAddGameModalOpen(false)}
       />
 
-      <DirectLoginModal
-        isOpen={isDirectLoginModalOpen}
-        onClose={() => setDirectLoginModalOpen(false)}
-      />
+      {import.meta.env.DEV && (
+        <DirectLoginModal
+          isOpen={isDirectLoginModalOpen}
+          onClose={() => setDirectLoginModalOpen(false)}
+        />
+      )}
 
       {/* Game Detail & Achievement Modal */}
       <GameDetailModal />

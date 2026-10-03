@@ -8,10 +8,11 @@ import { GameCard } from '@/components/desktop/GameCard';
 import { GuestBanner } from '@/components/layout/GuestBanner';
 import { Navbar } from '@/components/layout/Navbar';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
+import { QueryError } from '@/components/common/QueryError';
 import { Button } from '@/components/common/Button';
 import { Breadcrumb } from '@/components/desktop/Breadcrumb';
 import { GameDetailModal } from '@/components/modals/GameDetailModal';
-import { DirectLoginModal } from '@/components/modals/DirectLoginModal';
+import { LoginRequiredModal } from '@/components/modals/LoginRequiredModal';
 import { GuestUserGamesModal } from '@/components/modals/GuestUserGamesModal';
 import { useAuthStore } from '@/store/useAuthStore';
 import { Lock, Heart, Info, Share2, Check, ChevronRight } from 'lucide-react';
@@ -27,6 +28,7 @@ export const GuestShowcasePage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isPrivate, setIsPrivate] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [retryCount, setRetryCount] = useState(0);
 
   // Like state & interaction
   const [likeCount, setLikeCount] = useState<number>(0);
@@ -49,48 +51,63 @@ export const GuestShowcasePage: React.FC = () => {
 
   // Fetch showcase data and subfolder if folderId in URL
   useEffect(() => {
+    let isCurrent = true;
     const fetchShowcaseData = async () => {
       setIsLoading(true);
       setIsPrivate(false);
-      setError(null);
 
       try {
         const sc = await getPublicShowcaseApi(targetId);
+        if (!isCurrent) return;
         setShowcase(sc);
         setLikeCount(sc.user.likeCount ?? 0);
         setIsLiked(sc.user.isLiked ?? false);
 
         if (folderId) {
           const fid = Number(folderId);
-          if (!isNaN(fid)) {
+          if (Number.isInteger(fid) && fid > 0) {
             try {
               const fDetail = await getFolderDetailApi(fid);
+              if (!isCurrent) return;
               setCurrentFolder(fDetail);
-            } catch {
-              navigate(`/showcase/${targetId}`, { replace: true });
+            } catch (err: unknown) {
+              if (!isCurrent) return;
+              const status = (err as { response?: { status?: number } })?.response?.status;
+              if (status === 404) {
+                navigate(`/showcase/${encodeURIComponent(targetId)}`, { replace: true });
+              } else {
+                throw err;
+              }
             }
+          } else {
+            navigate(`/showcase/${encodeURIComponent(targetId)}`, { replace: true });
           }
         } else {
           setCurrentFolder(null);
         }
+        setError(null);
       } catch (err: unknown) {
+        if (!isCurrent) return;
         console.warn('Failed to fetch public showcase:', err);
         const status = (err as { response?: { status?: number } })?.response?.status;
         if (status === 403) {
           setIsPrivate(true);
         } else {
-          setError('해당 쇼케이스를 찾을 수 없거나 불러오지 못했습니다.');
+          setError(status === 404
+            ? '존재하지 않는 유저이거나 등록된 쇼케이스가 없습니다.'
+            : '잠시 후 다시 시도해 주세요.');
         }
       } finally {
-        setIsLoading(false);
+        if (isCurrent) setIsLoading(false);
       }
     };
 
     fetchShowcaseData();
-  }, [targetId, folderId, navigate]);
+    return () => { isCurrent = false; };
+  }, [targetId, folderId, navigate, retryCount, isAuthenticated, currentUser?.id]);
 
   const handleOpenFolder = (folder: FolderResponse) => {
-    navigate(`/showcase/${targetId}/folders/${folder.id}`);
+    navigate(`/showcase/${encodeURIComponent(targetId)}/folders/${folder.id}`);
   };
 
   const handleToggleLike = async () => {
@@ -196,7 +213,7 @@ export const GuestShowcasePage: React.FC = () => {
     return Math.max(3, maxY);
   }, [items]);
 
-  if (isLoading) {
+  if (isLoading && !error) {
     return (
       <div className="min-h-screen bg-[var(--bg-app)] flex flex-col items-center justify-center">
         <LoadingSpinner size="lg" label="공개 쇼케이스 불러오는 중..." />
@@ -235,14 +252,12 @@ export const GuestShowcasePage: React.FC = () => {
         <Navbar />
 
         <main className="flex-1 flex flex-col items-center justify-center p-6 text-center">
-          <div className="max-w-md w-full bg-[var(--bg-surface)] p-8 rounded-[3px] border border-[var(--border-card)] space-y-4 animate-in fade-in slide-in-from-bottom-2">
-            <h2 className="text-xl font-bold text-[var(--text-primary)]">쇼케이스를 찾을 수 없습니다</h2>
-            <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
-              {error || '존재하지 않는 유저이거나 등록된 쇼케이스가 없습니다.'}
-            </p>
-            <Link to="/" className="btn-variant-cyan mt-4 inline-flex min-h-11 w-full items-center justify-center rounded-[3px] px-4 text-sm font-semibold">
-              홈으로 돌아가기
-            </Link>
+          <div className="w-full max-w-md">
+            <QueryError title="쇼케이스를 불러오지 못했습니다" message={error || '등록된 쇼케이스가 없습니다.'} onRetry={() => setRetryCount((count) => count + 1)} isRetrying={isLoading}>
+              <Link to="/" className="inline-flex min-h-11 items-center justify-center rounded-[3px] px-4 text-sm font-semibold text-[var(--primary-accent)] hover:underline">
+                홈으로 돌아가기
+              </Link>
+            </QueryError>
           </div>
         </main>
 
@@ -451,7 +466,7 @@ export const GuestShowcasePage: React.FC = () => {
       <GameDetailModal />
 
       {/* Direct Login Modal for Guest Interaction */}
-      <DirectLoginModal
+      <LoginRequiredModal
         isOpen={isLoginModalOpen}
         onClose={() => setIsLoginModalOpen(false)}
       />

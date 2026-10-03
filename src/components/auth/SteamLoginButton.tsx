@@ -40,19 +40,19 @@ export const SteamLoginButton: React.FC<SteamLoginButtonProps> = ({
         variant="cyan"
         size={size}
         onClick={handleSteamRedirect}
-        className="font-medium cursor-pointer hover:translate-y-0"
+        className="min-h-11 font-medium cursor-pointer hover:translate-y-0"
       >
-        <span>스팀 계정으로 로그인</span>
+        <span>Steam으로 로그인</span>
       </Button>
 
-      {showDemoOption && (
+      {import.meta.env.DEV && showDemoOption && (
         <Button
           variant="secondary"
           size={size}
           onClick={() => setDirectLoginModalOpen(true)}
           className="text-xs font-medium"
         >
-          간편 / 데모 로그인
+          개발용 간편 로그인
         </Button>
       )}
     </div>

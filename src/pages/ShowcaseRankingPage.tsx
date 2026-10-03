@@ -3,7 +3,8 @@ import { Link } from 'react-router-dom';
 import { Navbar } from '@/components/layout/Navbar';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { AnimatedList } from '@/components/common/AnimatedList';
-import { DirectLoginModal } from '@/components/modals/DirectLoginModal';
+import { LoginRequiredModal } from '@/components/modals/LoginRequiredModal';
+import { QueryError } from '@/components/common/QueryError';
 import { getShowcaseRankingsApi } from '@/api/ranking';
 import { toggleShowcaseLikeApi } from '@/api/showcase';
 import type { ShowcaseRankingItemDto } from '@/types/ranking';
@@ -25,6 +26,8 @@ export const ShowcaseRankingPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [loadMoreError, setLoadMoreError] = useState<string | null>(null);
+  const [retryCount, setRetryCount] = useState(0);
 
   // Interaction & Feedback state
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
@@ -32,6 +35,8 @@ export const ShowcaseRankingPage: React.FC = () => {
   const [likeLoadingUserIds, setLikeLoadingUserIds] = useState<Set<number>>(new Set());
 
   const observerRef = useRef<HTMLDivElement>(null);
+  const requestRef = useRef({ active: false });
+  const loadingMoreRef = useRef(false);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -84,50 +89,66 @@ export const ShowcaseRankingPage: React.FC = () => {
 
   // Initial fetch
   useEffect(() => {
+    const request = { active: true };
+    requestRef.current = request;
+    loadingMoreRef.current = false;
     const fetchInitialRankings = async () => {
       setIsLoading(true);
-      setError(null);
+      setIsLoadingMore(false);
+      setLoadMoreError(null);
+      setHasNext(false);
       try {
         const res = await getShowcaseRankingsApi(null, null, 50);
+        if (!request.active) return;
+        setError(null);
         setRankings(res.content);
-        if (res.myRanking) {
-          setMyRanking(res.myRanking);
-        }
+        setMyRanking(res.myRanking ?? null);
         setNextCursorLikeCount(res.nextCursorLikeCount);
         setNextCursorUserId(res.nextCursorUserId);
         setHasNext(res.hasNext);
       } catch (err) {
+        if (!request.active) return;
         console.error('Failed to fetch showcase rankings:', err);
-        setError('인기 랭킹을 불러오는데 실패했습니다.');
+        setError('잠시 후 다시 시도해 주세요.');
       } finally {
-        setIsLoading(false);
+        if (request.active) setIsLoading(false);
       }
     };
 
     fetchInitialRankings();
-  }, []);
+    return () => { request.active = false; };
+  }, [retryCount, isAuthenticated, user?.id]);
 
   // Load more with cursor
   const loadMoreRankings = useCallback(async () => {
-    if (!hasNext || isLoadingMore || nextCursorLikeCount === null || nextCursorUserId === null) return;
+    if (!hasNext || isLoading || loadingMoreRef.current || nextCursorLikeCount === null || nextCursorUserId === null) return;
 
+    const request = requestRef.current;
+    loadingMoreRef.current = true;
     setIsLoadingMore(true);
     try {
       const res = await getShowcaseRankingsApi(nextCursorLikeCount, nextCursorUserId, 50);
+      if (!request.active) return;
+      setLoadMoreError(null);
       setRankings((prev) => [...prev, ...res.content]);
       setNextCursorLikeCount(res.nextCursorLikeCount);
       setNextCursorUserId(res.nextCursorUserId);
       setHasNext(res.hasNext);
     } catch (err) {
+      if (!request.active) return;
       console.error('Failed to load more rankings:', err);
+      setLoadMoreError('이미 불러온 랭킹은 유지됩니다. 잠시 후 다시 시도해 주세요.');
     } finally {
-      setIsLoadingMore(false);
+      if (request.active) {
+        loadingMoreRef.current = false;
+        setIsLoadingMore(false);
+      }
     }
-  }, [hasNext, isLoadingMore, nextCursorLikeCount, nextCursorUserId]);
+  }, [hasNext, isLoading, nextCursorLikeCount, nextCursorUserId]);
 
   // Infinite scroll intersection observer
   useEffect(() => {
-    if (!observerRef.current || !hasNext) return;
+    if (!observerRef.current || !hasNext || loadMoreError || isLoading) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -140,7 +161,7 @@ export const ShowcaseRankingPage: React.FC = () => {
 
     observer.observe(observerRef.current);
     return () => observer.disconnect();
-  }, [hasNext, isLoadingMore, loadMoreRankings]);
+  }, [hasNext, isLoadingMore, loadMoreError, isLoading, loadMoreRankings]);
 
   const cardHoverClass = 'hover:bg-[var(--bg-surface-elevated)]';
 
@@ -182,13 +203,11 @@ export const ShowcaseRankingPage: React.FC = () => {
         </div>
 
         {/* Content State */}
-        {isLoading ? (
+        {error ? (
+          <QueryError message={error} onRetry={() => setRetryCount((count) => count + 1)} isRetrying={isLoading} />
+        ) : isLoading ? (
           <div className="py-24 flex items-center justify-center">
             <LoadingSpinner size="lg" label="인기 랭킹 로딩 중..." />
-          </div>
-        ) : error ? (
-          <div className="border-y border-red-200 bg-red-50 px-6 py-16 text-center text-sm text-red-700 dark:border-red-500/20 dark:bg-red-500/10 dark:text-red-300">
-            {error}
           </div>
         ) : rankings.length === 0 ? (
           <div className="border-y border-[var(--border-subtle)] px-4 py-14 text-center sm:py-16">
@@ -288,7 +307,11 @@ export const ShowcaseRankingPage: React.FC = () => {
               );
             }}
             footer={
-              hasNext ? (
+              loadMoreError ? (
+                <div className="py-4">
+                  <QueryError title="추가 랭킹을 불러오지 못했습니다" message={loadMoreError} onRetry={loadMoreRankings} isRetrying={isLoadingMore} />
+                </div>
+              ) : hasNext ? (
                 <div ref={observerRef} className="py-6 flex items-center justify-center">
                   {isLoadingMore && <LoadingSpinner size="sm" label="추가 랭킹 불러오는 중..." />}
                 </div>
@@ -306,8 +329,8 @@ export const ShowcaseRankingPage: React.FC = () => {
         </div>
       )}
 
-      {/* Direct Login Modal for unauthenticated likes */}
-      <DirectLoginModal
+      {/* Steam login prompt for unauthenticated likes */}
+      <LoginRequiredModal
         isOpen={isLoginModalOpen}
         onClose={() => setIsLoginModalOpen(false)}
       />

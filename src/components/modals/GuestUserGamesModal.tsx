@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Modal } from '@/components/common/Modal';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
+import { QueryError } from '@/components/common/QueryError';
 import { useShowcaseStore } from '@/store/useShowcaseStore';
 import { getPublicShowcaseGamesApi } from '@/api/showcase';
 import { getGameAchievementsApi } from '@/api/game';
@@ -50,6 +51,8 @@ export const GuestUserGamesModal: React.FC<GuestUserGamesModalProps> = ({
   const [games, setGames] = useState<UserGame[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [displayLimit, setDisplayLimit] = useState(24);
+  const [gamesError, setGamesError] = useState<string | null>(null);
+  const [retryCount, setRetryCount] = useState(0);
 
   const [search, setSearch] = useState('');
   const [activeGenre, setActiveGenre] = useState('전체');
@@ -74,6 +77,7 @@ export const GuestUserGamesModal: React.FC<GuestUserGamesModalProps> = ({
       setActiveGenre('전체');
       setSortBy('playtime');
       setDisplayLimit(24);
+      setGamesError(null);
     }
   }, [isOpen]);
 
@@ -95,8 +99,11 @@ export const GuestUserGamesModal: React.FC<GuestUserGamesModalProps> = ({
         if (!isMounted) return;
 
         setGames(data.games || data.content || []);
+        setGamesError(null);
       } catch (err) {
+        if (!isMounted) return;
         console.error('Failed to load guest user games:', err);
+        setGamesError('검색·필터 조건은 유지됩니다. 잠시 후 다시 시도해 주세요.');
       } finally {
         if (isMounted) setIsLoading(false);
       }
@@ -107,7 +114,7 @@ export const GuestUserGamesModal: React.FC<GuestUserGamesModalProps> = ({
     return () => {
       isMounted = false;
     };
-  }, [isOpen, identifier, activeGenre, sortBy]);
+  }, [isOpen, identifier, activeGenre, sortBy, retryCount]);
 
   // Reset scroll and limit when search keyword changes
   useEffect(() => {
@@ -416,6 +423,9 @@ export const GuestUserGamesModal: React.FC<GuestUserGamesModalProps> = ({
 
         {/* 4. Long Horizontal Row List (Ranking-style, No Animation) */}
         <div className="relative min-h-32">
+          {gamesError ? (
+            <QueryError message={gamesError} onRetry={() => setRetryCount((count) => count + 1)} isRetrying={isLoading} />
+          ) : <>
           {isLoading && (
             <div className="absolute inset-0 z-20 flex items-center justify-center bg-[var(--glass-modal-bg)]/75 backdrop-blur-[1px]">
               <LoadingSpinner size="md" label="게임 목록 불러오는 중..." />
@@ -441,68 +451,34 @@ export const GuestUserGamesModal: React.FC<GuestUserGamesModalProps> = ({
               return (
                 <div
                   key={game.appId}
-                  className="group relative flex flex-col gap-3 rounded-[3px] border border-[var(--border-card)] bg-[var(--bg-card)] p-3.5 transition-all duration-300 hover:border-[var(--primary-accent)] hover:bg-[var(--bg-surface-elevated)] sm:p-4"
+                  className="group relative grid grid-cols-[88px_minmax(0,1fr)] items-start gap-3 rounded-[3px] border border-[var(--border-card)] bg-[var(--bg-card)] p-3 transition-colors duration-300 hover:border-[var(--primary-accent)] hover:bg-[var(--bg-surface-elevated)] sm:grid-cols-[208px_minmax(0,1fr)_auto] sm:gap-x-4 sm:p-4 md:grid-cols-[240px_minmax(0,1fr)_auto]"
                 >
-                  {/* Upper Row: Capsule Image + Title & Playtime Stats + Store Link */}
-                  <div className="flex flex-wrap items-start justify-between gap-3 sm:gap-4 min-w-0">
-                    {/* Left: Capsule Image + Info Block */}
-                    <div className="flex items-start gap-3.5 sm:gap-4 min-w-0 flex-1">
-                      <div className="w-28 sm:w-52 md:w-60 aspect-[460/215] rounded-[2px] overflow-hidden shrink-0 bg-[var(--bg-app)] border border-[var(--border-subtle)]">
-                        <img
-                          src={game.headerImage}
-                          alt=""
-                          className="w-full h-full object-cover transition-[filter] duration-500 group-hover:saturate-125"
-                          loading="lazy"
-                        />
-                      </div>
+                  <div className="col-start-1 row-start-1 aspect-[460/215] w-full overflow-hidden rounded-[2px] bg-[var(--bg-app)] border border-[var(--border-subtle)] sm:row-span-2">
+                    <img
+                      src={game.headerImage}
+                      alt=""
+                      className="w-full h-full object-cover transition-[filter] duration-500 group-hover:saturate-125"
+                      loading="lazy"
+                    />
+                  </div>
 
-                      {/* Title at top, Playtime Stats below in place of tags */}
-                      <div className="flex flex-col justify-between self-stretch min-w-0 flex-1 py-0.5">
-                        <span className="font-bold text-base sm:text-lg md:text-xl text-[var(--text-primary)] group-hover:text-[var(--primary-accent)] transition-colors truncate">
-                          {game.name}
-                        </span>
+                  <h3 title={game.name} className="col-start-2 row-start-1 min-w-0 line-clamp-2 break-words text-sm font-bold leading-snug text-[var(--text-primary)] group-hover:text-[var(--primary-accent)] transition-colors sm:line-clamp-none sm:truncate sm:text-lg md:text-xl">
+                    {game.name}
+                  </h3>
 
-                        {/* Steam Style: 전체 플레이 시간 & 최근 플레이 in place of genre tags */}
-                        <div className="flex items-center gap-5 sm:gap-8 pt-2">
-                          <div className="flex flex-col">
-                            <span className="text-xs text-[var(--text-muted)] font-medium">
-                              전체 플레이 시간
-                            </span>
-                            <span className="text-xs sm:text-sm font-bold text-[var(--text-primary)]">
-                              {playtimeDisplay}
-                            </span>
-                          </div>
-
-                          {lastPlayedFormatted && (
-                            <div className="flex flex-col min-w-[65px]">
-                              <span className="text-xs text-[var(--text-muted)] font-medium">
-                                최근 플레이
-                              </span>
-                              <span className="text-xs sm:text-sm font-bold text-[var(--text-primary)]">
-                                {lastPlayedFormatted}
-                              </span>
-                            </div>
-                          )}
-                        </div>
-                      </div>
+                  <div className="col-span-2 row-start-2 grid grid-cols-2 gap-3 sm:col-span-1 sm:col-start-2 sm:gap-6">
+                    <div className="flex flex-col">
+                      <span className="whitespace-nowrap text-xs text-[var(--text-muted)] font-medium">전체 플레이 시간</span>
+                      <span className="text-xs sm:text-sm font-bold text-[var(--text-primary)]">{playtimeDisplay}</span>
                     </div>
-
-                    {/* Right: Steam Store Button */}
-                    <div className="shrink-0 pt-0.5">
-                      <a
-                        href={`https://store.steampowered.com/app/${game.appId}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        onClick={(e) => e.stopPropagation()}
-                        className="flex items-center gap-1.5 px-2.5 py-1 rounded-[3px] text-xs font-medium bg-transparent border border-[var(--border-card)] text-[var(--text-secondary)] hover:text-[var(--primary-accent)] hover:border-[var(--primary-accent)] transition-all shrink-0 cursor-pointer group/store"
-                        title="스팀 공식 상점 페이지 열기 (새 창)"
-                      >
-                        <span>상점 방문</span>
-                      </a>
+                    <div className="flex min-w-0 flex-col">
+                      <span className="text-xs text-[var(--text-muted)] font-medium">최근 플레이</span>
+                      <span className="text-xs sm:text-sm font-bold text-[var(--text-primary)]">{lastPlayedFormatted || '기록 없음'}</span>
                     </div>
                   </div>
 
                   {/* Bottom Row: Achievement Progress Section (Matching GameDetailModal design) */}
+                  <div className="col-span-full row-start-3 min-w-0">
                   {isSyncing ? (
                     <div className="rounded-lg bg-[var(--bg-surface-elevated)] border border-[var(--border-card)] py-3 px-4 flex items-center justify-center gap-2 text-xs text-[var(--text-secondary)] animate-pulse">
                       <LoadingSpinner size="sm" label="스팀 업적 동기화 중..." />
@@ -514,7 +490,7 @@ export const GuestUserGamesModal: React.FC<GuestUserGamesModalProps> = ({
                     </div>
                   ) : game.achievementRate !== undefined && game.achievementRate !== null ? (
                     <div className="rounded-lg bg-[var(--bg-surface-elevated)] border border-[var(--border-card)] p-3 space-y-2 shadow-2xs">
-                      <div className="flex items-center justify-between text-xs sm:text-sm">
+                      <div className="flex flex-wrap items-center justify-between gap-2 text-xs sm:text-sm">
                         <span className="flex items-center gap-2 font-medium text-[var(--text-secondary)]">
 
                           <span>도전과제 달성 현황</span>
@@ -572,6 +548,19 @@ export const GuestUserGamesModal: React.FC<GuestUserGamesModalProps> = ({
                       )}
                     </div>
                   )}
+                  </div>
+                  <div className="col-span-2 row-start-4 justify-self-end sm:col-span-1 sm:col-start-3 sm:row-start-1 sm:row-span-2">
+                    <a
+                      href={`https://store.steampowered.com/app/${game.appId}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={(e) => e.stopPropagation()}
+                      className="flex min-h-11 items-center gap-1.5 px-3 py-1 rounded-[3px] text-xs font-medium bg-transparent border border-[var(--border-card)] text-[var(--text-secondary)] hover:text-[var(--primary-accent)] hover:border-[var(--primary-accent)] transition-colors cursor-pointer group/store"
+                      title="스팀 공식 상점 페이지 열기 (새 창)"
+                    >
+                      <span>상점 방문</span>
+                    </a>
+                  </div>
                 </div>
               );
             })}
@@ -587,12 +576,13 @@ export const GuestUserGamesModal: React.FC<GuestUserGamesModalProps> = ({
               </div>
             )}
 
-            {sortedGames.length === 0 && (
+            {!isLoading && sortedGames.length === 0 && (
               <div className="py-12 text-center text-xs text-slate-500 space-y-2">
                 <p>조건과 일치하는 게임이 없습니다.</p>
               </div>
             )}
           </div>
+          </>}
         </div>
       </div>
     </Modal>

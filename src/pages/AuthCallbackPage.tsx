@@ -13,10 +13,13 @@ export const AuthCallbackPage: React.FC = () => {
 
   const [error, setError] = useState<string | null>(null);
   const isProcessedRef = useRef(false);
+  const isActiveRef = useRef(false);
 
   useEffect(() => {
+    isActiveRef.current = true;
+    const cleanup = () => { isActiveRef.current = false; };
     // React StrictMode mounts components twice in dev. Prevent duplicate verification requests.
-    if (isProcessedRef.current) return;
+    if (isProcessedRef.current) return cleanup;
 
     const processAuth = async () => {
       // Collect all query parameters from Steam OpenID redirect
@@ -30,19 +33,28 @@ export const AuthCallbackPage: React.FC = () => {
         return;
       }
 
+      if (openIdParams['openid.mode'] === 'cancel') {
+        setError('Steam 로그인이 취소되었습니다.');
+        return;
+      }
+
       isProcessedRef.current = true;
 
       try {
         const authResponse = await loginWithSteamApi({ openIdParams });
-        setAuth(authResponse);
+        if (!isActiveRef.current) return;
+        await setAuth(authResponse);
+        if (!isActiveRef.current) return;
         navigate('/', { replace: true });
       } catch (err: unknown) {
+        if (!isActiveRef.current) return;
         console.error('Steam OpenID login failed:', err);
         setError(getErrorMessage(err, '스팀 로그인 검증에 실패했습니다.'));
       }
     };
 
     processAuth();
+    return cleanup;
   }, [searchParams, setAuth, navigate]);
 
   return (

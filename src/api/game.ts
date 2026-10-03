@@ -75,7 +75,8 @@ export const syncSteamGamesApi = async (): Promise<SyncResult> => {
  */
 export const getSyncCooldownApi = async (): Promise<CooldownStatus> => {
   const response = await apiClient.get<ApiResponse<CooldownStatus>>(
-    '/api/v1/steam/sync/cooldown'
+    '/api/v1/steam/sync/cooldown',
+    { timeout: 15000 }
   );
   return response.data.data;
 };

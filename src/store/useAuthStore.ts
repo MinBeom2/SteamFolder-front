@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { getAuthSessionVersion, invalidateAuthSession } from '@/utils/authSession';
 import type { User, AuthResponse, UpdateProfileRequest } from '@/types/auth';
 import {
   getMyProfileApi,
@@ -17,7 +18,7 @@ interface AuthState {
   error: string | null;
 
   // Actions
-  setAuth: (authData: AuthResponse) => void;
+  setAuth: (authData: AuthResponse) => Promise<void>;
   logout: () => void;
   fetchProfile: () => Promise<void>;
   updateProfile: (data: UpdateProfileRequest) => Promise<void>;
@@ -35,30 +36,46 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   isLoading: false,
   error: null,
 
-  setAuth: (authData: AuthResponse) => {
+  setAuth: async (authData: AuthResponse) => {
+    const sessionVersion = invalidateAuthSession();
     localStorage.setItem('accessToken', authData.accessToken);
     localStorage.setItem('refreshToken', authData.refreshToken);
-
-    const user: User = {
-      id: authData.userId,
-      steamId: authData.steamId,
-      username: authData.username,
-      avatarUrl: authData.avatarUrl,
-      themeColor: authData.themeColor || '#00F0FF',
-      isPublic: true,
-    };
 
     set({
       accessToken: authData.accessToken,
       refreshToken: authData.refreshToken,
-      user,
-      isAuthenticated: true,
+      user: null,
+      isAuthenticated: false,
       isInitialized: true,
+      isLoading: true,
       error: null,
     });
+
+    try {
+      // 로그인 응답에는 공개 범위가 없으므로 실제 프로필을 확인한 뒤 로그인 상태를 확정한다.
+      const user = await getMyProfileApi();
+      if (sessionVersion !== getAuthSessionVersion()) {
+        throw new Error('로그인이 취소되었습니다. 다시 시도해 주세요.');
+      }
+
+      set({
+        user,
+        accessToken: localStorage.getItem('accessToken'),
+        refreshToken: localStorage.getItem('refreshToken'),
+        isAuthenticated: true,
+        isLoading: false,
+      });
+    } catch (err: unknown) {
+      if (sessionVersion === getAuthSessionVersion()) {
+        get().logout();
+        set({ error: '로그인 후 프로필 정보를 불러오지 못했습니다. 다시 시도해 주세요.' });
+      }
+      throw err;
+    }
   },
 
   logout: () => {
+    invalidateAuthSession();
     localStorage.removeItem('accessToken');
     localStorage.removeItem('refreshToken');
     set({
@@ -67,11 +84,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       refreshToken: null,
       isAuthenticated: false,
       isInitialized: true,
+      isLoading: false,
       error: null,
     });
   },
 
   fetchProfile: async () => {
+    const sessionVersion = getAuthSessionVersion();
     const token = localStorage.getItem('accessToken');
     const refreshToken = localStorage.getItem('refreshToken');
 
@@ -84,14 +103,16 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         isAuthenticated: false,
         isInitialized: true,
         isLoading: false,
+        error: null,
       });
       return;
     }
 
-    set({ isLoading: true, error: null });
+    set({ isLoading: true });
     try {
       // 백엔드 GET /api/v1/users/me 호출로 실제 토큰 유효성 검증
       const user = await getMyProfileApi();
+      if (sessionVersion !== getAuthSessionVersion()) return;
       set({
         user,
         accessToken: localStorage.getItem('accessToken'),
@@ -99,11 +120,20 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         isAuthenticated: true,
         isInitialized: true,
         isLoading: false,
+        error: null,
       });
     } catch (err: unknown) {
-      console.warn('토큰 검증 실패 또는 만료됨 (로그아웃 처리):', err);
-      get().logout();
-      set({ isInitialized: true, isLoading: false });
+      if (sessionVersion !== getAuthSessionVersion()) return;
+      const status = (err as { response?: { status?: number } })?.response?.status;
+      if (status === 401 || status === 403) {
+        get().logout();
+      } else {
+        set({
+          isInitialized: true,
+          isLoading: false,
+          error: '서버에 연결하지 못했습니다. 잠시 후 다시 시도해 주세요.',
+        });
+      }
     }
   },
 

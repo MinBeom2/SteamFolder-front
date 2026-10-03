@@ -8,6 +8,8 @@ import { Breadcrumb } from './Breadcrumb';
 import { LandingHeroMarquee } from './LandingHeroMarquee';
 import { Button } from '@/components/common/Button';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
+import { confirmFolderDeletion } from '@/utils/folderDeletion';
+import { getErrorMessage } from '@/utils/error';
 import {
   Plus,
   FolderPlus,
@@ -79,6 +81,7 @@ export const DesktopCanvas: React.FC<DesktopCanvasProps> = ({ isReadOnly = false
   const canvasRef = useRef<HTMLDivElement>(null);
   const [selectionBox, setSelectionBox] = useState<SelectionBox | null>(null);
   const isSelectingRef = useRef(false);
+  const isDeletingRef = useRef(false);
 
   // Synchronize URL folderId parameter with showcase view
   useEffect(() => {
@@ -107,13 +110,13 @@ export const DesktopCanvas: React.FC<DesktopCanvasProps> = ({ isReadOnly = false
 
   // Global Keyboard Shortcuts
   useEffect(() => {
-    if (isReadOnly) return;
+    if (isReadOnly || !isAuthenticated) return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (document.querySelector('[data-app-modal]')) return;
-      // Ignore typing in input/textarea
+      // Leave text editing and form controls to their own keyboard handlers.
       if (
-        ['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement).tagName) ||
+        ['INPUT', 'TEXTAREA', 'SELECT'].includes((e.target as HTMLElement).tagName) ||
         (e.target as HTMLElement).isContentEditable
       ) {
         return;
@@ -130,7 +133,25 @@ export const DesktopCanvas: React.FC<DesktopCanvasProps> = ({ isReadOnly = false
         pasteClipboard();
       } else if (e.key === 'Delete' || e.key === 'Backspace') {
         e.preventDefault();
-        removeSelectedGamesFromFolder();
+        if (e.repeat || isDeletingRef.current || selectedItemKeys.length === 0) return;
+
+        const folderNames = selectedItemKeys
+          .filter((key) => key.startsWith('FOLDER_'))
+          .map((key) => {
+            const id = Number(key.replace('FOLDER_', ''));
+            return items.find((item) => item.type === 'FOLDER' && item.id === id)?.name || `폴더 ${id}`;
+          });
+        const selectedGameCount = selectedItemKeys.filter((key) => key.startsWith('GAME_')).length;
+        if (!confirmFolderDeletion(folderNames, selectedGameCount)) return;
+
+        isDeletingRef.current = true;
+        void removeSelectedGamesFromFolder()
+          .catch((err: unknown) => {
+            setToastMessage(getErrorMessage(err, '선택한 항목을 삭제하지 못했습니다.'));
+          })
+          .finally(() => {
+            isDeletingRef.current = false;
+          });
       } else if (e.key === 'Escape') {
         e.preventDefault();
         clearSelection();
@@ -153,6 +174,7 @@ export const DesktopCanvas: React.FC<DesktopCanvasProps> = ({ isReadOnly = false
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [
     isReadOnly,
+    isAuthenticated,
     copySelected,
     cutSelected,
     pasteClipboard,
@@ -161,6 +183,7 @@ export const DesktopCanvas: React.FC<DesktopCanvasProps> = ({ isReadOnly = false
     selectedItemKeys,
     items,
     setEditFolderModalOpen,
+    setToastMessage,
   ]);
 
   // Filter items by search query if any

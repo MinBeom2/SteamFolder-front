@@ -27,6 +27,7 @@ export const DirectLoginModal: React.FC<DirectLoginModalProps> = ({
 
   const handleDirectLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!import.meta.env.DEV || isLoading) return;
     if (!steamId.trim()) {
       setErrorMessage('Steam ID를 입력해주세요.');
       return;
@@ -43,37 +44,20 @@ export const DirectLoginModal: React.FC<DirectLoginModalProps> = ({
         avatarUrl: avatarUrl.trim() || undefined,
       });
 
-      setAuth(response);
+      await setAuth(response);
       setSuccessMessage('로그인에 성공했습니다! 잠시 후 닫힙니다.');
       setTimeout(() => {
         onClose();
       }, 800);
     } catch (err: unknown) {
-      const errorCode = (err as { response?: { data?: { code?: string } } })?.response?.data?.code;
-      if (errorCode === 'G004') {
-        setErrorMessage(getErrorMessage(err, '스팀 계정 공개 설정을 확인해 주세요.'));
-        return;
-      }
-      console.warn('Backend login request fallback to local auth:', err);
-      // Local fallback for offline/preview
-      setAuth({
-        accessToken: 'demo-jwt-access-token',
-        refreshToken: 'demo-jwt-refresh-token',
-        userId: 1,
-        steamId: steamId.trim(),
-        username: username.trim() || 'PixelHunter',
-        avatarUrl: avatarUrl.trim() || null,
-        themeColor: '#66C0F4',
-        isNewUser: false,
-      });
-      setSuccessMessage('데모 모드로 로그인되었습니다!');
-      setTimeout(() => {
-        onClose();
-      }, 800);
+      console.warn('Direct login failed:', err);
+      setErrorMessage(getErrorMessage(err, '로그인하지 못했습니다. 잠시 후 다시 시도해 주세요.'));
     } finally {
       setIsLoading(false);
     }
   };
+
+  if (!import.meta.env.DEV) return null;
 
   return (
     <Modal

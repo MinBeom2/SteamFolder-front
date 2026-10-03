@@ -152,15 +152,15 @@ export const FolderCard: React.FC<FolderCardProps> = ({
         className="flex w-full cursor-pointer flex-col items-center gap-3 text-left"
       >
       {/* Folder Shape Container */}
-      <div className="relative flex aspect-[460/215] w-full items-center justify-center">
+      <div className="relative aspect-[460/215] w-full shrink-0">
         {/* Folder Top Tab */}
         <div className="absolute -top-1 left-2 h-3 w-[30%] rounded-t-[2px] border-x border-t border-[var(--border-card)] bg-[var(--folder-top-bg)] transition-colors group-hover:border-[var(--primary-accent)]" />
 
         {/* Folder Body */}
-        <div className="relative flex h-full w-full flex-col justify-center rounded-[2px] border border-[var(--border-card)] bg-[var(--folder-body-bg)] p-2 transition-colors duration-300 group-hover:border-[var(--primary-accent)]">
+        <div className="absolute inset-0 flex min-h-0 flex-col justify-center rounded-[2px] border border-[var(--border-card)] bg-[var(--folder-body-bg)] p-2 transition-colors duration-300 group-hover:border-[var(--primary-accent)]">
           {/* Show only occupied previews; one or two covers keep their wide Steam ratio. */}
           <div
-            className={`grid h-full w-full gap-1 overflow-hidden border border-[var(--border-subtle)] bg-[var(--folder-inner-bg)] p-1 ${
+            className={`grid h-full min-h-0 w-full gap-1 overflow-hidden border border-[var(--border-subtle)] bg-[var(--folder-inner-bg)] p-1 ${
               previewCount <= 1
                 ? 'grid-cols-1 place-items-center'
                 : previewCount === 2
@@ -174,11 +174,15 @@ export const FolderCard: React.FC<FolderCardProps> = ({
               previewGames.map((game, index) => (
                 <div
                   key={game.id}
-                  className={`overflow-hidden border border-[var(--border-subtle)] bg-[var(--folder-slot-bg)] ${
-                    previewCount <= 2 ? 'aspect-[460/215] w-full' : 'h-full w-full'
+                  className={`min-h-0 min-w-0 overflow-hidden border border-[var(--border-subtle)] bg-[var(--folder-slot-bg)] ${
+                    previewCount <= 2 ? 'aspect-[460/215] max-h-full w-full' : 'h-full w-full'
                   } ${previewCount === 3 && index === 0 ? 'col-span-2' : ''}`}
                 >
-                  <img src={game.headerImage} alt="" className="h-full w-full object-cover" />
+                  <img
+                    src={game.headerImage}
+                    alt=""
+                    className={`h-full w-full ${previewCount <= 2 ? 'object-contain' : 'object-cover'}`}
+                  />
                 </div>
               ))
             )}

@@ -3,6 +3,7 @@ import { Modal } from '@/components/common/Modal';
 import { Button } from '@/components/common/Button';
 import { useShowcaseStore } from '@/store/useShowcaseStore';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
+import { QueryError } from '@/components/common/QueryError';
 import { getErrorMessage } from '@/utils/error';
 import {
   Search,
@@ -47,6 +48,8 @@ export const AddGameModal: React.FC<AddGameModalProps> = ({
     selectedGameAppIds,
     isLoadingGames,
     isLoadingMoreGames,
+    gamesError,
+    isAddingGames,
     hasMoreGames,
     isSyncingGames,
     cooldownSeconds,
@@ -63,6 +66,9 @@ export const AddGameModal: React.FC<AddGameModalProps> = ({
   const [sortBy, setSortBy] = useState<SortOption>('playtime');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const visibleErrorMessage = errorMessage || (successMessage && gamesError
+    ? 'Steam 동기화는 완료했지만 게임 목록을 갱신하지 못했습니다. 아래에서 다시 시도해 주세요.'
+    : null);
 
   // Drag-to-scroll state for genre tags
   const tagsContainerRef = useRef<HTMLDivElement>(null);
@@ -135,7 +141,7 @@ export const AddGameModal: React.FC<AddGameModalProps> = ({
   }, [isOpen, hasMoreGames, isLoadingMoreGames, isLoadingGames, loadMoreGames]);
 
   const handleSync = async () => {
-    if (isCooldownActive) {
+    if (isCooldownActive || useShowcaseStore.getState().isSyncingGames) {
       return;
     }
 
@@ -144,15 +150,12 @@ export const AddGameModal: React.FC<AddGameModalProps> = ({
 
     try {
       const res = await syncGames();
+      if (!useShowcaseStore.getState().isAddGameModalOpen) return;
       setSuccessMessage(`스팀 게임 ${res.syncedGameCount}개가 성공적으로 동기화되었습니다!`);
-      const genres = activeGenre === '전체' ? undefined : [activeGenre];
-      await filterUserGames(genres, sortBy);
     } catch (err: unknown) {
+      if (!useShowcaseStore.getState().isAddGameModalOpen) return;
       console.error('Failed to sync games:', err);
-      const resData = (err as { response?: { data?: { code?: string; message?: string } } })?.response?.data;
-      if (resData?.code !== 'G005' && !resData?.message?.includes('쿨다운')) {
-        setErrorMessage(getErrorMessage(err, '스팀 동기화 요청 중 오류가 발생했습니다.'));
-      }
+      setErrorMessage(getErrorMessage(err, '스팀 동기화 요청 중 오류가 발생했습니다.'));
     }
   };
 
@@ -212,7 +215,13 @@ export const AddGameModal: React.FC<AddGameModalProps> = ({
 
   const selectedCount = selectedGameAppIds.length;
 
+  const handleClose = () => {
+    if (!useShowcaseStore.getState().isAddingGames) onClose();
+  };
+
   const handleAdd = async () => {
+    if (useShowcaseStore.getState().isAddingGames || selectedCount === 0) return;
+    setErrorMessage(null);
     try {
       await addSelectedGamesToFolder();
       onClose();
@@ -236,7 +245,7 @@ export const AddGameModal: React.FC<AddGameModalProps> = ({
   return (
     <Modal
       isOpen={isOpen}
-      onClose={onClose}
+      onClose={handleClose}
       title={
         <div className="flex w-full flex-wrap items-center justify-between gap-2 pr-2">
           <span className="text-lg font-bold text-[var(--text-primary)] tracking-tight">게임 추가하기</span>
@@ -244,7 +253,7 @@ export const AddGameModal: React.FC<AddGameModalProps> = ({
             variant="secondary"
             size="sm"
             onClick={handleSync}
-            disabled={isCooldownActive}
+            disabled={isCooldownActive || isAddingGames}
             isLoading={isSyncingGames}
             className={`min-h-11 border px-3 text-xs transition-all ${
               isCooldownActive
@@ -269,7 +278,7 @@ export const AddGameModal: React.FC<AddGameModalProps> = ({
     >
       <div className="space-y-4">
         {/* Success Message Banner */}
-        {successMessage && (
+        {successMessage && !gamesError && (
           <div className="flex justify-center">
             <div className="px-4 py-2 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60 rounded-lg text-xs text-emerald-700 dark:text-emerald-300 flex items-center justify-center gap-2 animate-in fade-in duration-200 w-fit text-center">
               <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
@@ -279,10 +288,10 @@ export const AddGameModal: React.FC<AddGameModalProps> = ({
         )}
 
         {/* Error Message Banner */}
-        {errorMessage && (
+        {visibleErrorMessage && (
           <div className="flex justify-center">
-            <div className="px-4 py-2 bg-red-50 dark:bg-red-950/50 border border-red-200 dark:border-red-800/60 rounded-lg text-xs text-red-700 dark:text-red-300 flex items-center justify-center gap-2 animate-in fade-in duration-200 w-fit text-center">
-              <span>{errorMessage}</span>
+            <div role="alert" className="px-4 py-2 bg-red-50 dark:bg-red-950/50 border border-red-200 dark:border-red-800/60 rounded-lg text-xs text-red-700 dark:text-red-300 flex items-center justify-center gap-2 animate-in fade-in duration-200 w-fit text-center">
+              <span>{visibleErrorMessage}</span>
             </div>
           </div>
         )}
@@ -389,6 +398,9 @@ export const AddGameModal: React.FC<AddGameModalProps> = ({
 
         {/* 4. Game Card Grid (3 Columns) - Steam Official Header Aspect Ratio (460:215) */}
         <div className="relative min-h-32">
+          {gamesError ? (
+            <QueryError message="검색·필터와 선택한 게임은 유지됩니다. 잠시 후 다시 시도해 주세요." onRetry={() => filterUserGames(activeGenre === '전체' ? undefined : [activeGenre], sortBy)} isRetrying={isLoadingGames} />
+          ) : <>
           {isLoadingGames && (
             <div className="absolute inset-0 z-20 flex items-center justify-center bg-[var(--glass-modal-bg)]/75 backdrop-blur-[1px]">
               <LoadingSpinner size="md" label="스팀 게임 목록 불러오는 중..." />
@@ -407,6 +419,7 @@ export const AddGameModal: React.FC<AddGameModalProps> = ({
                   type="button"
                   key={game.appId}
                   onClick={() => toggleGameSelection(game.appId)}
+                  disabled={isAddingGames}
                   aria-pressed={isSelected}
                   aria-label={`${game.name} ${isSelected ? '선택 해제' : '선택'}`}
                   className={`relative overflow-hidden rounded-[3px] border bg-[var(--bg-card)] text-left transition-colors duration-300 cursor-pointer group select-none ${
@@ -478,7 +491,7 @@ export const AddGameModal: React.FC<AddGameModalProps> = ({
               </div>
             )}
 
-            {sortedGames.length === 0 && (
+            {!isLoadingGames && !gamesError && sortedGames.length === 0 && (
               <div className="col-span-full space-y-3 py-12 text-center text-sm text-[var(--text-secondary)]">
                 <p>조건과 일치하는 게임이 없습니다.</p>
                 <Button
@@ -495,6 +508,7 @@ export const AddGameModal: React.FC<AddGameModalProps> = ({
               </div>
             )}
           </div>
+          </>}
         </div>
 
         {/* Modal Footer */}
@@ -507,16 +521,19 @@ export const AddGameModal: React.FC<AddGameModalProps> = ({
               type="button"
               variant="ghost"
               size="sm"
-              onClick={onClose}
+              onClick={handleClose}
+              disabled={isAddingGames}
               className="text-xs"
             >
               취소
             </Button>
             <Button
-              type="submit"
+              type="button"
               variant="cyan"
               size="sm"
               onClick={handleAdd}
+              isLoading={isAddingGames}
+              disabled={selectedCount === 0 || isLoadingGames || isSyncingGames}
               className="px-5 text-xs font-semibold"
             >
               게임 추가

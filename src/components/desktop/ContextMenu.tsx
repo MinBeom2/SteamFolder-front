@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { useShowcaseStore } from '@/store/useShowcaseStore';
 import { useNavigate } from 'react-router-dom';
+import { confirmFolderDeletion } from '@/utils/folderDeletion';
 import {
   FolderPlus,
   Gamepad2,
@@ -207,7 +208,7 @@ export const ContextMenu: React.FC = () => {
             type="button"
             onClick={() => {
               closeContextMenu();
-              if (window.confirm(`'${targetItem.name}' 폴더와 하위 모든 내용을 삭제하시겠습니까?`)) {
+              if (confirmFolderDeletion([targetItem.name])) {
                 deleteFolder(targetItem.id);
               }
             }}

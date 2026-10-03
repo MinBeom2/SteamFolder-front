@@ -1,5 +1,6 @@
 import axios, { AxiosError, type InternalAxiosRequestConfig } from 'axios';
 import type { ApiResponse, TokenRefreshResponse } from '@/types/auth';
+import { getAuthSessionVersion, invalidateAuthSession } from '@/utils/authSession';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
 
@@ -11,104 +12,107 @@ export const apiClient = axios.create({
   withCredentials: true,
 });
 
-// Flag to prevent multiple concurrent token refresh calls
-let isRefreshing = false;
-let failedQueue: Array<{
-  resolve: (value?: unknown) => void;
-  reject: (reason?: unknown) => void;
-}> = [];
-
-const processQueue = (error: unknown, token: string | null = null) => {
-  failedQueue.forEach((prom) => {
-    if (error) {
-      prom.reject(error);
-    } else {
-      prom.resolve(token);
-    }
-  });
-  failedQueue = [];
+type SessionRequest = InternalAxiosRequestConfig & {
+  _authSession?: number;
+  _retry?: boolean;
 };
 
-// 1. Request Interceptor: Attach JWT Access Token
-apiClient.interceptors.request.use(
-  (config: InternalAxiosRequestConfig) => {
-    const accessToken = localStorage.getItem('accessToken');
-    if (accessToken && config.headers) {
-      config.headers.Authorization = `Bearer ${accessToken}`;
-    }
-    return config;
-  },
-  (error) => Promise.reject(error)
-);
+let refreshRequest: {
+  sessionVersion: number;
+  promise: Promise<TokenRefreshResponse>;
+} | null = null;
 
-// 2. Response Interceptor: Automatic JWT Refresh on 401
+const sessionChangedError = () => new Error('로그인 상태가 변경되었습니다. 다시 시도해 주세요.');
+
+const expireSession = (sessionVersion: number) => {
+  if (sessionVersion !== getAuthSessionVersion()) return;
+  localStorage.removeItem('accessToken');
+  localStorage.removeItem('refreshToken');
+  invalidateAuthSession();
+  window.dispatchEvent(new Event('auth:logout'));
+};
+
+const refreshSession = (sessionVersion: number, refreshToken: string) => {
+  if (refreshRequest?.sessionVersion === sessionVersion) return refreshRequest.promise;
+
+  const request = {
+    sessionVersion,
+    promise: axios.post<ApiResponse<TokenRefreshResponse>>(
+      `${API_BASE_URL}/api/v1/auth/refresh`,
+      { refreshToken },
+      { withCredentials: true, timeout: 15000 }
+    ).then((response) => {
+      if (sessionVersion !== getAuthSessionVersion()) throw sessionChangedError();
+      const tokens = response.data.data;
+      localStorage.setItem('accessToken', tokens.accessToken);
+      localStorage.setItem('refreshToken', tokens.refreshToken);
+      return tokens;
+    }).catch((error: unknown) => {
+      const status = (error as AxiosError)?.response?.status;
+      if (status === 401 || status === 403) expireSession(sessionVersion);
+      throw error;
+    }).finally(() => {
+      if (refreshRequest === request) refreshRequest = null;
+    }),
+  };
+  refreshRequest = request;
+  return request.promise;
+};
+
+apiClient.interceptors.request.use((config: SessionRequest) => {
+  const sessionVersion = getAuthSessionVersion();
+  if (config._authSession !== undefined && config._authSession !== sessionVersion) {
+    throw sessionChangedError();
+  }
+  config._authSession = sessionVersion;
+  const accessToken = localStorage.getItem('accessToken');
+  if (accessToken) config.headers.Authorization = `Bearer ${accessToken}`;
+  else delete config.headers.Authorization;
+  return config;
+});
+
 apiClient.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    if ((response.config as SessionRequest)._authSession !== getAuthSessionVersion()) {
+      throw sessionChangedError();
+    }
+    return response;
+  },
   async (error: AxiosError) => {
-    const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
-
-    // Ignore 401 on login or refresh endpoint itself
+    const request = error.config as SessionRequest | undefined;
     if (
-      error.response?.status === 401 &&
-      originalRequest &&
-      !originalRequest._retry &&
-      !originalRequest.url?.includes('/api/v1/auth/refresh') &&
-      !originalRequest.url?.includes('/api/v1/auth/steam/login')
+      error.response?.status !== 401 ||
+      !request ||
+      request.url?.includes('/api/v1/auth/refresh') ||
+      request.url?.includes('/api/v1/auth/steam/login')
     ) {
-      if (isRefreshing) {
-        return new Promise((resolve, reject) => {
-          failedQueue.push({ resolve, reject });
-        })
-          .then((token) => {
-            if (originalRequest.headers) {
-              originalRequest.headers.Authorization = `Bearer ${token}`;
-            }
-            return apiClient(originalRequest);
-          })
-          .catch((err) => Promise.reject(err));
-      }
-
-      originalRequest._retry = true;
-      isRefreshing = true;
-
-      const refreshToken = localStorage.getItem('refreshToken');
-
-      if (!refreshToken) {
-        isRefreshing = false;
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
-        window.dispatchEvent(new Event('auth:logout'));
-        return Promise.reject(error);
-      }
-
-      try {
-        const response = await axios.post<ApiResponse<TokenRefreshResponse>>(
-          `${API_BASE_URL}/api/v1/auth/refresh`,
-          { refreshToken }
-        );
-
-        const { accessToken: newAccessToken, refreshToken: newRefreshToken } = response.data.data;
-
-        localStorage.setItem('accessToken', newAccessToken);
-        localStorage.setItem('refreshToken', newRefreshToken);
-
-        if (originalRequest.headers) {
-          originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
-        }
-
-        processQueue(null, newAccessToken);
-        return apiClient(originalRequest);
-      } catch (refreshError) {
-        processQueue(refreshError, null);
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
-        window.dispatchEvent(new Event('auth:logout'));
-        return Promise.reject(refreshError);
-      } finally {
-        isRefreshing = false;
-      }
+      throw error;
     }
 
-    return Promise.reject(error);
+    const sessionVersion = request._authSession;
+    if (sessionVersion === undefined || sessionVersion !== getAuthSessionVersion()) {
+      throw sessionChangedError();
+    }
+    if (request._retry) {
+      expireSession(sessionVersion);
+      throw error;
+    }
+    request._retry = true;
+
+    // Another request may have rotated the token before this 401 arrived.
+    const accessToken = localStorage.getItem('accessToken');
+    if (accessToken && request.headers.Authorization !== `Bearer ${accessToken}`) {
+      return apiClient(request);
+    }
+
+    const refreshToken = localStorage.getItem('refreshToken');
+    if (!refreshToken) {
+      if (accessToken) expireSession(sessionVersion);
+      throw error;
+    }
+
+    await refreshSession(sessionVersion, refreshToken);
+    if (sessionVersion !== getAuthSessionVersion()) throw sessionChangedError();
+    return apiClient(request);
   }
 );

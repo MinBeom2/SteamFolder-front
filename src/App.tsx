@@ -8,6 +8,8 @@ import { AuthCallbackPage } from '@/pages/AuthCallbackPage';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useThemeStore } from '@/store/useThemeStore';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
+import { QueryError } from '@/components/common/QueryError';
+import { Button } from '@/components/common/Button';
 
 const PageTitle: React.FC = () => {
   const { pathname } = useLocation();
@@ -31,7 +33,7 @@ const PageTitle: React.FC = () => {
 };
 
 export const App: React.FC = () => {
-  const { initializeAuth, isInitialized } = useAuthStore();
+  const { initializeAuth, isInitialized, isAuthenticated, isLoading, error, accessToken, refreshToken, logout } = useAuthStore();
   const { initializeTheme } = useThemeStore();
 
   useEffect(() => {
@@ -44,6 +46,21 @@ export const App: React.FC = () => {
     return (
       <div className="min-h-screen bg-[var(--bg-app,#07090e)] text-[var(--text-primary,#e2e8f0)] flex flex-col items-center justify-center">
         <LoadingSpinner size="lg" label="스팀 인증중..." />
+      </div>
+    );
+  }
+
+  if (!isAuthenticated && error && (accessToken || refreshToken)) {
+    return (
+      <div className="min-h-screen bg-[var(--bg-app,#07090e)] text-[var(--text-primary,#e2e8f0)] flex items-center justify-center p-4">
+        <QueryError
+          title="로그인 상태를 확인하지 못했습니다"
+          message={error}
+          onRetry={initializeAuth}
+          isRetrying={isLoading}
+        >
+          <Button variant="ghost" onClick={logout} disabled={isLoading}>로그아웃</Button>
+        </QueryError>
       </div>
     );
   }
