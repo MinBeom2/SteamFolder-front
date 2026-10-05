@@ -8,7 +8,7 @@ import { Breadcrumb } from './Breadcrumb';
 import { LandingHeroMarquee } from './LandingHeroMarquee';
 import { Button } from '@/components/common/Button';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
-import { confirmFolderDeletion } from '@/utils/folderDeletion';
+import { useFolderDeletionStore } from '@/store/useFolderDeletionStore';
 import { getErrorMessage } from '@/utils/error';
 import {
   Plus,
@@ -142,7 +142,15 @@ export const DesktopCanvas: React.FC<DesktopCanvasProps> = ({ isReadOnly = false
             return items.find((item) => item.type === 'FOLDER' && item.id === id)?.name || `폴더 ${id}`;
           });
         const selectedGameCount = selectedItemKeys.filter((key) => key.startsWith('GAME_')).length;
-        if (!confirmFolderDeletion(folderNames, selectedGameCount)) return;
+        if (folderNames.length > 0) {
+          const selection = { itemKeys: [...selectedItemKeys], currentFolderId };
+          useFolderDeletionStore.getState().requestDeletion({
+            folderNames,
+            selectedGameCount,
+            onDelete: () => removeSelectedGamesFromFolder(selection),
+          });
+          return;
+        }
 
         isDeletingRef.current = true;
         void removeSelectedGamesFromFolder()
@@ -182,6 +190,7 @@ export const DesktopCanvas: React.FC<DesktopCanvasProps> = ({ isReadOnly = false
     clearSelection,
     selectedItemKeys,
     items,
+    currentFolderId,
     setEditFolderModalOpen,
     setToastMessage,
   ]);

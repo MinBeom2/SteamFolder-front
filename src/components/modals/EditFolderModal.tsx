@@ -5,7 +5,7 @@ import { useShowcaseStore } from '@/store/useShowcaseStore';
 import type { FolderResponse } from '@/types/showcase';
 import { Trash2 } from 'lucide-react';
 import { getErrorMessage } from '@/utils/error';
-import { confirmFolderDeletion } from '@/utils/folderDeletion';
+import { useFolderDeletionStore } from '@/store/useFolderDeletionStore';
 
 interface EditFolderModalProps {
   isOpen: boolean;
@@ -47,15 +47,12 @@ const EditFolderForm: React.FC<EditFolderFormProps> = ({ folder, onClose }) => {
     }
   };
 
-  const handleDelete = async () => {
-    if (confirmFolderDeletion([folder.name])) {
-      try {
-        await deleteFolder(folder.id);
-        onClose();
-      } catch (err) {
-        console.error('Failed to delete folder:', err);
-      }
-    }
+  const handleDelete = () => {
+    useFolderDeletionStore.getState().requestDeletion({
+      folderNames: [folder.name],
+      onDelete: () => deleteFolder(folder.id),
+      onSuccess: onClose,
+    });
   };
 
   return (
@@ -89,7 +86,8 @@ const EditFolderForm: React.FC<EditFolderFormProps> = ({ folder, onClose }) => {
         <button
           type="button"
           onClick={handleDelete}
-          className="flex items-center gap-1.5 text-xs text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300 py-1.5 px-2 rounded-lg hover:bg-red-500/10 active:scale-[0.98] transition-colors cursor-pointer font-medium"
+          disabled={isSubmitting}
+          className="flex items-center gap-1.5 text-xs text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300 py-1.5 px-2 rounded-lg hover:bg-red-500/10 active:scale-[0.98] transition-colors cursor-pointer font-medium disabled:opacity-45 disabled:pointer-events-none"
         >
           <Trash2 className="w-3.5 h-3.5" />
           <span>폴더 삭제</span>

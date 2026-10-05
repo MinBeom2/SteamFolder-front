@@ -41,7 +41,7 @@ export const Button: React.FC<ButtonProps> = ({
     secondary:
       'btn-variant-secondary font-medium',
     danger:
-      'text-red-500 hover:text-red-600 dark:hover:text-red-400 bg-red-500/5 hover:bg-red-500/10 border border-red-500/20 active:scale-[0.98] font-medium',
+      'text-red-700 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 bg-red-500/5 hover:bg-red-500/10 border border-red-500/20 active:scale-[0.98] font-medium',
     outline:
       'border border-[var(--border-card)] text-[var(--text-secondary)] hover:bg-black/5 dark:hover:bg-white/5 hover:text-[var(--text-primary)] active:scale-[0.98] font-medium',
     ghost:

@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { useShowcaseStore } from '@/store/useShowcaseStore';
 import { useNavigate } from 'react-router-dom';
-import { confirmFolderDeletion } from '@/utils/folderDeletion';
+import { useFolderDeletionStore } from '@/store/useFolderDeletionStore';
 import {
   FolderPlus,
   Gamepad2,
@@ -151,7 +151,7 @@ export const ContextMenu: React.FC = () => {
       {type === 'FOLDER' && targetItem && (
         <div className="space-y-0.5">
           <div className="px-3 py-1.5 text-[10px] font-semibold text-[var(--text-muted)] truncate border-b border-[var(--border-subtle)] mb-1">
-            📁 {targetItem.name}
+            {targetItem.name}
           </div>
 
           <button
@@ -181,7 +181,7 @@ export const ContextMenu: React.FC = () => {
           >
             <div className="flex items-center gap-2">
               <Edit3 className="w-4 h-4 text-[var(--text-secondary)]" />
-              <span>폴더 설정 / 이름 변경</span>
+              <span>이름 변경</span>
             </div>
             <span className="text-[10px] text-[var(--text-muted)] font-mono">F2</span>
           </button>
@@ -208,15 +208,16 @@ export const ContextMenu: React.FC = () => {
             type="button"
             onClick={() => {
               closeContextMenu();
-              if (confirmFolderDeletion([targetItem.name])) {
-                deleteFolder(targetItem.id);
-              }
+              useFolderDeletionStore.getState().requestDeletion({
+                folderNames: [targetItem.name],
+                onDelete: () => deleteFolder(targetItem.id),
+              });
             }}
             className="w-full flex items-center justify-between px-3 py-2 rounded-md hover:bg-red-500/10 text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300 transition-colors text-left cursor-pointer font-medium"
           >
             <div className="flex items-center gap-2">
               <Trash2 className="w-4 h-4" />
-              <span>폴더 삭제</span>
+              <span>삭제</span>
             </div>
             <span className="text-[10px] text-red-400/60 font-mono">Del</span>
           </button>

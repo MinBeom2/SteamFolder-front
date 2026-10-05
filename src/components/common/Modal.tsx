@@ -11,6 +11,7 @@ interface ModalProps {
   zIndex?: number;
   className?: string;
   ariaLabel?: string;
+  ariaDescribedBy?: string;
 }
 
 export const Modal: React.FC<ModalProps> = ({
@@ -23,6 +24,7 @@ export const Modal: React.FC<ModalProps> = ({
   zIndex = 50,
   className = '',
   ariaLabel,
+  ariaDescribedBy,
 }) => {
   const titleId = useId();
   const dialogRef = useRef<HTMLDivElement>(null);
@@ -105,6 +107,7 @@ export const Modal: React.FC<ModalProps> = ({
         ref={dialogRef}
         role="dialog"
         aria-modal="true"
+        aria-describedby={ariaDescribedBy}
         aria-labelledby={title ? titleId : undefined}
         aria-label={!title ? ariaLabel || '대화상자' : undefined}
         tabIndex={-1}

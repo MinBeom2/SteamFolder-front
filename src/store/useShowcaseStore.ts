@@ -46,6 +46,12 @@ interface ContextMenuState {
   targetItem?: CanvasItem;
 }
 
+interface DeletionSelection {
+  currentFolderId: number | null;
+  // The confirmation owns this work queue; completed targets are removed for retries.
+  itemKeys: string[];
+}
+
 interface ShowcaseState {
   // Navigation & Data
   showcase: ShowcaseResponse | null;
@@ -122,7 +128,7 @@ interface ShowcaseState {
   addSelectedGamesToFolder: () => Promise<void>;
   addSingleGameToFolder: (appId: number, posX?: number, posY?: number) => Promise<void>;
   removeGameFromFolder: (folderGameId: number) => Promise<void>;
-  removeSelectedGamesFromFolder: () => Promise<void>;
+  removeSelectedGamesFromFolder: (selection?: DeletionSelection) => Promise<void>;
   moveGameToFolder: (folderGameId: number, targetFolderId: number, posX?: number, posY?: number) => Promise<void>;
 
   // Actions - 2D Grid Drag & Drop
@@ -505,9 +511,19 @@ export const useShowcaseStore = create<ShowcaseState>((set, get) => ({
   },
 
   deleteFolder: async (folderId: number) => {
+    const sessionVersion = getAuthSessionVersion();
     await deleteFolderApi(folderId);
+    if (sessionVersion !== getAuthSessionVersion()) return;
+    set((state) => ({
+      items: state.items.filter((item) => !(item.type === 'FOLDER' && item.id === folderId)),
+      selectedItemKeys: state.selectedItemKeys.filter((key) => key !== `FOLDER_${folderId}`),
+    }));
     get().setToastMessage('폴더가 삭제되었습니다.');
-    await get().refreshCurrentView();
+    try {
+      await get().refreshCurrentView();
+    } catch {
+      if (sessionVersion === getAuthSessionVersion()) get().setToastMessage('폴더는 삭제되었지만 목록을 불러오지 못했습니다. 새로고침해 주세요.');
+    }
   },
 
   moveFolder: async (folderId: number, targetParentFolderId: number | null, posX?: number, posY?: number) => {
@@ -609,47 +625,47 @@ export const useShowcaseStore = create<ShowcaseState>((set, get) => ({
     await get().refreshCurrentView();
   },
 
-  removeSelectedGamesFromFolder: async () => {
-    const { currentFolderId, selectedItemKeys } = get();
-    if (currentFolderId === null && selectedItemKeys.length > 0) {
-      const folderIdsToDelete = selectedItemKeys
-        .filter((k) => k.startsWith('FOLDER_'))
-        .map((k) => Number(k.replace('FOLDER_', '')));
+  removeSelectedGamesFromFolder: async (selection) => {
+    const targets = selection || { currentFolderId: get().currentFolderId, itemKeys: [...get().selectedItemKeys] };
+    const sessionVersion = getAuthSessionVersion();
+    const gameKeys = targets.currentFolderId === null ? [] : targets.itemKeys.filter((key) => key.startsWith('GAME_'));
+    const folderKeys = targets.itemKeys.filter((key) => key.startsWith('FOLDER_'));
+    let completedCount = 0;
 
-      for (const folderId of folderIdsToDelete) {
-        await deleteFolderApi(folderId);
+    const complete = (keys: string[]) => {
+      completedCount += keys.length;
+      targets.itemKeys = targets.itemKeys.filter((key) => !keys.includes(key));
+      set((state) => ({
+        selectedItemKeys: state.selectedItemKeys.filter((key) => !keys.includes(key)),
+        items: state.items.filter((item) => !keys.includes(`${item.type}_${item.id}`)),
+      }));
+    };
+
+    try {
+      if (gameKeys.length > 0) {
+        await removeFolderGamesApi(targets.currentFolderId!, { folderGameIds: gameKeys.map((key) => Number(key.replace('GAME_', ''))) });
+        if (sessionVersion !== getAuthSessionVersion()) return;
+        complete(gameKeys);
       }
-      set({ selectedItemKeys: [] });
-      get().setToastMessage(`${folderIdsToDelete.length}개 폴더가 삭제되었습니다.`);
+      for (const key of folderKeys) {
+        if (sessionVersion !== getAuthSessionVersion()) return;
+        await deleteFolderApi(Number(key.replace('FOLDER_', '')));
+        if (sessionVersion !== getAuthSessionVersion()) return;
+        complete([key]);
+      }
+    } catch (err: unknown) {
+      if (completedCount > 0) {
+        throw new Error(`${completedCount}개 항목은 삭제되었습니다. ${getErrorMessage(err, '남은 항목을 삭제하지 못했습니다.')} 다시 시도하면 남은 항목만 삭제합니다.`);
+      }
+      throw err;
+    }
+
+    if (completedCount > 0) get().setToastMessage(`${completedCount}개 항목이 삭제되었습니다.`);
+    try {
       await get().refreshCurrentView();
-      return;
+    } catch {
+      if (sessionVersion === getAuthSessionVersion()) get().setToastMessage('삭제는 완료되었지만 목록을 불러오지 못했습니다. 새로고침해 주세요.');
     }
-
-    const gameIdsToDelete: number[] = [];
-    const folderIdsToDelete: number[] = [];
-
-    selectedItemKeys.forEach((key) => {
-      const [type, idStr] = key.split('_');
-      const id = Number(idStr);
-      if (type === 'GAME') gameIdsToDelete.push(id);
-      if (type === 'FOLDER') folderIdsToDelete.push(id);
-    });
-
-    if (gameIdsToDelete.length > 0) {
-      await removeFolderGamesApi(currentFolderId!, { folderGameIds: gameIdsToDelete });
-    }
-
-    for (const folderId of folderIdsToDelete) {
-      await deleteFolderApi(folderId);
-    }
-
-    const totalCount = gameIdsToDelete.length + folderIdsToDelete.length;
-    if (totalCount > 0) {
-      get().setToastMessage(`${totalCount}개 아이템이 삭제되었습니다.`);
-    }
-
-    set({ selectedItemKeys: [] });
-    await get().refreshCurrentView();
   },
 
   moveGameToFolder: async (folderGameId: number, targetFolderId: number, posX?: number, posY?: number) => {

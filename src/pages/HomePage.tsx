@@ -5,6 +5,7 @@ import { ContextMenu } from '@/components/desktop/ContextMenu';
 import { AddGameModal } from '@/components/modals/AddGameModal';
 import { CreateFolderModal } from '@/components/modals/CreateFolderModal';
 import { EditFolderModal } from '@/components/modals/EditFolderModal';
+import { DeleteFolderModal } from '@/components/modals/DeleteFolderModal';
 import { DirectLoginModal } from '@/components/modals/DirectLoginModal';
 import { GameDetailModal } from '@/components/modals/GameDetailModal';
 import { useShowcaseStore } from '@/store/useShowcaseStore';
@@ -68,6 +69,7 @@ export const HomePage: React.FC = () => {
 
       {/* Game Detail & Achievement Modal */}
       <GameDetailModal />
+      <DeleteFolderModal />
     </div>
   );
 };

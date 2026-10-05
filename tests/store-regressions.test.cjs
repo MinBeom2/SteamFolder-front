@@ -100,6 +100,75 @@ const page = (games, extra = {}) => ({
   pageSize: 24, ...extra,
 });
 const filtered = (games) => ({ totalCount: games.length, games });
+
+test('folder deletion failure keeps the folder and selection available for retry', async () => {
+  const store = loadStore({ deleteFolderApi: async () => { throw new Error('offline'); } });
+  const item = { type: 'FOLDER', id: 7, name: 'Keep me' };
+  store.setState({ items: [item], selectedItemKeys: ['FOLDER_7'] });
+  await assert.rejects(store.getState().deleteFolder(7), /offline/);
+  assert.deepEqual(store.getState().items, [item]);
+  assert.deepEqual(store.getState().selectedItemKeys, ['FOLDER_7']);
+});
+
+test('successful deletion with failed list refresh does not ask to delete the same folder again', async () => {
+  let deletes = 0;
+  const store = loadStore({
+    deleteFolderApi: async () => { deletes++; },
+    getMyShowcaseApi: async () => { throw new Error('list offline'); },
+  });
+  store.setState({ items: [{ type: 'FOLDER', id: 7 }], selectedItemKeys: ['FOLDER_7'] });
+  await store.getState().deleteFolder(7);
+  assert.equal(deletes, 1);
+  assert.equal(store.getState().items.length, 0);
+  assert.equal(store.getState().selectedItemKeys.length, 0);
+  assert.match(store.getState().toastMessage, /폴더는 삭제되었지만 목록/);
+});
+
+test('a delayed confirmation deletes its captured folder and games instead of a newer selection', async () => {
+  const calls = [];
+  const store = loadStore({
+    removeFolderGamesApi: async (id, body) => calls.push([id, ...body.folderGameIds]),
+    deleteFolderApi: async (id) => calls.push(id),
+  });
+  const captured = { currentFolderId: 10, itemKeys: ['GAME_42', 'FOLDER_7'] };
+  store.setState({ currentFolderId: 20, selectedItemKeys: ['FOLDER_99'] });
+  await store.getState().removeSelectedGamesFromFolder(captured);
+  assert.deepEqual(calls, [[10, 42], 7]);
+  assert.equal(captured.itemKeys.length, 0);
+  assert.deepEqual([...store.getState().selectedItemKeys], ['FOLDER_99']);
+});
+
+test('retrying partial selection deletion skips the folders already deleted', async () => {
+  const calls = [];
+  let fail = true;
+  const store = loadStore({
+    deleteFolderApi: async (id) => {
+      calls.push(id);
+      if (id === 8 && fail) { fail = false; throw new Error('offline'); }
+    },
+    getMyShowcaseApi: async () => ({ rootFolders: [] }),
+  });
+  const captured = { currentFolderId: null, itemKeys: ['FOLDER_7', 'FOLDER_8'] };
+  store.setState({ items: [{ type: 'FOLDER', id: 7 }, { type: 'FOLDER', id: 8 }], selectedItemKeys: [...captured.itemKeys] });
+  await assert.rejects(store.getState().removeSelectedGamesFromFolder(captured), /1개 항목은 삭제되었습니다/);
+  assert.deepEqual([...captured.itemKeys], ['FOLDER_8']);
+  assert.deepEqual([...store.getState().selectedItemKeys], ['FOLDER_8']);
+  assert.equal(store.getState().items[0].id, 8);
+  await store.getState().removeSelectedGamesFromFolder(captured);
+  assert.deepEqual(calls, [7, 8, 8]);
+});
+
+test('logout during multi-folder deletion prevents deleting the next folder', async () => {
+  const pending = deferred();
+  const calls = [];
+  const store = loadStore({ deleteFolderApi: (id) => { calls.push(id); return pending.promise; } });
+  const deleting = store.getState().removeSelectedGamesFromFolder({ currentFolderId: null, itemKeys: ['FOLDER_7', 'FOLDER_8'] });
+  store.invalidateAuthSession();
+  pending.resolve();
+  await deleting;
+  assert.deepEqual(calls, [7]);
+  assert.equal(store.getState().items.length, 0);
+});
 const achievements = (appId, achieved = 3) => ({
   appId, gameName: `Game ${appId}`, totalAchievements: 10,
   achievedAchievements: achieved, achievementRate: achieved * 10,
