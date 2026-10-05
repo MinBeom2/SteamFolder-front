@@ -80,16 +80,24 @@ const ROW5_GAMES = [
 interface MarqueeRowProps {
   games: typeof ROW1_GAMES;
   duration: number;
+  initialProgress: number;
   isDark: boolean;
 }
 
-const MarqueeRow: React.FC<MarqueeRowProps> = ({ games, duration, isDark }) => {
+const MarqueeRow: React.FC<MarqueeRowProps> = ({ games, duration, initialProgress, isDark }) => {
   const cardClassName = isDark
     ? 'w-60 sm:w-72 h-30 sm:h-36 rounded-lg overflow-hidden shadow-lg border border-white/10 shrink-0 bg-[#121620]'
     : 'w-60 sm:w-72 h-30 sm:h-36 rounded-lg overflow-hidden shadow-md border border-slate-200/80 shrink-0 bg-white';
 
   return (
-    <div className="marquee-row flex w-max shrink-0 will-change-transform" style={{ animation: `marqueeSeamless ${duration}s linear infinite` }}>
+    <div
+      className="marquee-row flex w-max shrink-0 will-change-transform"
+      style={{
+        animation: `marqueeSeamless ${duration}s linear infinite`,
+        // Start each row mid-cycle so the first frame already feels in motion.
+        animationDelay: `-${duration * initialProgress}s`,
+      }}
+    >
       {["a", "b"].map((copy) => (
         <div key={copy} className="flex gap-4 sm:gap-5 shrink-0 pr-4 sm:pr-5">
           {games.map((game, idx) => (
@@ -117,20 +125,20 @@ export const LandingHeroMarquee: React.FC = () => {
       `}</style>
 
       <div aria-hidden="true" className={`absolute -inset-[50vw] flex flex-col justify-center gap-3.5 sm:gap-5 pointer-events-none select-none overflow-hidden -rotate-[15deg] scale-125 origin-center transition-opacity duration-300 ${isDark ? 'opacity-75 blur-[1.5px]' : 'opacity-65 blur-[1.5px]'}`}>
-        <MarqueeRow games={ROW1_GAMES} duration={52} isDark={isDark} />
-        <MarqueeRow games={ROW2_GAMES} duration={66} isDark={isDark} />
-        <MarqueeRow games={ROW3_GAMES} duration={46} isDark={isDark} />
-        <MarqueeRow games={ROW4_GAMES} duration={60} isDark={isDark} />
-        <MarqueeRow games={ROW5_GAMES} duration={50} isDark={isDark} />
-        <MarqueeRow games={ROW1_GAMES} duration={56} isDark={isDark} />
-        <MarqueeRow games={ROW2_GAMES} duration={44} isDark={isDark} />
-        <MarqueeRow games={ROW3_GAMES} duration={62} isDark={isDark} />
-        <MarqueeRow games={ROW4_GAMES} duration={48} isDark={isDark} />
-        <MarqueeRow games={ROW5_GAMES} duration={54} isDark={isDark} />
-        <MarqueeRow games={ROW1_GAMES} duration={42} isDark={isDark} />
-        <MarqueeRow games={ROW2_GAMES} duration={58} isDark={isDark} />
-        <MarqueeRow games={ROW3_GAMES} duration={48} isDark={isDark} />
-        <MarqueeRow games={ROW4_GAMES} duration={64} isDark={isDark} />
+        <MarqueeRow games={ROW1_GAMES} duration={52} initialProgress={0.035} isDark={isDark} />
+        <MarqueeRow games={ROW2_GAMES} duration={66} initialProgress={0.078} isDark={isDark} />
+        <MarqueeRow games={ROW3_GAMES} duration={46} initialProgress={0.018} isDark={isDark} />
+        <MarqueeRow games={ROW4_GAMES} duration={60} initialProgress={0.061} isDark={isDark} />
+        <MarqueeRow games={ROW5_GAMES} duration={50} initialProgress={0.094} isDark={isDark} />
+        <MarqueeRow games={ROW1_GAMES} duration={56} initialProgress={0.049} isDark={isDark} />
+        <MarqueeRow games={ROW2_GAMES} duration={44} initialProgress={0.012} isDark={isDark} />
+        <MarqueeRow games={ROW3_GAMES} duration={62} initialProgress={0.082} isDark={isDark} />
+        <MarqueeRow games={ROW4_GAMES} duration={48} initialProgress={0.038} isDark={isDark} />
+        <MarqueeRow games={ROW5_GAMES} duration={54} initialProgress={0.067} isDark={isDark} />
+        <MarqueeRow games={ROW1_GAMES} duration={42} initialProgress={0.023} isDark={isDark} />
+        <MarqueeRow games={ROW2_GAMES} duration={58} initialProgress={0.103} isDark={isDark} />
+        <MarqueeRow games={ROW3_GAMES} duration={48} initialProgress={0.054} isDark={isDark} />
+        <MarqueeRow games={ROW4_GAMES} duration={64} initialProgress={0.089} isDark={isDark} />
       </div>
 
       <div
