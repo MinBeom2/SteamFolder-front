@@ -5,14 +5,17 @@ import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { AnimatedList } from '@/components/common/AnimatedList';
 import { LoginRequiredModal } from '@/components/modals/LoginRequiredModal';
 import { QueryError } from '@/components/common/QueryError';
+import { ShowcaseRankingPreview } from '@/components/common/ShowcaseRankingPreview';
 import { getShowcaseRankingsApi } from '@/api/ranking';
 import { toggleShowcaseLikeApi } from '@/api/showcase';
 import type { ShowcaseRankingItemDto } from '@/types/ranking';
 import { useAuthStore } from '@/store/useAuthStore';
+import { getAuthSessionVersion } from '@/utils/authSession';
 import {
   Heart,
   Info,
   Lock,
+  ArrowUpRight,
 } from 'lucide-react';
 
 export const ShowcaseRankingPage: React.FC = () => {
@@ -20,6 +23,7 @@ export const ShowcaseRankingPage: React.FC = () => {
 
   const [rankings, setRankings] = useState<ShowcaseRankingItemDto[]>([]);
   const [myRanking, setMyRanking] = useState<ShowcaseRankingItemDto | null>(null);
+  const [rankingUserId, setRankingUserId] = useState<number | null>(null);
   const [nextCursorLikeCount, setNextCursorLikeCount] = useState<number | null>(null);
   const [nextCursorUserId, setNextCursorUserId] = useState<number | null>(null);
   const [hasNext, setHasNext] = useState(false);
@@ -37,6 +41,7 @@ export const ShowcaseRankingPage: React.FC = () => {
   const observerRef = useRef<HTMLDivElement>(null);
   const requestRef = useRef({ active: false });
   const loadingMoreRef = useRef(false);
+  const likeRequestsRef = useRef(new Map<number, object>());
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -57,11 +62,18 @@ export const ShowcaseRankingPage: React.FC = () => {
       return;
     }
 
-    if (likeLoadingUserIds.has(targetUserId)) return;
+    if (likeRequestsRef.current.has(targetUserId)) return;
+
+    const request = {};
+    const pageRequest = requestRef.current;
+    const sessionVersion = getAuthSessionVersion();
+    likeRequestsRef.current.set(targetUserId, request);
+    const isCurrent = () => pageRequest.active && getAuthSessionVersion() === sessionVersion && likeRequestsRef.current.get(targetUserId) === request;
 
     setLikeLoadingUserIds((prev) => new Set(prev).add(targetUserId));
     try {
       const res = await toggleShowcaseLikeApi(targetUserId);
+      if (!isCurrent()) return;
       setRankings((prev) =>
         prev.map((item) =>
           item.userId === targetUserId
@@ -75,15 +87,20 @@ export const ShowcaseRankingPage: React.FC = () => {
         );
       }
     } catch (err: unknown) {
+      if (!isCurrent()) return;
       console.error('Failed to toggle like:', err);
       const errMsg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
       showToast(errMsg || '좋아요 처리에 실패했습니다.');
     } finally {
-      setLikeLoadingUserIds((prev) => {
-        const next = new Set(prev);
-        next.delete(targetUserId);
-        return next;
-      });
+      if (likeRequestsRef.current.get(targetUserId) === request) {
+        const wasCurrent = isCurrent();
+        likeRequestsRef.current.delete(targetUserId);
+        if (wasCurrent) setLikeLoadingUserIds((prev) => {
+          const next = new Set(prev);
+          next.delete(targetUserId);
+          return next;
+        });
+      }
     }
   };
 
@@ -92,7 +109,9 @@ export const ShowcaseRankingPage: React.FC = () => {
     const request = { active: true };
     requestRef.current = request;
     loadingMoreRef.current = false;
+    likeRequestsRef.current.clear();
     const fetchInitialRankings = async () => {
+      setLikeLoadingUserIds(new Set());
       setIsLoading(true);
       setIsLoadingMore(false);
       setLoadMoreError(null);
@@ -103,6 +122,7 @@ export const ShowcaseRankingPage: React.FC = () => {
         setError(null);
         setRankings(res.content);
         setMyRanking(res.myRanking ?? null);
+        setRankingUserId(isAuthenticated ? user?.id ?? null : null);
         setNextCursorLikeCount(res.nextCursorLikeCount);
         setNextCursorUserId(res.nextCursorUserId);
         setHasNext(res.hasNext);
@@ -163,18 +183,24 @@ export const ShowcaseRankingPage: React.FC = () => {
     return () => observer.disconnect();
   }, [hasNext, isLoadingMore, loadMoreError, isLoading, loadMoreRankings]);
 
-  const cardHoverClass = 'hover:bg-[var(--bg-surface-elevated)]';
+  // Only use ranking data fetched for the current account. A missing myRanking
+  // can still be recovered from that account's row in the loaded list.
+  const displayedMyRanking = user && rankingUserId === user.id
+    ? (myRanking?.userId === user.id ? myRanking : rankings.find((item) => item.userId === user.id))
+    : undefined;
+  const isMyShowcasePrivate = displayedMyRanking?.isPublic === false
+    || (!displayedMyRanking && user?.isPublic === false);
 
   const renderRankBadge = (rank: number | null) => {
     if (rank === null) {
       return (
-        <span className="w-8 sm:w-10 flex items-center justify-center shrink-0 select-none text-[var(--text-secondary)]">
-          <Lock className="w-5 h-5 text-slate-400" />
+        <span aria-label="비공개 쇼케이스" className="ranking-position">
+          <Lock className="size-4" aria-hidden="true" />
         </span>
       );
     }
     return (
-      <span className="w-8 sm:w-10 text-center font-black text-lg sm:text-xl shrink-0 select-none text-[var(--text-secondary)]">
+      <span className={`ranking-position ${rank <= 3 ? 'ranking-position-leading' : ''}`}>
         {rank}
       </span>
     );
@@ -186,12 +212,12 @@ export const ShowcaseRankingPage: React.FC = () => {
       <Navbar />
 
       {/* Main Ranking Content */}
-      <main className="relative z-10 max-w-6xl mx-auto w-full p-4 sm:p-8 flex-1 flex flex-col select-none pb-28">
+      <main className="relative z-10 max-w-6xl mx-auto w-full p-4 sm:p-8 flex-1 flex flex-col select-none pb-[calc(7rem+env(safe-area-inset-bottom))] sm:pb-[calc(7rem+env(safe-area-inset-bottom))]">
         {/* Hero Header */}
-        <div className="mb-8 flex flex-col justify-between gap-4 border-b border-[var(--page-rule)] pb-6 pt-3 sm:flex-row sm:items-end sm:pb-8">
+        <div className="mb-5 flex flex-col justify-between gap-4 pt-3 sm:mb-6 sm:flex-row sm:items-end">
           <div className="flex items-start gap-4 sm:items-center">
             <div>
-              <h1 className="flex items-center gap-2 text-3xl font-black tracking-[-0.045em] text-[var(--text-primary)] sm:text-4xl">
+              <h1 className="flex items-center gap-2 text-3xl font-black tracking-[-0.03em] text-[var(--text-primary)] sm:text-4xl">
                 <span>쇼케이스 랭킹</span>
               </h1>
               <p className="mt-2 text-sm text-[var(--text-secondary)]">
@@ -220,31 +246,26 @@ export const ShowcaseRankingPage: React.FC = () => {
         ) : (
           <AnimatedList<ShowcaseRankingItemDto>
             items={rankings}
-            showGradients={true}
+            showGradients={false}
             enableArrowNavigation={false}
             displayScrollbar={true}
             className="w-full"
-            listClassName="max-h-[72vh] overflow-y-auto border-t border-[var(--border-subtle)] !px-0 !py-0"
-            renderItem={(item) => {
+            listClassName="!max-h-none !overflow-visible border-t border-[var(--border-subtle)] !px-0 !py-0"
+            renderItem={(item, index) => {
               const isOwner = user?.id === item.userId;
 
               return (
                 <div
                   key={item.userId}
-                  className={`group relative flex min-w-0 items-center justify-between gap-3 border-b border-[var(--border-subtle)] px-3 py-4 transition-colors duration-200 sm:gap-4 sm:px-7 sm:py-6 ${cardHoverClass} ${
-                    isOwner ? 'bg-[var(--selection-bg)]' : ''
-                  }`}
+                  className={`ranking-row group ${isOwner ? 'ranking-row-own' : ''}`}
                 >
                   <Link
                     to={`/showcase/${encodeURIComponent(item.username)}`}
-                    className="flex min-h-12 min-w-0 flex-1 items-center gap-3 sm:gap-5"
+                    className="ranking-profile"
                     aria-label={`${item.username}님의 쇼케이스 열기`}
                   >
-                  {/* Left: 1번칸 (순위 번호 텍스트 + 아바타 + 닉네임) */}
-                  <div className="flex min-w-0 items-center gap-2 sm:min-w-[300px] sm:gap-5 md:min-w-[340px]">
                     {renderRankBadge(item.rank)}
-
-                    <div className="w-12 h-12 rounded-full ring-2 ring-[var(--border-card)] overflow-hidden shadow-sm shrink-0">
+                    <div className="size-10 shrink-0 overflow-hidden rounded-full ring-1 ring-[var(--border-card)] sm:size-11">
                       <img
                         src={
                           item.avatarUrl ||
@@ -255,53 +276,42 @@ export const ShowcaseRankingPage: React.FC = () => {
                       />
                     </div>
 
-                    <div className="flex min-w-0 flex-col gap-1">
+                    <div className="flex min-w-0 flex-1 flex-col gap-1">
                       <div className="flex min-w-0 items-center gap-2">
-                        <span className="truncate text-sm font-bold text-[var(--text-primary)] sm:text-lg">{item.username}</span>
-                      {isOwner && (
-                        <span className="shrink-0 border border-[var(--primary-accent)] bg-[var(--selection-bg)] px-2 py-0.5 text-xs font-semibold text-[var(--primary-accent)]">
-                          나
-                        </span>
-                      )}
+                        <span className="truncate text-sm font-bold text-[var(--text-primary)] group-hover:text-[var(--primary-accent)] sm:text-base" title={item.username}>{item.username}</span>
+                        {isOwner && (
+                          <span className="shrink-0 text-xs font-semibold text-[var(--primary-accent)]">
+                            나
+                          </span>
+                        )}
                       </div>
-                      <span className="text-xs text-[var(--text-secondary)] sm:hidden">보유 게임 {item.totalGamesCount}개</span>
+                      <span className="text-xs text-[var(--text-secondary)]">보유 게임 {item.totalGamesCount.toLocaleString()}개</span>
                     </div>
-                  </div>
-
-                  {/* Center: 2번칸 (보유 게임 수량 중앙 배치) */}
-                  <div className="hidden flex-1 items-center justify-center px-4 sm:flex">
-                    <div className="flex items-center gap-2 text-sm sm:text-base text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors">
-                      <span>
-                        보유 게임: <strong className="font-bold text-[var(--text-primary)] text-base sm:text-lg">{item.totalGamesCount}</strong>
-                      </span>
-                    </div>
-                  </div>
+                    <ArrowUpRight className="ranking-open-icon" aria-hidden="true" />
                   </Link>
-
-                  {/* Right: 좋아요 인터랙티브 버튼 */}
-                  <div className="flex shrink-0 items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={(e) => handleLikeClick(e, item.userId)}
-                      disabled={likeLoadingUserIds.has(item.userId)}
-                      className={`flex cursor-pointer items-center gap-2 rounded-[2px] border px-3.5 py-2 text-sm font-bold transition-colors disabled:opacity-60 sm:px-4 sm:text-base ${
-                        item.isLiked
-                          ? 'bg-rose-500/15 border-rose-500/30 text-[var(--text-like)] hover:bg-rose-500/25'
-                          : 'bg-[var(--nav-btn-bg)] border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-like)] hover:border-rose-500/30 hover:bg-rose-500/10'
-                      }`}
-                      title={item.isLiked ? '좋아요 취소' : '좋아요'}
-                      aria-label={`${item.username}님 쇼케이스 ${item.isLiked ? '좋아요 취소' : '좋아요'}, 현재 ${item.likeCount}개`}
-                      aria-pressed={item.isLiked}
-                    >
-                      <Heart
-                        className={`w-5 h-5 transition-all ${
-                          item.isLiked
-                            ? 'fill-rose-500 text-rose-500 scale-105'
-                            : 'fill-none text-slate-400'
-                        }`}
-                      />
-                      <span>{item.likeCount}</span>
-                    </button>
+                  <ShowcaseRankingPreview key={item.userId} userId={item.userId} username={item.username} autoLoad={index < 3} />
+                  <div className="ranking-likes">
+                    {isOwner ? (
+                      <span className="ranking-like-count ranking-like-own" title="내 쇼케이스가 받은 좋아요" aria-label={`내 쇼케이스 좋아요 ${item.likeCount}개`}>
+                        <Heart className="size-4" aria-hidden="true" />
+                        <span className="tabular-nums">{item.likeCount.toLocaleString()}</span>
+                        <span className="ranking-like-caption">받은 좋아요</span>
+                      </span>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={(e) => handleLikeClick(e, item.userId)}
+                        disabled={likeLoadingUserIds.has(item.userId)}
+                        className={`ranking-like-count ranking-like-button ${item.isLiked ? 'ranking-like-selected' : ''}`}
+                        title={item.isLiked ? '좋아요 취소' : '좋아요'}
+                        aria-label={`${item.username}님 쇼케이스 ${item.isLiked ? '좋아요 취소' : '좋아요'}, 현재 ${item.likeCount}개`}
+                        aria-pressed={item.isLiked}
+                      >
+                        <Heart className={`size-4 ${item.isLiked ? 'fill-current' : ''}`} aria-hidden="true" />
+                        <span className="tabular-nums">{item.likeCount.toLocaleString()}</span>
+                        <span className="ranking-like-caption">{item.isLiked ? '좋아요 취소' : '좋아요'}</span>
+                      </button>
+                    )}
                   </div>
                 </div>
               );
@@ -323,8 +333,8 @@ export const ShowcaseRankingPage: React.FC = () => {
 
       {/* Floating Feedback Toast */}
       {toastMessage && (
-        <div className="fixed top-16 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 px-4 py-2.5 rounded-lg bg-[var(--bg-surface)] text-[var(--text-primary)] border border-[var(--border-subtle)] shadow-xl animate-in fade-in slide-in-from-top-2 text-xs font-semibold">
-          <Info className="w-4 h-4 text-[#66c0f4]" />
+        <div role="status" aria-live="polite" className="fixed top-16 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 px-4 py-2.5 rounded-lg bg-[var(--bg-surface)] text-[var(--text-primary)] border border-[var(--border-subtle)] shadow-xl animate-in fade-in slide-in-from-top-2 text-xs font-semibold">
+          <Info className="w-4 h-4 text-[var(--primary-accent)]" />
           <span>{toastMessage}</span>
         </div>
       )}
@@ -335,37 +345,42 @@ export const ShowcaseRankingPage: React.FC = () => {
         onClose={() => setIsLoginModalOpen(false)}
       />
 
-      {/* Sticky Bottom Floating Bar: My Ranking */}
-      {isAuthenticated && myRanking && (
-        <div className="fixed bottom-4 left-1/2 z-40 flex max-w-[calc(100vw-2rem)] -translate-x-1/2 items-center gap-3 rounded-full border border-[var(--border-card)] bg-[var(--bg-surface)]/95 px-4 py-2.5 shadow-2xl backdrop-blur-xl animate-in fade-in slide-in-from-bottom-4 select-none sm:px-5">
-          {/* 1. 이미지 좌측에 다른 유저처럼 숫자만 (비공개 시 자물쇠 아이콘) */}
-          {myRanking.isPublic === false || myRanking.rank == null ? (
-            <span title="비공개 쇼케이스" className="flex items-center text-[var(--text-secondary)] select-none">
-              <Lock className="w-4 h-4 text-slate-400" />
-            </span>
-          ) : (
-            <span className="font-black text-sm sm:text-base text-[var(--text-secondary)] select-none">
-              {myRanking.rank}
-            </span>
-          )}
-
-          {/* 2. 실제 내 프로필 이미지 */}
-          <img
-            src={
-              myRanking.avatarUrl ||
-              user?.avatarUrl ||
-              'https://avatars.steamstatic.com/fef49e7fa7e1997310d705b2a6158ff8dc1cdfeb_full.jpg'
-            }
-            alt={myRanking.username || user?.username || 'My Avatar'}
-            className="w-8 h-8 rounded-full ring-1 ring-[var(--border-card)] object-cover shadow-xs shrink-0"
-          />
-
-          {/* 3. 하트 좋아요 수 */}
-          <div className="flex items-center gap-1.5 whitespace-nowrap text-xs font-bold text-[var(--text-like)] sm:text-sm">
-            <Heart className="w-3.5 h-3.5 fill-rose-500" />
-            <span>{myRanking.likeCount}</span>
-          </div>
-        </div>
+      {/* Keep the personal bar visible while data loads; blur only the strip behind it. */}
+      {isAuthenticated && user && (
+        <section className="my-ranking-dock" aria-label="내 랭킹">
+          <Link to="/" aria-label="내 쇼케이스 열기" className="my-ranking-bar flex max-w-full items-center gap-3 rounded-full border border-[var(--border-card)] px-4 py-2 select-none sm:px-5">
+            <span className="whitespace-nowrap text-xs font-semibold text-[var(--text-secondary)]">내 랭킹</span>
+            {isMyShowcasePrivate ? (
+              <span title="비공개 쇼케이스" aria-label="비공개 쇼케이스" className="flex items-center text-[var(--text-secondary)]">
+                <Lock className="w-4 h-4" />
+              </span>
+            ) : (
+              <span
+                aria-label={displayedMyRanking?.rank != null ? `순위 ${displayedMyRanking.rank}위` : '순위 확인 불가'}
+                className="font-black text-sm tabular-nums text-[var(--text-primary)] sm:text-base"
+              >
+                {displayedMyRanking?.rank ?? '—'}
+              </span>
+            )}
+            <img
+              src={displayedMyRanking?.avatarUrl || user.avatarUrl || 'https://avatars.steamstatic.com/fef49e7fa7e1997310d705b2a6158ff8dc1cdfeb_full.jpg'}
+              alt={user.username}
+              className="w-8 h-8 rounded-full ring-1 ring-[var(--border-card)] object-cover shrink-0"
+            />
+            <div className="flex items-center gap-1.5 whitespace-nowrap text-xs font-bold text-[var(--text-like)] sm:text-sm">
+              <Heart className="w-3.5 h-3.5 fill-current" aria-hidden="true" />
+              <span aria-label={displayedMyRanking ? `좋아요 ${displayedMyRanking.likeCount}개` : '좋아요 확인 불가'} className="tabular-nums">
+                {displayedMyRanking?.likeCount ?? '—'}
+              </span>
+            </div>
+            {!displayedMyRanking && (
+              <span className="whitespace-nowrap text-xs text-[var(--text-secondary)]" role="status">
+                {isLoading ? '조회 중' : '확인 불가'}
+              </span>
+            )}
+            <ArrowUpRight className="size-3.5 shrink-0 text-[var(--primary-accent)]" aria-hidden="true" />
+          </Link>
+        </section>
       )}
     </div>
   );

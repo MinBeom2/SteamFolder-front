@@ -5,6 +5,8 @@ import { QueryError } from '@/components/common/QueryError';
 import { useShowcaseStore } from '@/store/useShowcaseStore';
 import { getPublicShowcaseGamesApi } from '@/api/showcase';
 import { getGameAchievementsApi } from '@/api/game';
+import { getErrorMessage } from '@/utils/error';
+import { getAuthSessionVersion } from '@/utils/authSession';
 import type { UserGame } from '@/types/game';
 import {
   Search,
@@ -47,6 +49,18 @@ export const GuestUserGamesModal: React.FC<GuestUserGamesModalProps> = ({
 }) => {
   const { achievementDetail } = useShowcaseStore();
   const [syncingAppIds, setSyncingAppIds] = useState<Set<number>>(new Set());
+  const [achievementErrors, setAchievementErrors] = useState<Record<number, string>>({});
+  const achievementRequestsRef = useRef(new Map<number, object>());
+  const achievementScopeRef = useRef({ version: 0 });
+
+  useEffect(() => {
+    const scope = achievementScopeRef.current;
+    const requests = achievementRequestsRef.current;
+    return () => {
+      scope.version++;
+      requests.clear();
+    };
+  }, [isOpen, identifier, isReadOnly]);
 
   const [games, setGames] = useState<UserGame[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -72,6 +86,8 @@ export const GuestUserGamesModal: React.FC<GuestUserGamesModalProps> = ({
 
   // Reset states when modal is closed
   useEffect(() => {
+    setAchievementErrors({});
+    setSyncingAppIds(new Set());
     if (!isOpen) {
       setSearch('');
       setActiveGenre('전체');
@@ -79,7 +95,7 @@ export const GuestUserGamesModal: React.FC<GuestUserGamesModalProps> = ({
       setDisplayLimit(24);
       setGamesError(null);
     }
-  }, [isOpen]);
+  }, [isOpen, identifier, isReadOnly]);
 
   // Fetch games from server with dynamic JPA specification filter & DB sort
   useEffect(() => {
@@ -280,14 +296,25 @@ export const GuestUserGamesModal: React.FC<GuestUserGamesModalProps> = ({
 
   const handleCardClick = async (game: UserGame) => {
     // 1. 읽기 전용(게스트 모드)이거나 이미 동기화 진행 중인 경우 건너뜀
-    if (isReadOnly || syncingAppIds.has(game.appId)) return;
+    if (isReadOnly || achievementRequestsRef.current.has(game.appId)) return;
 
     // 2. 이미 도전과제 데이터가 로드되어 있는 경우(쿨타임/캐시 유효 상태) 동기화 표시 없이 건너뜀
     if (game.totalAchievements !== undefined && game.totalAchievements !== null) return;
 
+    const request = {};
+    const scope = achievementScopeRef.current.version;
+    const sessionVersion = getAuthSessionVersion();
+    const isCurrent = () => scope === achievementScopeRef.current.version && sessionVersion === getAuthSessionVersion();
+    achievementRequestsRef.current.set(game.appId, request);
     setSyncingAppIds((prev) => new Set(prev).add(game.appId));
+    setAchievementErrors((prev) => {
+      const next = { ...prev };
+      delete next[game.appId];
+      return next;
+    });
     try {
       const data = await getGameAchievementsApi(game.appId);
+      if (!isCurrent()) return;
       if (data) {
         setGames((prev) =>
           prev.map((g) =>
@@ -302,14 +329,23 @@ export const GuestUserGamesModal: React.FC<GuestUserGamesModalProps> = ({
           )
         );
       }
-    } catch (err) {
+    } catch (err: unknown) {
+      if (!isCurrent()) return;
       console.error('Failed to sync achievements for game:', game.appId, err);
+      const code = (err as { response?: { data?: { code?: string } } })?.response?.data?.code;
+      const message = code === 'G003'
+        ? 'Steam에서 업적 정보를 가져오지 못했습니다. 잠시 후 다시 시도해 주세요.'
+        : getErrorMessage(err, '업적 정보를 불러오지 못했습니다. 다시 시도해 주세요.');
+      setAchievementErrors((prev) => ({ ...prev, [game.appId]: message }));
     } finally {
-      setSyncingAppIds((prev) => {
-        const next = new Set(prev);
-        next.delete(game.appId);
-        return next;
-      });
+      if (achievementRequestsRef.current.get(game.appId) === request) achievementRequestsRef.current.delete(game.appId);
+      if (isCurrent()) {
+        setSyncingAppIds((prev) => {
+          const next = new Set(prev);
+          next.delete(game.appId);
+          return next;
+        });
+      }
     }
   };
 
@@ -534,8 +570,13 @@ export const GuestUserGamesModal: React.FC<GuestUserGamesModalProps> = ({
                     </div>
                   ) : (
                     <div className="rounded-[3px] bg-[var(--bg-surface-elevated)] border border-[var(--border-subtle)] py-2.5 px-3 flex flex-wrap items-center justify-between gap-2 text-xs text-[var(--text-muted)] group-hover:border-[var(--primary-accent)] transition-colors">
-                      <div className="flex items-center gap-2">
-                        <span>도전과제 미동기화</span>
+                      <div className="min-w-0 flex-1 space-y-1">
+                        <span>{achievementErrors[game.appId] ? '업적 정보를 불러오지 못했습니다' : '도전과제 미동기화'}</span>
+                        {achievementErrors[game.appId] && (
+                          <p role="alert" className="break-words text-xs leading-relaxed text-red-700 dark:text-red-400">
+                            {achievementErrors[game.appId]}
+                          </p>
+                        )}
                       </div>
                       {!isReadOnly && (
                         <button
@@ -543,7 +584,7 @@ export const GuestUserGamesModal: React.FC<GuestUserGamesModalProps> = ({
                           onClick={() => handleCardClick(game)}
                           className="min-h-11 rounded px-2 text-sm font-semibold text-[var(--primary-accent)] hover:underline"
                         >
-                          업적 불러오기
+                          {achievementErrors[game.appId] ? '다시 시도' : '업적 불러오기'}
                         </button>
                       )}
                     </div>
@@ -577,7 +618,7 @@ export const GuestUserGamesModal: React.FC<GuestUserGamesModalProps> = ({
             )}
 
             {!isLoading && sortedGames.length === 0 && (
-              <div className="py-12 text-center text-xs text-slate-500 space-y-2">
+              <div className="py-12 text-center text-xs text-[var(--text-muted)] space-y-2">
                 <p>조건과 일치하는 게임이 없습니다.</p>
               </div>
             )}

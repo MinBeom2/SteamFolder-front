@@ -134,7 +134,7 @@ export const FolderCard: React.FC<FolderCardProps> = ({
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
       onContextMenu={handleContextMenu}
-      className={`group relative flex w-full select-none flex-col items-start p-1 transition-[transform,background-color,outline-color] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+      className={`group relative flex w-full max-w-48 select-none flex-col items-start p-1 transition-[transform,background-color,outline-color] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
         isSelected
           ? 'bg-[var(--selection-bg)] outline outline-1 outline-[var(--selection-border)]'
           : isDragOver
@@ -152,19 +152,21 @@ export const FolderCard: React.FC<FolderCardProps> = ({
         className="flex w-full cursor-pointer flex-col items-center gap-3 text-left"
       >
       {/* Folder Shape Container */}
-      <div className="relative aspect-[460/215] w-full shrink-0">
+      <div className="relative aspect-[4/3] w-full shrink-0">
         {/* Folder Top Tab */}
         <div className="absolute -top-1 left-2 h-3 w-[30%] rounded-t-[2px] border-x border-t border-[var(--border-card)] bg-[var(--folder-top-bg)] transition-colors group-hover:border-[var(--primary-accent)]" />
 
         {/* Folder Body */}
         <div className="absolute inset-0 flex min-h-0 flex-col justify-center rounded-[2px] border border-[var(--border-card)] bg-[var(--folder-body-bg)] p-2 transition-colors duration-300 group-hover:border-[var(--primary-accent)]">
-          {/* Show only occupied previews; one or two covers keep their wide Steam ratio. */}
+          {/* Keep the folder silhouette stable and Steam covers at their original ratio. */}
           <div
-            className={`grid h-full min-h-0 w-full gap-1 overflow-hidden border border-[var(--border-subtle)] bg-[var(--folder-inner-bg)] p-1 ${
+            className={`grid h-full min-h-0 w-full gap-1 overflow-hidden ${
+              previewCount === 0 ? 'border border-[var(--border-subtle)] bg-[var(--folder-inner-bg)] p-1' : ''
+            } ${
               previewCount <= 1
                 ? 'grid-cols-1 place-items-center'
                 : previewCount === 2
-                  ? 'grid-cols-2 place-items-center'
+                  ? 'grid-cols-1 grid-rows-2'
                   : 'grid-cols-2 grid-rows-2'
             }`}
           >
@@ -174,14 +176,14 @@ export const FolderCard: React.FC<FolderCardProps> = ({
               previewGames.map((game, index) => (
                 <div
                   key={game.id}
-                  className={`min-h-0 min-w-0 overflow-hidden border border-[var(--border-subtle)] bg-[var(--folder-slot-bg)] ${
-                    previewCount <= 2 ? 'aspect-[460/215] max-h-full w-full' : 'h-full w-full'
+                  className={`min-h-0 min-w-0 overflow-hidden ${
+                    previewCount === 1 ? 'aspect-[460/215] max-h-full w-full' : 'h-full w-full'
                   } ${previewCount === 3 && index === 0 ? 'col-span-2' : ''}`}
                 >
                   <img
                     src={game.headerImage}
                     alt=""
-                    className={`h-full w-full ${previewCount <= 2 ? 'object-contain' : 'object-cover'}`}
+                    className="h-full w-full object-contain"
                   />
                 </div>
               ))
@@ -190,8 +192,8 @@ export const FolderCard: React.FC<FolderCardProps> = ({
         </div>
       </div>
       {/* Folder Label */}
-      <div className="w-full border-t border-[var(--border-subtle)] px-1 pt-2 text-center">
-        <span className="block min-w-0 truncate text-center text-xs font-bold text-[var(--text-primary)] transition-colors group-hover:text-[var(--primary-accent)]">
+      <div className="flex min-h-11 w-full items-center border-t border-[var(--border-subtle)] pl-1 pr-12 text-center md:min-h-0 md:px-1 md:pt-2">
+        <span className="block min-w-0 w-full truncate text-center text-xs font-bold text-[var(--text-primary)] transition-colors group-hover:text-[var(--primary-accent)]">
           {folder.name}
         </span>
       </div>
@@ -200,7 +202,7 @@ export const FolderCard: React.FC<FolderCardProps> = ({
         <button
           type="button"
           onClick={handleMoreClick}
-          className="absolute right-0 top-0 z-10 flex h-11 w-11 items-center justify-center rounded-[3px] border border-[var(--border-card)] bg-[var(--bg-surface)] text-[var(--text-primary)] md:hidden"
+          className="absolute bottom-0 right-0 z-10 flex h-11 w-11 items-center justify-center rounded-[3px] border border-[var(--border-card)] bg-[var(--bg-surface)] text-[var(--text-primary)] md:hidden"
           aria-label={`${folder.name} 폴더 메뉴`}
         >
           <MoreHorizontal className="h-5 w-5" aria-hidden="true" />
