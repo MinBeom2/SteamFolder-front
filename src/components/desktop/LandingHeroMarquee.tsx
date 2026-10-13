@@ -124,7 +124,7 @@ export const LandingHeroMarquee: React.FC = () => {
         }
       `}</style>
 
-      <div aria-hidden="true" className={`absolute -inset-[50vw] flex flex-col justify-center gap-3.5 sm:gap-5 pointer-events-none select-none overflow-hidden -rotate-[15deg] scale-125 origin-center transition-opacity duration-300 ${isDark ? 'opacity-75 blur-[1.5px]' : 'opacity-65 blur-[1.5px]'}`}>
+      <div aria-hidden="true" className={`absolute -inset-[50vw] flex flex-col justify-center gap-3.5 sm:gap-5 pointer-events-none select-none overflow-hidden -rotate-[15deg] scale-125 origin-center transition-opacity duration-300 ${isDark ? 'opacity-60 blur-[1.5px]' : 'opacity-50 blur-[1.5px]'}`}>
         <MarqueeRow games={ROW1_GAMES} duration={52} initialProgress={0.035} isDark={isDark} />
         <MarqueeRow games={ROW2_GAMES} duration={66} initialProgress={0.078} isDark={isDark} />
         <MarqueeRow games={ROW3_GAMES} duration={46} initialProgress={0.018} isDark={isDark} />
